@@ -1,0 +1,25 @@
+{
+    "en": {
+      "appTitle": "Card Flipper App",
+      "cardFront": "Card Front",
+      "cardBack": "Card Back",
+      "flipRed": "Flip Red",
+      "flipYellow": "Flip Yellow",
+      "flipGreen": "Flip Green",
+      "reflip": "Reflip",
+      "newCard": "New Card",
+      "cardCount": "Card {index} / {total}"
+    },
+    "tr": {
+      "appTitle": "Kart Çevirme Uygulaması",
+      "cardFront": "Kart Önü",
+      "cardBack": "Kart Arkası",
+      "flipRed": "Kırmızı Çevir",
+      "flipYellow": "Sarı Çevir",
+      "flipGreen": "Yeşil Çevir",
+      "reflip": "Tekrar Çevir",
+      "newCard": "Yeni Kart",
+      "cardCount": "Kart {index} / {total}"
+    }
+  }
+  

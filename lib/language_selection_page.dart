@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'strings_loader.dart';
 import 'card_flip_page.dart'; 
 class LanguageSelectionPage extends StatelessWidget {
+  const LanguageSelectionPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,11 +13,11 @@ class LanguageSelectionPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Select Language:',
               style: TextStyle(fontSize: 24),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
                 await StringsLoader.changeLanguage('en');
@@ -24,9 +25,9 @@ class LanguageSelectionPage extends StatelessWidget {
                   builder: (context) => CardFlipPage(),
                 ));
               },
-              child: Text('English'),
+              child: const Text('English'),
             ),
-            SizedBox(height: 10),
+           const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () async {
                 await StringsLoader.changeLanguage('tr');
@@ -34,7 +35,7 @@ class LanguageSelectionPage extends StatelessWidget {
                   builder: (context) => CardFlipPage(),
                 ));
               },
-              child: Text('Türkçe'),
+              child: const Text('Türkçe'),
             ),
           ],
         ),

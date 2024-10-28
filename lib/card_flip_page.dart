@@ -55,10 +55,10 @@ class _CardFlipPageState extends State<CardFlipPage> {
             alignment: Alignment.center,
             child: Text(
               _isFlipped ? currentCard.backText : currentCard.frontText,
-              style: TextStyle(color: Colors.white, fontSize: 24),
+              style: const TextStyle(color: Colors.white, fontSize: 24),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           if (!_isFlipped) ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -67,12 +67,12 @@ class _CardFlipPageState extends State<CardFlipPage> {
                   onPressed: () => _flipCard(Colors.red),
                   child: Text(StringsLoader.get('flipRed')),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () => _flipCard(Colors.yellow),
                   child: Text(StringsLoader.get('flipYellow')),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: () => _flipCard(Colors.green),
                   child: Text(StringsLoader.get('flipGreen')),
@@ -87,7 +87,7 @@ class _CardFlipPageState extends State<CardFlipPage> {
                   onPressed: _reflipCard,
                   child: Text(StringsLoader.get('reflip')),
                 ),
-                SizedBox(width: 10),
+                const SizedBox(width: 10),
                 ElevatedButton(
                   onPressed: _nextCard,
                   child: Text(StringsLoader.get('newCard')),
@@ -95,10 +95,10 @@ class _CardFlipPageState extends State<CardFlipPage> {
               ],
             ),
           ],
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Text(
             cardCountText,
-            style: TextStyle(fontSize: 16),
+            style: const TextStyle(fontSize: 16),
           ),
         ],
       ),

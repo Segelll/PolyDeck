@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 class StringsLoader {
   static Map<String, String> _strings = {};
-  static String _currentLanguage = 'en'; // Default language
+  static String _currentLanguage = 'en'; 
 
   static Future<void> loadStrings() async {
     final String response = await rootBundle.loadString('lib/strings.json');
@@ -23,4 +23,5 @@ class StringsLoader {
     setLanguage(language);
     await loadStrings();
   }
+  
 }

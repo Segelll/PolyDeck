@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/decks_page.dart';
+import 'package:poly2/strings_loader.dart';
 
 class ResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;
 
-  const ResultPage({super.key,required this.score,required this.totalQuestions,
-  });
+  const ResultPage({super.key,required this.score,required this.totalQuestions,});
 
   String _getLevel(int score) {
     if (score >= 17) return 'C1';
@@ -22,7 +22,7 @@ class ResultPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Test Results'),
+        title: Text(StringsLoader.get('testResult')),
         centerTitle: true,
       ),
       body: Center(
@@ -45,10 +45,10 @@ class ResultPage extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => DecksPage(),
+                  builder: (context) => const DecksPage(),
                 ));
               },
-              child: const Text('Decks Page'),
+              child:Text(StringsLoader.get('deckPage')),
             ),
           ],
         ),

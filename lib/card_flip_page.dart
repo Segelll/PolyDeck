@@ -16,15 +16,14 @@ class _CardFlipPageState extends State<CardFlipPage> {
   bool _isFlipped = false;
   bool _isCardVisible = true;
   Color _cardColor = Colors.grey;
-  List<Color> _colorTracker = List.generate(10, (_) => Colors.grey); // Initialize with grey colors
-  List<String> _analysisResults = []; // Store the results of flips
-  int _deckIndex = 1; // Keep track of current deck number
-
+  List<Color> _colorTracker = List.generate(10, (_) => Colors.grey); 
+  List<String> _analysisResults = []; 
+  int _deckIndex = 1; 
   void _flipCard(Color color) {
     setState(() {
       _isFlipped = true;
       _cardColor = color;
-      _colorTracker[_currentCardIndex] = color; // Track the color for this card
+      _colorTracker[_currentCardIndex] = color; 
       _analysisResults.add('Card ${_currentCardIndex + 1}: ${_getColorString(color)}');
     });
   }
@@ -37,13 +36,11 @@ class _CardFlipPageState extends State<CardFlipPage> {
   }
 
   void _reflipCard() {
-    // Reset the color in the color tracker for the current card
     setState(() {
       _isFlipped = false;
-      _cardColor = Colors.grey; // Reset the color to grey
-      _colorTracker[_currentCardIndex] = Colors.grey; // Reset the corresponding color in the tracker
+      _cardColor = Colors.grey; 
+      _colorTracker[_currentCardIndex] = Colors.grey; 
 
-      // Reset analysis entry for the current card
       _analysisResults.removeWhere((result) => result.startsWith('Card ${_currentCardIndex + 1}:'));
     });
   }
@@ -52,7 +49,7 @@ class _CardFlipPageState extends State<CardFlipPage> {
     if (_currentCardIndex < _deck.cards.length - 1) {
       _setNextCard();
     } else {
-      _showAnalysis(); // Call to show the analysis
+      _showAnalysis(); 
     }
   }
 
@@ -65,8 +62,8 @@ class _CardFlipPageState extends State<CardFlipPage> {
       setState(() {
         _currentCardIndex++;
         _isCardVisible = true;
-        _isFlipped = false; // Reset to show front face
-        _cardColor = Colors.grey; // Reset color for the new card
+        _isFlipped = false; 
+        _cardColor = Colors.grey; 
       });
     });
   }
@@ -79,9 +76,9 @@ class _CardFlipPageState extends State<CardFlipPage> {
       MaterialPageRoute(
         builder: (context) => AnalysisPage(
           analysisResults: _analysisResults,
-          previousDeckName: previousDeckName, // Pass the previous deck name
+          previousDeckName: previousDeckName, 
           deckIndex: _deckIndex,
-          onNewDeck: _startNewDeck, // Pass the function to start a new deck
+          onNewDeck: _startNewDeck, 
         ),
       ),
     );
@@ -89,13 +86,13 @@ class _CardFlipPageState extends State<CardFlipPage> {
 
   void _startNewDeck() {
     setState(() {
-      _deckIndex++; // Increment the deck index
-      _currentCardIndex = 0; // Reset the card index
-      _deck.reset(); // Reset the deck
-      _analysisResults.clear(); // Clear analysis results for new deck
-      _colorTracker = List.generate(10, (_) => Colors.grey); // Reset color tracker for new deck
-      _isFlipped = false; // Ensure the first card shows its front
-      _cardColor = Colors.grey; // Set the first card color to gray
+      _deckIndex++; 
+      _currentCardIndex = 0; 
+      _deck.reset(); 
+      _analysisResults.clear(); 
+      _colorTracker = List.generate(10, (_) => Colors.grey); 
+      _isFlipped = false; 
+      _cardColor = Colors.grey; 
     });
   }
 
@@ -109,11 +106,11 @@ class _CardFlipPageState extends State<CardFlipPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Display current deck number
+          
           Text('Deck $_deckIndex', style: TextStyle(fontSize: 24)),
           SizedBox(height: 20),
 
-          // Small representation of the deck on top without text
+        
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -126,12 +123,12 @@ class _CardFlipPageState extends State<CardFlipPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-              for (int i = _colorTracker.length; i < 10; i++) // Ensure 10 slots
+              for (int i = _colorTracker.length; i < 10; i++) 
                 Container(
                   width: 30,
                   height: 45,
                   decoration: BoxDecoration(
-                    color: Colors.grey, // Default color
+                    color: Colors.grey, 
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),

@@ -9,7 +9,17 @@
     "reflip": "Reflip",
     "newCard": "New Card",
     "cardCount": "Card {index} / {total}",
-    "analysis": "Analysis"  
+    "analysis": "Analysis",
+    "decks": "Decks",
+    "nextQuestion":"Next Question",
+    "finishExam":"Finish Exam",
+    "testResult":"Test Result",
+    "recommendation":"Recommended Deck",
+    "score":"Score",
+    "deckPage":"Decks Page",
+    "question":"Question",
+    "exam":"Exam",
+    "a1Deck":"A1 Deck"
   },
   "tr": {
     "appTitle": "Kart Çevirme Uygulaması",
@@ -21,6 +31,17 @@
     "reflip": "Tekrar Çevir",
     "newCard": "Yeni Kart",
     "cardCount": "Kart {index} / {total}",
-    "analysis": "Analiz"  
+    "analysis": "Analiz",
+    "decks": "Desteler",
+    "nextQuestion":"Sonraki Soru",
+    "finishExam":"Sınavı Bitir",
+    "testResult":"Test Sonucu",
+    "recommendation":"Önerilen Deste",
+    "score":"Sonuç",
+    "deckPage":"Desteler Sayfası",
+    "question":"Soru",
+    "exam":"Sınav",
+    "a1Deck":"A1 Destesi"
+
   }
 }

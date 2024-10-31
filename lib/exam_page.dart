@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:poly2/exam_model.dart';
 import 'package:poly2/exam_questions.dart';
 import 'package:poly2/exam_result_page.dart';
+import 'package:poly2/strings_loader.dart';
 
 class ExamPage extends StatefulWidget {
   const ExamPage({super.key});
@@ -52,7 +53,7 @@ class _ExamPageState extends State<ExamPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Exam'),
+        title: Text(StringsLoader.get('exam')),
         centerTitle: true,
       ),
       body: Padding(
@@ -61,7 +62,7 @@ class _ExamPageState extends State<ExamPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Question ${currentQuestionIndex + 1} of ${questions.length}',
+              'Question ${currentQuestionIndex + 1} / ${questions.length}',
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -89,12 +90,12 @@ class _ExamPageState extends State<ExamPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: userAnswers[currentQuestionIndex] != null
-                  ? _nextQuestion
+                  ? _nextQuestion 
                   : null,
               child: Text(
                 currentQuestionIndex < questions.length - 1
-                    ? 'Next Question'
-                    : 'Finish Exam',
+                    ? StringsLoader.get('nextQuestion')
+                    : StringsLoader.get('finishExam'),
               ),
             ),
           ],

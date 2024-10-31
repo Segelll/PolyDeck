@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/exam_page.dart';
 import 'strings_loader.dart';
-import 'card_flip_page.dart'; 
+import 'card_flip_page.dart';
+
 class LanguageSelectionPage extends StatelessWidget {
   const LanguageSelectionPage({super.key});
   @override
@@ -20,9 +22,12 @@ class LanguageSelectionPage extends StatelessWidget {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () async {
+
+                //denemek için exampage'ye bağladım giriş ekranını desteler ekranından bağlayabiliriz senin yaptığını
+                //onun dışında senin kodlarda değişiklik yok.
                 await StringsLoader.changeLanguage('en');
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => CardFlipPage(),
+                  builder: (context) => ExamPage(),
                 ));
               },
               child: const Text('English'),
@@ -32,7 +37,7 @@ class LanguageSelectionPage extends StatelessWidget {
               onPressed: () async {
                 await StringsLoader.changeLanguage('tr');
                 Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => CardFlipPage(),
+                  builder: (context) => ExamPage(),
                 ));
               },
               child: const Text('Türkçe'),

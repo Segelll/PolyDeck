@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/decks_page.dart';
+import 'decks_page.dart';
+import 'card_flip_page.dart';
 
 class ResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;
 
-  const ResultPage({super.key,required this.score,required this.totalQuestions,
+  const ResultPage({
+    super.key,
+    required this.score,
+    required this.totalQuestions,
   });
 
   String _getLevel(int score) {
@@ -25,10 +29,11 @@ class ResultPage extends StatelessWidget {
         title: const Text('Test Results'),
         centerTitle: true,
       ),
-      body: Center(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            SizedBox(height: 50),
             Text(
               'Score: $score / $totalQuestions',
               style: const TextStyle(fontSize: 24),
@@ -49,6 +54,16 @@ class ResultPage extends StatelessWidget {
                 ));
               },
               child: const Text('Decks Page'),
+            ),
+            SizedBox(height: 20),
+            
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pushReplacement(MaterialPageRoute(
+                  builder: (context) => CardFlipPage(),
+                ));
+              },
+              child: const Text('Go to Card Flip'),
             ),
           ],
         ),

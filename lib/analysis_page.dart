@@ -16,31 +16,43 @@ class AnalysisPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Analysis')),
+      appBar: AppBar(
+        title: Text('Analysis'),
+        centerTitle: true,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Previous Deck: $previousDeckName'),
+            Text(
+              'Previous Deck: $previousDeckName',
+              style: TextStyle(fontSize: 20),
+            ),
             SizedBox(height: 20),
-            Text('Analysis Results:', style: TextStyle(fontSize: 20)),
+            Text('Analysis Results:', style: TextStyle(fontSize: 24)),
+            SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
                 itemCount: analysisResults.length,
                 itemBuilder: (context, index) {
                   return ListTile(
-                    title: Text(analysisResults[index]),
+                    title: Text(
+                      analysisResults[index],
+                      style: TextStyle(fontSize: 18),
+                    ),
                   );
                 },
               ),
             ),
             ElevatedButton(
               onPressed: () {
-                onNewDeck(); 
-                Navigator.of(context).pop(); 
+                onNewDeck();
+                Navigator.of(context).pop();
               },
               child: Text('Start New Deck'),
+              style: ElevatedButton.styleFrom(
+                minimumSize: Size(double.infinity, 50),
+              ),
             ),
           ],
         ),

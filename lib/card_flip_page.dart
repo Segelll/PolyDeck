@@ -69,7 +69,6 @@ class _CardFlipPageState extends State<CardFlipPage> {
   }
 
   void _showAnalysis() {
-    // Store the previous deck name
     String previousDeckName = 'Deck $_deckIndex';
     
     Navigator.of(context).push(

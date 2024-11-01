@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/decks_page.dart';
 import 'exam_page.dart';
 import 'strings_loader.dart';
 
@@ -46,6 +47,17 @@ class LanguageSelectionPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(200, 50),
                 ),
+              ),
+              const SizedBox(height: 10),
+              //direkt test ile uğraşmadan kartlar sayfasına gitmek için
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => DecksPage()),
+                  );
+                },
+                child: const Text("Desteler sayfası"),
               ),
               const Spacer(),
             ],

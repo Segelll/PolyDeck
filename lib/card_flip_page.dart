@@ -10,11 +10,12 @@ class CardFlipPage extends StatefulWidget {
   _CardFlipPageState createState() => _CardFlipPageState();
 }
 
-class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMixin {
+class _CardFlipPageState extends State<CardFlipPage>
+    with TickerProviderStateMixin {
   final CardDeck _deck = CardDeck();
   int _currentCardIndex = 0;
   bool _isFlipped = false;
-  Color _backCardColor = Colors.grey; 
+  Color _backCardColor = Colors.grey;
   List<Color> _colorTracker = List.generate(10, (_) => Colors.grey);
   List<String> _analysisResults = [];
   int _deckIndex = 1;
@@ -22,7 +23,8 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   AnimationController? _drawCardController;
   Animation<Offset>? _drawCardAnimation;
 
-  final GlobalKey<CardFlipAnimationState> _cardKey = GlobalKey<CardFlipAnimationState>();
+  final GlobalKey<CardFlipAnimationState> _cardKey =
+      GlobalKey<CardFlipAnimationState>();
 
   @override
   void initState() {
@@ -37,8 +39,8 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     );
 
     _drawCardAnimation = Tween<Offset>(
-      begin: Offset(0, -2.0), 
-      end: Offset(0, 0), 
+      begin: Offset(0, -2.0),
+      end: Offset(0, 0),
     ).animate(
       CurvedAnimation(
         parent: _drawCardController!,
@@ -54,7 +56,8 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       _isFlipped = true;
       _backCardColor = color;
       _colorTracker[_currentCardIndex] = color;
-      _analysisResults.add('Card ${_currentCardIndex + 1}: ${_getColorString(color)}');
+      _analysisResults
+          .add('Card ${_currentCardIndex + 1}: ${_getColorString(color)}');
     });
   }
 
@@ -72,7 +75,8 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
         setState(() {
           _backCardColor = Colors.grey;
           _colorTracker[_currentCardIndex] = Colors.grey;
-          _analysisResults.removeWhere((result) => result.startsWith('Card ${_currentCardIndex + 1}:'));
+          _analysisResults.removeWhere(
+              (result) => result.startsWith('Card ${_currentCardIndex + 1}:'));
         });
 
         _cardKey.currentState?.removeStatusListener();
@@ -96,7 +100,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     setState(() {
       _currentCardIndex++;
       _isFlipped = false;
-      _backCardColor = Colors.grey; 
+      _backCardColor = Colors.grey;
 
       _drawCardController!.reset();
       _drawCardController!.forward();
@@ -128,7 +132,6 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       _isFlipped = false;
       _backCardColor = Colors.grey;
 
-
       _drawCardController!.reset();
       _drawCardController!.forward();
     });
@@ -158,8 +161,6 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
             children: [
               Text('Deck $_deckIndex', style: TextStyle(fontSize: 24)),
               SizedBox(height: 20),
-
-
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -176,8 +177,6 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 ],
               ),
               SizedBox(height: 20),
-
-
               Expanded(
                 child: Stack(
                   children: [
@@ -187,14 +186,14 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                         child: GestureDetector(
                           onTap: () {},
                           child: CardFlipAnimation(
-                            key: _cardKey, 
+                            key: _cardKey,
                             isFlipped: _isFlipped,
-                            frontCardColor: Colors.grey, 
-                            backCardColor: _backCardColor, 
+                            frontCardColor: Colors.grey,
+                            backCardColor: _backCardColor,
                             frontText: currentCard.frontText,
                             backText: currentCard.backText,
                             onFlipComplete: _reflipCard,
-                            cardNumber: _currentCardIndex + 1, 
+                            cardNumber: _currentCardIndex + 1,
                           ),
                         ),
                       ),
@@ -203,8 +202,6 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 ),
               ),
               SizedBox(height: 20),
-
-
               if (!_isFlipped) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -260,7 +257,6 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 ),
               ],
               SizedBox(height: 20),
-
               Text(
                 StringsLoader.get('cardCount')
                     .replaceAll('{index}', (_currentCardIndex + 1).toString())

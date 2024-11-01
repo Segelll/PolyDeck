@@ -8,7 +8,7 @@ class ExamPage extends StatefulWidget {
   const ExamPage({super.key});
 
   @override
-  State<ExamPage>   createState(){
+  State<ExamPage> createState() {
     return _ExamPageState();
   }
 }
@@ -36,7 +36,7 @@ class _ExamPageState extends State<ExamPage> {
           score++;
         }
       }
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -71,7 +71,11 @@ class _ExamPageState extends State<ExamPage> {
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 20),
-            ...questions[currentQuestionIndex].options.asMap().entries.map((entry) {
+            ...questions[currentQuestionIndex]
+                .options
+                .asMap()
+                .entries
+                .map((entry) {
               final int idx = entry.key;
               final String option = entry.value;
               return Padding(
@@ -90,7 +94,7 @@ class _ExamPageState extends State<ExamPage> {
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: userAnswers[currentQuestionIndex] != null
-                  ? _nextQuestion 
+                  ? _nextQuestion
                   : null,
               child: Text(
                 currentQuestionIndex < questions.length - 1

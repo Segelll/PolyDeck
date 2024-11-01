@@ -1,22 +1,16 @@
 import 'package:flutter/material.dart';
-
 import 'decks_page.dart';
-import 'card_flip_page.dart';
 import 'strings_loader.dart';
 
 class ResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;
 
-
   const ResultPage({
     super.key,
     required this.score,
     required this.totalQuestions,
   });
-
-
-
 
   String _getLevel(int score) {
     if (score >= 17) return 'C1';
@@ -59,10 +53,8 @@ class ResultPage extends StatelessWidget {
                   builder: (context) => const DecksPage(),
                 ));
               },
-              child:Text(StringsLoader.get('deckPage')),
+              child: Text(StringsLoader.get('deckPage')),
             ),
-            
-            
           ],
         ),
       ),

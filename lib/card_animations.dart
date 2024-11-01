@@ -97,7 +97,8 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
               color: isUnder ? widget.backCardColor : widget.frontCardColor,
               borderRadius: BorderRadius.circular(12),
               boxShadow: const [
-                BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(2, 2)),
+                BoxShadow(
+                    color: Colors.black26, blurRadius: 5, offset: Offset(2, 2)),
               ],
             ),
             child: Stack(
@@ -120,13 +121,15 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
                           transform: Matrix4.identity()..rotateY(3.1415),
                           child: Text(
                             widget.backText,
-                            style: const TextStyle(color: Colors.white, fontSize: 28),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 28),
                             textAlign: TextAlign.center,
                           ),
                         )
                       : Text(
                           widget.frontText,
-                          style: const TextStyle(color: Colors.white, fontSize: 28),
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 28),
                           textAlign: TextAlign.center,
                         ),
                 ),

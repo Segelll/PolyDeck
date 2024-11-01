@@ -39,7 +39,7 @@ class ResultPage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            SizedBox(height: 50),
+            const SizedBox(height: 50),
             Text(
               'Score: $score / $totalQuestions',
               style: const TextStyle(fontSize: 24),
@@ -61,16 +61,8 @@ class ResultPage extends StatelessWidget {
               },
               child:Text(StringsLoader.get('deckPage')),
             ),
-            SizedBox(height: 20),
             
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => CardFlipPage(),
-                ));
-              },
-              child: const Text('Go to Card Flip'),
-            ),
+            
           ],
         ),
       ),

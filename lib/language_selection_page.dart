@@ -19,7 +19,7 @@ class LanguageSelectionPage extends StatelessWidget {
             children: [
               const Spacer(),
               const Text(
-                'Select Your Language:',
+                'Choose Your Language:',
                 style: TextStyle(fontSize: 24),
               ),
               const SizedBox(height: 20),
@@ -51,15 +51,7 @@ class LanguageSelectionPage extends StatelessWidget {
               ),
               const SizedBox(height: 10),
 
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DecksPage()),
-                  );
-                },
-                child: const Text("Desteler sayfası"),
-              ),
+
               const Spacer(),
             ],
           ),

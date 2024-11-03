@@ -3,12 +3,17 @@ import 'package:flutter/services.dart';
 
 class StringsLoader {
   static Map<String, String> _strings = {};
-  static String _currentLanguage = 'en'; 
+  static String _currentLanguage = 'en';
 
   static Future<void> loadStrings() async {
-    final String response = await rootBundle.loadString('lib/strings.json');
-    final Map<String, dynamic> jsonData = json.decode(response);
-    _strings = Map<String, String>.from(jsonData[_currentLanguage]);
+    try {
+      final String response = await rootBundle.loadString('assets/strings.json');
+      final Map<String, dynamic> jsonData = json.decode(response);
+      _strings = Map<String, String>.from(jsonData[_currentLanguage]);
+    } catch (e) {
+      print('Error loading strings.json: $e');
+      _strings = {}; // Provide default strings or handle the error as needed
+    }
   }
 
   static String get(String key) {
@@ -23,5 +28,4 @@ class StringsLoader {
     setLanguage(language);
     await loadStrings();
   }
-  
 }

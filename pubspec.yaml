@@ -53,8 +53,9 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
-    - lib/strings.json
-
+    - assets/strings.json
+    - assets/english_words_a1.json
+    - assets/turkish_words_a1.json
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

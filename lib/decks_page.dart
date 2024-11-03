@@ -12,17 +12,39 @@ class DecksPage extends StatelessWidget {
         title: Text(StringsLoader.get("deckPage")),
       ),
       body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => CardFlipPage()),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-                minimumSize:const Size(200, 50),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // A1 Deck Button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'a1')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(200, 50),
               ),
-          child: Text(StringsLoader.get("a1Deck")),
+              child: Text(StringsLoader.get("a1Deck")),
+            ),
+            const SizedBox(height: 20),
+            // You can add more decks here, e.g., A2, B1
+            // A2 Deck Button
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'a2')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(200, 50),
+              ),
+              child: const Text("A2 Deck"),
+            ),
+            // Add more buttons for different levels if needed
+          ],
         ),
       ),
     );

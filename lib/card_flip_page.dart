@@ -4,43 +4,62 @@ import 'strings_loader.dart';
 import 'card_deck.dart';
 import 'card_model.dart';
 import 'analysis_page.dart';
+import 'analysis_result.dart';
 
 class CardFlipPage extends StatefulWidget {
+  final String level;
+
+  const CardFlipPage({Key? key, required this.level}) : super(key: key);
+
   @override
   _CardFlipPageState createState() => _CardFlipPageState();
 }
 
-class _CardFlipPageState extends State<CardFlipPage>
-    with TickerProviderStateMixin {
+class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMixin {
   final CardDeck _deck = CardDeck();
   int _currentCardIndex = 0;
   bool _isFlipped = false;
   Color _backCardColor = Colors.grey;
   List<Color> _colorTracker = List.generate(10, (_) => Colors.grey);
-  List<String> _analysisResults = [];
+  List<AnalysisResult> _analysisResults = [];
   int _deckIndex = 1;
 
   AnimationController? _drawCardController;
   Animation<Offset>? _drawCardAnimation;
 
-  final GlobalKey<CardFlipAnimationState> _cardKey =
-      GlobalKey<CardFlipAnimationState>();
+  final GlobalKey<CardFlipAnimationState> _cardKey = GlobalKey<CardFlipAnimationState>();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _initDrawCardAnimation();
+    _loadDeck();
+  }
+
+  Future<void> _loadDeck() async {
+    try {
+      await _deck.loadCards(widget.level);
+      setState(() {
+        _isLoading = false;
+        _initDrawCardAnimation();
+      });
+    } catch (e) {
+      print('Error in _loadDeck: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _initDrawCardAnimation() {
     _drawCardController = AnimationController(
-      duration: Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 500),
       vsync: this,
     );
 
     _drawCardAnimation = Tween<Offset>(
-      begin: Offset(0, -2.0),
-      end: Offset(0, 0),
+      begin: const Offset(0, -2.0),
+      end: const Offset(0, 0),
     ).animate(
       CurvedAnimation(
         parent: _drawCardController!,
@@ -56,17 +75,14 @@ class _CardFlipPageState extends State<CardFlipPage>
       _isFlipped = true;
       _backCardColor = color;
       _colorTracker[_currentCardIndex] = color;
-      _analysisResults
-          .add('Card ${_currentCardIndex + 1}: ${_getColorString(color)}');
-    });
-  }
 
-  String _getColorString(Color color) {
-    if (color == Colors.red) return 'Red';
-    if (color == Colors.yellow) return 'Yellow';
-    if (color == Colors.green) return 'Green';
-    if (color == Colors.grey) return 'Grey';
-    return '';
+      final currentCard = _deck.cards[_currentCardIndex];
+      _analysisResults.add(AnalysisResult(
+        word: currentCard.frontText,
+        meaning: currentCard.backText,
+        color: color,
+      ));
+    });
   }
 
   void _reflipCard() {
@@ -75,8 +91,8 @@ class _CardFlipPageState extends State<CardFlipPage>
         setState(() {
           _backCardColor = Colors.grey;
           _colorTracker[_currentCardIndex] = Colors.grey;
-          _analysisResults.removeWhere(
-              (result) => result.startsWith('Card ${_currentCardIndex + 1}:'));
+          _analysisResults.removeWhere((result) =>
+          result.word == _deck.cards[_currentCardIndex].frontText);
         });
 
         _cardKey.currentState?.removeStatusListener();
@@ -108,7 +124,8 @@ class _CardFlipPageState extends State<CardFlipPage>
   }
 
   void _showAnalysis() {
-    String previousDeckName = 'Deck $_deckIndex';
+    String previousDeckName =
+    StringsLoader.get('deck').replaceAll('{index}', _deckIndex.toString());
 
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -122,16 +139,20 @@ class _CardFlipPageState extends State<CardFlipPage>
     );
   }
 
-  void _startNewDeck() {
+  void _startNewDeck() async {
     setState(() {
       _deckIndex++;
       _currentCardIndex = 0;
-      _deck.reset();
       _analysisResults.clear();
       _colorTracker = List.generate(10, (_) => Colors.grey);
       _isFlipped = false;
       _backCardColor = Colors.grey;
+      _isLoading = true;
+    });
 
+    await _deck.loadCards(widget.level);
+    setState(() {
+      _isLoading = false;
       _drawCardController!.reset();
       _drawCardController!.forward();
     });
@@ -145,7 +166,15 @@ class _CardFlipPageState extends State<CardFlipPage>
 
   @override
   Widget build(BuildContext context) {
-    if (_deck.cards.isEmpty) return Center(child: CircularProgressIndicator());
+    if (_isLoading || _deck.cards.isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(StringsLoader.get('appTitle')),
+          centerTitle: true,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
     final CardModel currentCard = _deck.cards[_currentCardIndex];
 
@@ -159,8 +188,11 @@ class _CardFlipPageState extends State<CardFlipPage>
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              Text('Deck $_deckIndex', style: TextStyle(fontSize: 24)),
-              SizedBox(height: 20),
+              Text(
+                StringsLoader.get('deck').replaceAll('{index}', _deckIndex.toString()),
+                style: const TextStyle(fontSize: 24),
+              ),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -168,7 +200,7 @@ class _CardFlipPageState extends State<CardFlipPage>
                     Container(
                       width: 30,
                       height: 45,
-                      margin: EdgeInsets.symmetric(horizontal: 2),
+                      margin: const EdgeInsets.symmetric(horizontal: 2),
                       decoration: BoxDecoration(
                         color: _colorTracker[i],
                         borderRadius: BorderRadius.circular(8),
@@ -176,7 +208,7 @@ class _CardFlipPageState extends State<CardFlipPage>
                     ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Expanded(
                 child: Stack(
                   children: [
@@ -201,7 +233,7 @@ class _CardFlipPageState extends State<CardFlipPage>
                   ],
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (!_isFlipped) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -210,25 +242,25 @@ class _CardFlipPageState extends State<CardFlipPage>
                       onPressed: () => _flipCard(Colors.red),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
-                        minimumSize: Size(100, 50),
+                        minimumSize: const Size(100, 50),
                       ),
                       child: Text(StringsLoader.get('flipRed')),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () => _flipCard(Colors.yellow),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.yellow[700],
-                        minimumSize: Size(100, 50),
+                        minimumSize: const Size(100, 50),
                       ),
                       child: Text(StringsLoader.get('flipYellow')),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: () => _flipCard(Colors.green),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
-                        minimumSize: Size(100, 50),
+                        minimumSize: const Size(100, 50),
                       ),
                       child: Text(StringsLoader.get('flipGreen')),
                     ),
@@ -241,29 +273,29 @@ class _CardFlipPageState extends State<CardFlipPage>
                     ElevatedButton(
                       onPressed: _reflipCard,
                       style: ElevatedButton.styleFrom(
-                        minimumSize: Size(100, 50),
+                        minimumSize: const Size(100, 50),
                       ),
                       child: Text(StringsLoader.get('reflip')),
                     ),
-                    SizedBox(width: 10),
+                    const SizedBox(width: 10),
                     ElevatedButton(
                       onPressed: _nextCard,
                       style: ElevatedButton.styleFrom(
-                        minimumSize: Size(100, 50),
+                        minimumSize: const Size(100, 50),
                       ),
                       child: Text(StringsLoader.get('newCard')),
                     ),
                   ],
                 ),
               ],
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 StringsLoader.get('cardCount')
                     .replaceAll('{index}', (_currentCardIndex + 1).toString())
                     .replaceAll('{total}', _deck.cards.length.toString()),
-                style: TextStyle(fontSize: 16),
+                style: const TextStyle(fontSize: 16),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),

@@ -50,7 +50,7 @@ class LanguageSelectionPage extends StatelessWidget {
                 child: const Text('Türkçe'),
               ),
               const SizedBox(height: 10),
-              //direkt test ile uğraşmadan kartlar sayfasına gitmek için
+
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(

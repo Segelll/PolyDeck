@@ -12,7 +12,7 @@ class StringsLoader {
       _strings = Map<String, String>.from(jsonData[_currentLanguage]);
     } catch (e) {
       print('Error loading strings.json: $e');
-      _strings = {}; // Provide default strings or handle the error as needed
+      _strings = {};
     }
   }
 

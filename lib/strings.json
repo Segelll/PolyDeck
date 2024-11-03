@@ -19,7 +19,9 @@
     "deckPage":"Decks Page",
     "question":"Question",
     "exam":"Exam",
-    "a1Deck":"A1 Deck"
+    "a1Deck":"A1 Deck",
+    "goExam":"Go Exam",
+    "choosePage":"Choose Page to Go"             
   },
   "tr": {
     "appTitle": "Kart Çevirme Uygulaması",
@@ -41,7 +43,9 @@
     "deckPage":"Desteler Sayfası",
     "question":"Soru",
     "exam":"Sınav",
-    "a1Deck":"A1 Destesi"
+    "a1Deck":"A1 Destesi",
+    "goExam":"Sınava Git",
+    "choosePage":"Gitmek İstediğiniz Sayfayı Seçin"
 
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/decks_page.dart';
-import 'exam_page.dart';
 import 'strings_loader.dart';
+import 'exam_middle_page.dart';
 
 class LanguageSelectionPage extends StatelessWidget {
   const LanguageSelectionPage({super.key});
@@ -19,7 +19,7 @@ class LanguageSelectionPage extends StatelessWidget {
             children: [
               const Spacer(),
               const Text(
-                'Select Language:',
+                'Select Your Language:',
                 style: TextStyle(fontSize: 24),
               ),
               const SizedBox(height: 20),
@@ -27,26 +27,27 @@ class LanguageSelectionPage extends StatelessWidget {
                 onPressed: () async {
                   await StringsLoader.changeLanguage('en');
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => ExamPage(),
+                    builder: (context) => const ExamMiddlePage(),
                   ));
                 },
-                child: const Text('English'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(200, 50),
+                  
                 ),
+                child: const Text('English'),
               ),
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
                   await StringsLoader.changeLanguage('tr');
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
-                    builder: (context) => ExamPage(),
+                    builder: (context) => const ExamMiddlePage(),
                   ));
                 },
-                child: const Text('Türkçe'),
                 style: ElevatedButton.styleFrom(
                   minimumSize: Size(200, 50),
                 ),
+                child: const Text('Türkçe'),
               ),
               const SizedBox(height: 10),
               //direkt test ile uğraşmadan kartlar sayfasına gitmek için
@@ -54,7 +55,7 @@ class LanguageSelectionPage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => DecksPage()),
+                    MaterialPageRoute(builder: (context) => const DecksPage()),
                   );
                 },
                 child: const Text("Desteler sayfası"),

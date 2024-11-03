@@ -19,6 +19,9 @@ class DecksPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => CardFlipPage()),
             );
           },
+          style: ElevatedButton.styleFrom(
+                minimumSize:const Size(200, 50),
+              ),
           child: Text(StringsLoader.get("a1Deck")),
         ),
       ),

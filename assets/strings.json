@@ -1,6 +1,6 @@
 {
   "en": {
-    "appTitle": "Card Flipper App",
+    "appTitle": "Polydeck Preview",
     "cardFront": "Card Front",
     "cardBack": "Card Back",
     "flipRed": "Flip Red",
@@ -33,7 +33,7 @@
     "analysisResults": "Analysis Results:"
   },
   "tr": {
-    "appTitle": "Kart Çevirme Uygulaması",
+    "appTitle": "Polydeck Önizleme",
     "cardFront": "Kart Önü",
     "cardBack": "Kart Arkası",
     "flipRed": "Kırmızı Çevir",

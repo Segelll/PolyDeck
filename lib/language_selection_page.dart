@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/decks_page.dart';
+import 'decks_page.dart';
 import 'strings_loader.dart';
 import 'exam_middle_page.dart';
 

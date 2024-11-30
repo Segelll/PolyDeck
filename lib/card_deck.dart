@@ -11,19 +11,18 @@ class CardDeck {
 
   Future<void> loadCards(String level) async {
     try {
-      // Load English words
       final String englishJsonString = await rootBundle.loadString('assets/english_words_$level.json');
       final List<dynamic> englishJsonData = jsonDecode(englishJsonString);
 
-      // Load Turkish words
       final String turkishJsonString = await rootBundle.loadString('assets/turkish_words_$level.json');
       final List<dynamic> turkishJsonData = jsonDecode(turkishJsonString);
 
-      final Map<int, String> englishWordsById = {};
+      final Map<int, Map<String, dynamic>> englishWordsById = {};
       for (var item in englishJsonData) {
         int id = item['id'];
         String word = item['word'];
-        englishWordsById[id] = word;
+        String wordLevel = item['level'];
+        englishWordsById[id] = {'word': word, 'level': wordLevel};
       }
 
       final Map<int, String> turkishWordsById = {};
@@ -39,7 +38,11 @@ class CardDeck {
       final List<int> selectedIds = commonIds.take(10).toList();
 
       _cards = selectedIds.map((id) {
-        return CardModel(englishWordsById[id]!, turkishWordsById[id]!);
+        return CardModel(
+          englishWordsById[id]!['word'],
+          turkishWordsById[id]!,
+          englishWordsById[id]!['level'],
+        );
       }).toList();
     } catch (e) {
       print('Error loading cards: $e');

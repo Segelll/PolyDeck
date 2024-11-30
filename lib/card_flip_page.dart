@@ -5,7 +5,7 @@ import 'card_deck.dart';
 import 'card_model.dart';
 import 'analysis_page.dart';
 import 'analysis_result.dart';
-
+import 'dart:math';
 class CardFlipPage extends StatefulWidget {
   final String level;
 
@@ -29,6 +29,11 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
 
   final GlobalKey<CardFlipAnimationState> _cardKey = GlobalKey<CardFlipAnimationState>();
   bool _isLoading = true;
+
+  FlipDirection _flipDirection = FlipDirection.leftToRight;
+
+  List<AnimationController> _indicatorControllers = [];
+  List<Animation<double>> _indicatorAnimations = [];
 
   @override
   void initState() {
@@ -70,11 +75,12 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     _drawCardController!.forward();
   }
 
-  void _flipCard(Color color) {
+  void _flipCard(Color color, FlipDirection direction) {
     setState(() {
       _isFlipped = true;
       _backCardColor = color;
       _colorTracker[_currentCardIndex] = color;
+      _flipDirection = direction;
 
       final currentCard = _deck.cards[_currentCardIndex];
       _analysisResults.add(AnalysisResult(
@@ -82,7 +88,28 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
         meaning: currentCard.backText,
         color: color,
       ));
+
+      _animateIndicator(_currentCardIndex);
     });
+  }
+
+  void _animateIndicator(int index) {
+    if (_indicatorControllers.length < _colorTracker.length) {
+      for (int i = 0; i < _colorTracker.length; i++) {
+        _indicatorControllers.add(AnimationController(
+          duration: const Duration(milliseconds: 400),
+          vsync: this,
+        ));
+        _indicatorAnimations.add(Tween<double>(begin: 0, end: 1).animate(
+          CurvedAnimation(
+            parent: _indicatorControllers[i],
+            curve: Curves.easeOut,
+          ),
+        ));
+      }
+    }
+
+    _indicatorControllers[index].forward(from: 0);
   }
 
   void _reflipCard() {
@@ -158,9 +185,52 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     });
   }
 
+  void _showInstructions() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(StringsLoader.get('instructionsTitle')),
+          content: Text(StringsLoader.get('instructionsContent')),
+          actions: [
+            TextButton(
+              child: Text(StringsLoader.get('close')),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _openSettings() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(StringsLoader.get('settings')),
+          content: Text(StringsLoader.get('settingsContent')),
+          actions: [
+            TextButton(
+              child: Text(StringsLoader.get('close')),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   void dispose() {
     _drawCardController?.dispose();
+    for (var controller in _indicatorControllers) {
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -178,10 +248,20 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
 
     final CardModel currentCard = _deck.cards[_currentCardIndex];
 
+    Color frontCardColor = Theme.of(context).brightness == Brightness.light
+        ? Colors.grey[200]!
+        : Colors.grey[800]!;
+
     return Scaffold(
       appBar: AppBar(
         title: Text(StringsLoader.get('appTitle')),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: _openSettings,
+          ),
+        ],
       ),
       body: Center(
         child: Padding(
@@ -197,14 +277,29 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   for (int i = 0; i < _colorTracker.length; i++)
-                    Container(
-                      width: 30,
-                      height: 45,
-                      margin: const EdgeInsets.symmetric(horizontal: 2),
-                      decoration: BoxDecoration(
-                        color: _colorTracker[i],
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    AnimatedBuilder(
+                      animation: _indicatorControllers.isNotEmpty
+                          ? _indicatorAnimations[i]
+                          : AlwaysStoppedAnimation(0),
+                      builder: (context, child) {
+                        return Transform(
+                          transform: Matrix4.identity()
+                            ..setEntry(3, 2, 0.001)
+                            ..rotateY(_indicatorAnimations.isNotEmpty
+                                ? _indicatorAnimations[i].value * pi
+                                : 0),
+                          alignment: Alignment.center,
+                          child: Container(
+                            width: 30,
+                            height: 45,
+                            margin: const EdgeInsets.symmetric(horizontal: 2),
+                            decoration: BoxDecoration(
+                              color: _colorTracker[i],
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                 ],
               ),
@@ -216,16 +311,34 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                       position: _drawCardAnimation!,
                       child: Center(
                         child: GestureDetector(
+                          onHorizontalDragEnd: !_isFlipped
+                              ? (details) {
+                            if (details.primaryVelocity! < 0) {
+                              _flipCard(Colors.red, FlipDirection.leftToRight);
+                            } else if (details.primaryVelocity! > 0) {
+                              _flipCard(Colors.green, FlipDirection.rightToLeft);
+                            }
+                          }
+                              : null,
+                          onVerticalDragEnd: !_isFlipped
+                              ? (details) {
+                            if (details.primaryVelocity! > 0) {
+                              _flipCard(Colors.yellow, FlipDirection.topToBottom);
+                            }
+                          }
+                              : null,
                           onTap: () {},
                           child: CardFlipAnimation(
                             key: _cardKey,
                             isFlipped: _isFlipped,
-                            frontCardColor: Colors.grey,
+                            frontCardColor: frontCardColor,
                             backCardColor: _backCardColor,
                             frontText: currentCard.frontText,
                             backText: currentCard.backText,
                             onFlipComplete: _reflipCard,
                             cardNumber: _currentCardIndex + 1,
+                            flipDirection: _flipDirection,
+                            level: currentCard.level,
                           ),
                         ),
                       ),
@@ -234,39 +347,14 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 ),
               ),
               const SizedBox(height: 20),
-              if (!_isFlipped) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => _flipCard(Colors.red),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red,
-                        minimumSize: const Size(100, 50),
-                      ),
-                      child: Text(StringsLoader.get('flipRed')),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () => _flipCard(Colors.yellow),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.yellow[700],
-                        minimumSize: const Size(100, 50),
-                      ),
-                      child: Text(StringsLoader.get('flipYellow')),
-                    ),
-                    const SizedBox(width: 10),
-                    ElevatedButton(
-                      onPressed: () => _flipCard(Colors.green),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        minimumSize: const Size(100, 50),
-                      ),
-                      child: Text(StringsLoader.get('flipGreen')),
-                    ),
-                  ],
+              Align(
+                alignment: Alignment.bottomRight,
+                child: IconButton(
+                  icon: const Icon(Icons.help_outline),
+                  onPressed: _showInstructions,
                 ),
-              ] else ...[
+              ),
+              if (_isFlipped) ...[
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

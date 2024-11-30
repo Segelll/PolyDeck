@@ -1,4 +1,11 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
+
+enum FlipDirection {
+  leftToRight,
+  rightToLeft,
+  topToBottom,
+}
 
 class CardFlipAnimation extends StatefulWidget {
   final bool isFlipped;
@@ -8,9 +15,11 @@ class CardFlipAnimation extends StatefulWidget {
   final String backText;
   final VoidCallback onFlipComplete;
   final int cardNumber;
+  final FlipDirection flipDirection;
+  final String level;
 
   const CardFlipAnimation({
-    super.key,
+    Key? key,
     required this.isFlipped,
     required this.frontCardColor,
     required this.backCardColor,
@@ -18,7 +27,9 @@ class CardFlipAnimation extends StatefulWidget {
     required this.backText,
     required this.onFlipComplete,
     required this.cardNumber,
-  });
+    required this.flipDirection,
+    required this.level,
+  }) : super(key: key);
 
   @override
   CardFlipAnimationState createState() => CardFlipAnimationState();
@@ -78,14 +89,21 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
 
   @override
   Widget build(BuildContext context) {
+
+    bool isHorizontalFlip = widget.flipDirection != FlipDirection.topToBottom;
+    bool isReverse = widget.flipDirection == FlipDirection.rightToLeft;
+
     return AnimatedBuilder(
       animation: _flipAnimation,
       builder: (context, child) {
-        final angle = _flipAnimation.value * 3.1415;
-        final isUnder = (angle > 3.1415 / 2.0);
-        final transform = Matrix4.identity()
-          ..setEntry(3, 2, 0.001)
-          ..rotateY(angle);
+        final angle = _flipAnimation.value * pi;
+        final transform = Matrix4.identity()..setEntry(3, 2, 0.001);
+
+        if (isHorizontalFlip) {
+          transform.rotateY(isReverse ? -angle : angle);
+        } else {
+          transform.rotateX(angle);
+        }
 
         return Transform(
           transform: transform,
@@ -94,50 +112,85 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
             width: 250,
             height: 350,
             decoration: BoxDecoration(
-              color: isUnder ? widget.backCardColor : widget.frontCardColor,
+              color: widget.isFlipped ? widget.backCardColor : widget.frontCardColor,
               borderRadius: BorderRadius.circular(12),
               boxShadow: const [
-                BoxShadow(
-                    color: Colors.black26, blurRadius: 5, offset: Offset(2, 2)),
+                BoxShadow(color: Colors.black26, blurRadius: 5, offset: Offset(2, 2)),
               ],
             ),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: Text(
-                    'Card ${widget.cardNumber}',
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                Center(
-                  child: isUnder
-                      ? Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.identity()..rotateY(3.1415),
-                          child: Text(
-                            widget.backText,
-                            style: const TextStyle(
-                                color: Colors.white, fontSize: 28),
-                            textAlign: TextAlign.center,
-                          ),
-                        )
-                      : Text(
-                          widget.frontText,
-                          style: const TextStyle(
-                              color: Colors.white, fontSize: 28),
-                          textAlign: TextAlign.center,
-                        ),
-                ),
-              ],
-            ),
+            child: _buildCardContent(isHorizontalFlip, isReverse),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildCardContent(bool isHorizontalFlip, bool isReverse) {
+    final isUnder = _flipAnimation.value > 0.5;
+    final contentText = isUnder ? widget.backText : widget.frontText;
+
+
+    final textRotationAngle = isUnder
+        ? (isHorizontalFlip
+        ? (isReverse ? pi : -pi)
+        : pi)
+        : 0.0;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Center(
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, 0.001)
+                ..rotateY(isHorizontalFlip ? textRotationAngle : 0)
+                ..rotateX(isHorizontalFlip ? 0 : textRotationAngle),
+              child: Text(
+                contentText,
+                style: const TextStyle(color: Colors.white, fontSize: 28),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 8,
+          left: 8,
+          child: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(isHorizontalFlip ? textRotationAngle : 0)
+              ..rotateX(isHorizontalFlip ? 0 : textRotationAngle),
+            child: Text(
+              widget.level,
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 8,
+          right: 8,
+          child: Transform(
+            alignment: Alignment.center,
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(isHorizontalFlip ? textRotationAngle : 0)
+              ..rotateX(isHorizontalFlip ? 0 : textRotationAngle),
+            child: Text(
+              'Card ${widget.cardNumber}',
+              style: const TextStyle(
+                color: Colors.white70,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

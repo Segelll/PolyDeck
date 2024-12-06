@@ -24,7 +24,8 @@ class LanguageSelectionPage extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () async {
+                onPressed: () async {                  
+                  await DataLoader().loadJsonFilesToDatabase();
                   await StringsLoader.changeLanguage('en');
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (context) => const ExamMiddlePage(),

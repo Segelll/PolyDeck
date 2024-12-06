@@ -1,4 +1,4 @@
-/*import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/auth_service.dart';
 import 'strings_loader.dart';
@@ -30,16 +30,15 @@ class MyApp extends StatelessWidget {
       home: const LanguageSelectionPage(),
     );
   }
-}*/
+}
 
-import 'package:flutter/material.dart';
+/*import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:poly2/services/auth_service.dart';
 import 'package:poly2/login_page.dart';
 import 'strings_loader.dart';
 import 'language_selection_page.dart';
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -80,4 +79,4 @@ class AuthWrapper extends StatelessWidget {
         ? const LanguageSelectionPage() 
         : LoginPage();
   }
-}
+}*/

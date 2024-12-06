@@ -13,6 +13,8 @@ class CardFlipAnimation extends StatefulWidget {
   final Color backCardColor;
   final String frontText;
   final String backText;
+  final String frontSentence;
+  final String backSentence;
   final VoidCallback onFlipComplete;
   final int cardNumber;
   final FlipDirection flipDirection;
@@ -25,6 +27,8 @@ class CardFlipAnimation extends StatefulWidget {
     required this.backCardColor,
     required this.frontText,
     required this.backText,
+    required this.frontSentence,
+    required this.backSentence,
     required this.onFlipComplete,
     required this.cardNumber,
     required this.flipDirection,
@@ -128,6 +132,7 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
   Widget _buildCardContent(bool isHorizontalFlip, bool isReverse) {
     final isUnder = _flipAnimation.value > 0.5;
     final contentText = isUnder ? widget.backText : widget.frontText;
+    final contentSentence=isUnder? widget.backSentence:widget.frontSentence;
 
 
     final textRotationAngle = isUnder
@@ -146,10 +151,19 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
                 ..setEntry(3, 2, 0.001)
                 ..rotateY(isHorizontalFlip ? textRotationAngle : 0)
                 ..rotateX(isHorizontalFlip ? 0 : textRotationAngle),
-              child: Text(
-                contentText,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(contentText,
                 style: const TextStyle(color: Colors.white, fontSize: 28),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.center,),
+                  const SizedBox(height: 10),
+                  Text(contentSentence,
+                style: const TextStyle(color: Colors.white, fontSize: 16),
+                textAlign: TextAlign.center,)
+                
+                ],
+                
               ),
             ),
           ),

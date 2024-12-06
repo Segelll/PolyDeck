@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/services/database_helper.dart';
 import 'card_animations.dart';
 import 'strings_loader.dart';
 import 'card_deck.dart';
@@ -6,10 +7,12 @@ import 'card_model.dart';
 import 'analysis_page.dart';
 import 'analysis_result.dart';
 import 'dart:math';
+
 class CardFlipPage extends StatefulWidget {
   final String level;
+  final String language;
 
-  const CardFlipPage({Key? key, required this.level}) : super(key: key);
+  const CardFlipPage({Key? key, required this.level, required this.language}) : super(key: key);
 
   @override
   _CardFlipPageState createState() => _CardFlipPageState();
@@ -43,7 +46,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
 
   Future<void> _loadDeck() async {
     try {
-      await _deck.loadCards(widget.level);
+      await _deck.loadCards(widget.level,widget.language);
       setState(() {
         _isLoading = false;
         _initDrawCardAnimation();
@@ -52,6 +55,23 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       print('Error in _loadDeck: $e');
       setState(() {
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> updateFeedback(String tableName, int id, int feedback) async {
+    setState(() {
+      print("Feedback güncelleniyor...");
+    });
+
+    try {
+      await DBHelper.instance.updateFeedback(tableName, id, feedback);
+      setState(() {
+        print("Feedback başarıyla güncellendi.");
+      });
+    } catch (e) {
+      setState(() {
+        print("Hata: Feedback güncellenirken bir sorun oluştu: $e");
       });
     }
   }
@@ -177,7 +197,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       _isLoading = true;
     });
 
-    await _deck.loadCards(widget.level);
+    await _deck.loadCards(widget.level, widget.language);
     setState(() {
       _isLoading = false;
       _drawCardController!.reset();
@@ -315,8 +335,12 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                               ? (details) {
                             if (details.primaryVelocity! < 0) {
                               _flipCard(Colors.red, FlipDirection.leftToRight);
+                               updateFeedback(widget.language, currentCard.id, 1);
+                              print(currentCard.id);
+
                             } else if (details.primaryVelocity! > 0) {
                               _flipCard(Colors.green, FlipDirection.rightToLeft);
+                               updateFeedback(widget.language,currentCard.id, 2);
                             }
                           }
                               : null,
@@ -324,6 +348,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                               ? (details) {
                             if (details.primaryVelocity! > 0) {
                               _flipCard(Colors.yellow, FlipDirection.topToBottom);
+                               updateFeedback(widget.language, currentCard.id, 3);
                             }
                           }
                               : null,
@@ -335,6 +360,8 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                             backCardColor: _backCardColor,
                             frontText: currentCard.frontText,
                             backText: currentCard.backText,
+                            frontSentence: currentCard.frontSentence,
+                            backSentence: currentCard.backSentence,
                             onFlipComplete: _reflipCard,
                             cardNumber: _currentCardIndex + 1,
                             flipDirection: _flipDirection,

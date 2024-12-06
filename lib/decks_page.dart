@@ -20,7 +20,7 @@ class DecksPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'a1')),
+                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'A1',language: "en")),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -34,7 +34,7 @@ class DecksPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'a2')),
+                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'A2', language: 'en')),
                 );
               },
               style: ElevatedButton.styleFrom(

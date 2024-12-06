@@ -1,4 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package= "com.example.poly2">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="poly2"
         android:name="${applicationName}"

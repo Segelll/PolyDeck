@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/services/data_loader.dart';
 import 'strings_loader.dart';
 import 'exam_middle_page.dart';
 
@@ -38,6 +39,7 @@ class LanguageSelectionPage extends StatelessWidget {
               const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () async {
+                  await DataLoader().loadJsonFilesToDatabase();
                   await StringsLoader.changeLanguage('tr');
                   Navigator.of(context).pushReplacement(MaterialPageRoute(
                     builder: (context) => const ExamMiddlePage(),

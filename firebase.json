@@ -1,0 +1,1 @@
+{"storage":{"rules":"storage.rules"},"flutter":{"platforms":{"android":{"default":{"projectId":"polydeck-words","appId":"1:1034884339576:android:6795f794b8fd72c97c5a8d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"polydeck-words","configurations":{"android":"1:1034884339576:android:6795f794b8fd72c97c5a8d"}}}}}}

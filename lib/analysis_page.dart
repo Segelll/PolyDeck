@@ -41,6 +41,7 @@ class AnalysisPage extends StatelessWidget {
                 itemCount: analysisResults.length,
                 itemBuilder: (context, index) {
                   final result = analysisResults[index];
+                  
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: result.color,

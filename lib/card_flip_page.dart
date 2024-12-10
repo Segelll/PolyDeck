@@ -46,7 +46,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
 
   Future<void> _loadDeck() async {
     try {
-      await _deck.loadCards(widget.level,widget.language);
+      await _deck.loadCards(level:widget.level,language:widget.language);
       setState(() {
         _isLoading = false;
         _initDrawCardAnimation();
@@ -197,7 +197,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       _isLoading = true;
     });
 
-    await _deck.loadCards(widget.level, widget.language);
+    await _deck.loadCards(level:widget.level, language:widget.language);
     setState(() {
       _isLoading = false;
       _drawCardController!.reset();
@@ -244,6 +244,8 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       },
     );
   }
+
+
 
   @override
   void dispose() {
@@ -336,8 +338,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                             if (details.primaryVelocity! < 0) {
                               _flipCard(Colors.red, FlipDirection.leftToRight);
                                updateFeedback(widget.language, currentCard.id, 1);
-                              print(currentCard.id);
-
+                              
                             } else if (details.primaryVelocity! > 0) {
                               _flipCard(Colors.green, FlipDirection.rightToLeft);
                                updateFeedback(widget.language,currentCard.id, 2);

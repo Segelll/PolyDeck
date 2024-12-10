@@ -1,6 +1,7 @@
 import 'package:poly2/models/word_model.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
 class DBHelper {
   static final DBHelper instance = DBHelper._init();
   static Database? _database;
@@ -27,6 +28,20 @@ class DBHelper {
     await db.execute('''
       CREATE TABLE IF NOT EXISTS $tableName (
         id INTEGER PRIMARY KEY NOT NULL,
+        word TEXT NOT NULL,
+        sentence TEXT NOT NULL,
+        level TEXT NOT NULL,
+        isSeen INTEGER DEFAULT 0,
+        feedback INTEGER DEFAULT 0
+      )
+    ''');
+  }
+
+    Future<void> createFavouriteTable() async {
+    final db = await instance.database;
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS fav (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         word TEXT NOT NULL,
         sentence TEXT NOT NULL,
         level TEXT NOT NULL,
@@ -132,31 +147,51 @@ Future<List<Map<String, dynamic>>> fetchWordsByLevel(
 
 Future<List<Map<String, dynamic>>> fetchWordsByIsSeen(
   String tableName,
-  String level,
-  int isSeen, 
-  int limit
+  String? level,
+  int feedback,
+  int limit,
 ) async {
   final db = await instance.database;
-  return await db.query(
-    tableName,
-    where: 'isSeen = ? AND level = ?',
-    whereArgs: [isSeen, level],
-    limit: limit,
-  );
+  if (level == null) {
+    return await db.query(
+      tableName,
+      where: 'feedback = ?',
+      whereArgs: [feedback],
+      limit: limit,
+    );
+  } else {
+    return await db.query(
+      tableName,
+      where: 'feedback = ? AND level = ?',
+      whereArgs: [feedback, level],
+      limit: limit,
+    );
+  }
 }
+
 Future<List<Map<String, dynamic>>> fetchWordsByFeedback(
   String tableName,
-  String level,
-  int feedback, 
-  int limit
+  String? level,
+  int feedback,
+  int limit,
 ) async {
   final db = await instance.database;
-  return await db.query(
-    tableName,
-    where: 'feedback = ? AND level = ?',
-    whereArgs: [feedback, level],
-    limit: limit,
-  );
+
+  if (level == null) {
+    return await db.query(
+      tableName,
+      where: 'feedback = ?',
+      whereArgs: [feedback],
+      limit: limit,
+    );
+  } else {
+    return await db.query(
+      tableName,
+      where: 'feedback = ? AND level = ?',
+      whereArgs: [feedback, level],
+      limit: limit,
+    );
+  }
 }
 
 Future<int> feedBackCount(
@@ -180,4 +215,19 @@ Future<int> isSeenCount(
     [level]
   )) ?? 0;
 }
+
+Future<void> insertFavourite(String word, String sentence, String level) async {
+    final db = await instance.database;
+    await db.insert(
+      'fav',
+      {
+        'word': word,
+        'sentence': sentence,
+        'level': level,
+        'isSeen': 0,
+        'feedback': 0, 
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 }

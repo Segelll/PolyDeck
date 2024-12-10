@@ -16,28 +16,42 @@ class CardDeck {
     }
   }
 
-  Future<void> loadCards(String level, String language) async {
+  Future<void> loadCards({String? level, required String language}) async {
     try {
-      final List<Map<String, dynamic>> feedback1Words =
-          await DBHelper.instance.fetchWordsByFeedback(language, level, 1, 4);
-      final List<Map<String, dynamic>> feedback2Words =
-          await DBHelper.instance.fetchWordsByFeedback(language, level, 2, 1);
+      List<Map<String, dynamic>> allWords = [];
 
-      final List<Map<String, dynamic>> allWords = [
-        ...feedback1Words,
-        ...feedback2Words,
-      ];
+      if (level != null) {
+        final List<Map<String, dynamic>> feedback1Words =
+            await DBHelper.instance.fetchWordsByFeedback(language, level, 1, 4);
+        final List<Map<String, dynamic>> feedback2Words =
+            await DBHelper.instance.fetchWordsByFeedback(language, level, 2, 1);
 
-      final int missingCards = 10 - allWords.length;
-      if (missingCards > 0) {
-        final List<Map<String, dynamic>> additionalIsSeenWords =
-            await DBHelper.instance.fetchWordsByIsSeen(language, level, 0, missingCards);
+        allWords = [...feedback1Words, ...feedback2Words];
 
-        allWords.addAll(additionalIsSeenWords);
+        final int missingCards = 10 - allWords.length;
+        if (missingCards > 0) {
+          final List<Map<String, dynamic>> additionalIsSeenWords =
+              await DBHelper.instance.fetchWordsByIsSeen(language, level, 0, missingCards);
+
+          allWords.addAll(additionalIsSeenWords);
+        }
+      } else {
+        final List<Map<String, dynamic>> feedback1Words =
+            await DBHelper.instance.fetchWordsByFeedback(language, null, 1, 4);
+        final List<Map<String, dynamic>> feedback2Words =
+            await DBHelper.instance.fetchWordsByFeedback(language, null, 2, 1);
+
+        allWords = [...feedback1Words, ...feedback2Words];
+
+        final int missingCards = 10 - allWords.length;
+        if (missingCards > 0) {
+          final List<Map<String, dynamic>> additionalIsSeenWords =
+              await DBHelper.instance.fetchWordsByIsSeen(language, null, 0, missingCards);
+
+          allWords.addAll(additionalIsSeenWords);
+        }
       }
-
       List<Map<String, dynamic>> turkishWords = [];
-
       for (var word in allWords) {
         final int wordId = word['id'];
         final turkishWord = await DBHelper.instance.fetchWordById("tr", wordId);
@@ -52,7 +66,7 @@ class CardDeck {
 
         final turkishWord = turkishWords.firstWhere(
           (tWord) => tWord['id'] == id,
-          orElse: () => {}
+          orElse: () => {},
         );
         if (turkishWord.isEmpty) {
           return null;

@@ -14,6 +14,8 @@ class DataLoader {
       'it.json',
       'pr.json',
     ];
+    //favori sayfası
+    await DBHelper.instance.createFavouriteTable();
 
     for (var fileName in fileNames) {
       final tableName = fileName.split('.').first;
@@ -48,7 +50,6 @@ if (jsonData is Map<String, dynamic>) {
 } else {
   throw Exception("Beklenmeyen JSON formatı.");
 }
-
       await DBHelper.instance.insertWords(tableName, words);
     }
   }

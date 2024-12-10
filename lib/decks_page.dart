@@ -20,6 +20,19 @@ class DecksPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
+                  MaterialPageRoute(builder: (context) => const CardFlipPage(level: "", language: 'en')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(200, 50),
+              ),
+              child: Text(StringsLoader.get("favorite")),
+            ),
+
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
                   MaterialPageRoute(builder: (context) => const CardFlipPage(level: 'A1',language: "en")),
                 );
               },

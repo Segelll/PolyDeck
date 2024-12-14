@@ -38,6 +38,8 @@ dependencies:
   sqflite: ^2.4.1
   sqlite3_flutter_libs: ^0.5.27
   sqflite_common_ffi: ^2.3.4+3
+  path_provider: ^2.0.11
+  path: ^1.8.1
 
 dev_dependencies:
   flutter_test:
@@ -57,15 +59,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/strings.json
-    - assets/json/de.json
-    - assets/json/en.json
-    - assets/json/tr.json
-    - assets/json/esp.json
-    - assets/json/it.json
-    - assets/json/pr.json
-    - assets/json/fr.json
-    - assets/english_words_a1.json
-    - assets/turkish_words_a1.json
+    - assets/language_data.db
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:

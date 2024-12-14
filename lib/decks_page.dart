@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/card_flip_page.dart';
+import 'package:poly2/progress_report.dart';
 import 'package:poly2/strings_loader.dart';
 
 class DecksPage extends StatelessWidget {
@@ -15,6 +16,18 @@ class DecksPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+             ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProgressReport()),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(200, 50),
+              ),
+              child: Text(StringsLoader.get("weeklyReport")),
+            ),
 
             ElevatedButton(
               onPressed: () {

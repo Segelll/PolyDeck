@@ -60,7 +60,8 @@
     "correctAnswer": "Correct Answer",
     "recommendedDeck": "Recommended Deck",
     "yourScore": "Score",
-    "favorite": "Favorites"
+    "favorite": "Favorites",
+    "weeklyReport": "Weekly Report"
   },
   "tr": {
     "appTitle": "Polydeck Önizleme",
@@ -123,6 +124,7 @@
     "correctAnswer": "Doğru Cevap",
     "recommendedDeck": "Önerilen Deste",
     "yourScore": "Skor",
-    "favorite": "Favoriler"
+    "favorite": "Favoriler",
+    "weeklyReport": "Haftalık Rapor"
   }
 }

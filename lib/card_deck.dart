@@ -8,9 +8,9 @@ class CardDeck {
 
   List<CardModel> get cards => _cards;
 
-  Future<void> updateIsSeen(String tableName, int id, int feedback) async {
+  Future<void> updateIsSeen(String tableName, int id) async {
     try {
-      await DBHelper.instance.updateIsSeen(tableName, id, 1);
+      await DBHelper.instance.updateIsSeenDate(tableName, id);
     } catch (e) {
       print('Error updating isSeen: $e');
     }
@@ -20,73 +20,40 @@ class CardDeck {
     try {
       List<Map<String, dynamic>> allWords = [];
 
-      if (level != null) {
-        final List<Map<String, dynamic>> feedback1Words =
-            await DBHelper.instance.fetchWordsByFeedback(language, level, 1, 4);
-        final List<Map<String, dynamic>> feedback2Words =
-            await DBHelper.instance.fetchWordsByFeedback(language, level, 2, 1);
+      final List<Map<String, dynamic>> feedback1Words = await DBHelper.instance.fetchWordsByFeedback(language, level, 1, 4);
+      final List<Map<String, dynamic>> feedback2Words = await DBHelper.instance.fetchWordsByFeedback(language, level, 2, 1);
 
-        allWords = [...feedback1Words, ...feedback2Words];
+      allWords = [...feedback1Words, ...feedback2Words];
 
-        final int missingCards = 10 - allWords.length;
-        if (missingCards > 0) {
-          final List<Map<String, dynamic>> additionalIsSeenWords =
-              await DBHelper.instance.fetchWordsByIsSeen(language, level, 0, missingCards);
-
-          allWords.addAll(additionalIsSeenWords);
-        }
-      } else {
-        final List<Map<String, dynamic>> feedback1Words =
-            await DBHelper.instance.fetchWordsByFeedback(language, null, 1, 4);
-        final List<Map<String, dynamic>> feedback2Words =
-            await DBHelper.instance.fetchWordsByFeedback(language, null, 2, 1);
-
-        allWords = [...feedback1Words, ...feedback2Words];
-
-        final int missingCards = 10 - allWords.length;
-        if (missingCards > 0) {
-          final List<Map<String, dynamic>> additionalIsSeenWords =
-              await DBHelper.instance.fetchWordsByIsSeen(language, null, 0, missingCards);
-
-          allWords.addAll(additionalIsSeenWords);
-        }
+      final int missingCards = 10 - allWords.length;
+      if (missingCards > 0) {
+        final List<Map<String, dynamic>> additionalIsSeenWords = await DBHelper.instance.fetchWordsByIsSeen(language, level, 0, missingCards);
+        allWords.addAll(additionalIsSeenWords);
       }
-      List<Map<String, dynamic>> turkishWords = [];
+
+      List<CardModel> allCards = [];
       for (var word in allWords) {
         final int wordId = word['id'];
-        final turkishWord = await DBHelper.instance.fetchWordById("tr", wordId);
+        final translation = await DBHelper.instance.fetchWordById("tr", wordId);
 
-        if (turkishWord != null) {
-          turkishWords.add(turkishWord.toMap());
+        if (translation != null) {
+          allCards.add(
+            CardModel(
+              word['id'],
+              word['word'],
+              word['sentence'],
+              translation.backText,
+              translation.backSentence,
+              word['level'],
+            ),
+          );
         }
       }
-
-      final List<CardModel> allCards = allWords.map((englishWord) {
-        final int id = englishWord['id'];
-
-        final turkishWord = turkishWords.firstWhere(
-          (tWord) => tWord['id'] == id,
-          orElse: () => {},
-        );
-        if (turkishWord.isEmpty) {
-          return null;
-        }
-
-        return CardModel(
-          englishWord['id'],
-          englishWord['word'],
-          englishWord['sentence'],
-          turkishWord['word'],
-          turkishWord['sentence'],
-          englishWord['level'],
-        );
-      }).whereType<CardModel>().toList();
-
       allCards.shuffle(Random());
       _cards = allCards.take(10).toList();
 
       for (var card in _cards) {
-        updateIsSeen(language, card.id, 1);
+        await updateIsSeen(language, card.id);
       }
     } catch (e) {
       print('Error loading cards: $e');

@@ -1,233 +1,218 @@
-import 'package:poly2/models/word_model.dart';
-import 'package:sqflite/sqflite.dart';
+import 'dart:io';
+import 'dart:math';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:poly2/models/word_model.dart';
 
 class DBHelper {
-  static final DBHelper instance = DBHelper._init();
+  static final DBHelper _instance = DBHelper._privateConstructor();
   static Database? _database;
 
-  DBHelper._init();
+  factory DBHelper() => _instance;
+
+  DBHelper._privateConstructor();
+
+  static DBHelper get instance => _instance;
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('language_word_data.db');
+    _database = await _initDatabase();
     return _database!;
   }
+  Future<Database> _initDatabase() async {
+    try {
+      final dbPath = await getDatabasesPath();
+      final path = join(dbPath, 'language_data.db');
+      await deleteDatabase(path);
+      final dbExists = await databaseExists(path);
 
-  Future<Database> _initDB(String fileName) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, fileName);
-    return await openDatabase(
-      path,
-      version: 1,
-    );
-  }
+      if (!dbExists) {
+        ByteData data = await rootBundle.load('assets/language_data.db');
+        List<int> bytes = data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+        await File(path).writeAsBytes(bytes, flush: true);
+      }
 
-  Future<void> createTable(String tableName) async {
-    final db = await instance.database;
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS $tableName (
-        id INTEGER PRIMARY KEY NOT NULL,
-        word TEXT NOT NULL,
-        sentence TEXT NOT NULL,
-        level TEXT NOT NULL,
-        isSeen INTEGER DEFAULT 0,
-        feedback INTEGER DEFAULT 0
-      )
-    ''');
-  }
-
-    Future<void> createFavouriteTable() async {
-    final db = await instance.database;
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS fav (
-        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-        word TEXT NOT NULL,
-        sentence TEXT NOT NULL,
-        level TEXT NOT NULL,
-        isSeen INTEGER DEFAULT 0,
-        feedback INTEGER DEFAULT 0
-      )
-    ''');
-  }
-
-  Future<void> insertWords(String tableName, List<WordModel> words) async {
-    final db = await instance.database;
-    final batch = db.batch();
-
-    for (var word in words) {
-      batch.insert(
-        tableName,
-        word.toMap(),
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      return await openDatabase(path);
+    } catch (e) {
+      throw Exception('Database initialization failed: $e');
     }
-
-    await batch.commit(noResult: true);
   }
 
-  Future<List<WordModel>> fetchWords(String tableName) async {
-    final db = await instance.database;
-    final maps = await db.query(tableName);
-
-    return maps.map((map) => WordModel.fromMap(map)).toList();
-  }
-  
-  Future<WordModel?> fetchWordById(String tableName, int id) async {
-    final db = await instance.database;
-    final maps = await db.query(
+  Future<void> updateIsSeenDate(String tableName, int id) async {
+    final DateTime now = DateTime.now();
+    final String dateFormatted = "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+  try {
+    final db = await database;
+    await db.update(
       tableName,
+      {
+        'isSeen': 1,
+        'date': dateFormatted,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
+  } catch (e) {
+    throw Exception('Failed to update isSeen: $e');
+  }
+}
 
-    if (maps.isNotEmpty) {
-      return WordModel.fromMap(maps.first);
+Future<String?> getEarliestDate(String tableName) async {
+  try {
+    final db = await database;
+    final result = await db.rawQuery('SELECT MIN(date) as earliestDate FROM $tableName');
+    if (result.isNotEmpty && result.first['earliestDate'] != null) {
+      return result.first['earliestDate'] as String;
     }
     return null;
-  }
-
-   Future<int> updateWord(String tableName, WordModel word) async {
-    final db = await instance.database;
-    return await db.update(
-      tableName,
-      word.toMap(),
-      where: 'id = ?',
-      whereArgs: [word.id],
-    );
-  }
-  Future<int> deleteWord(String tableName, int id) async {
-    final db = await instance.database;
-    return await db.delete(
-      tableName,
-      where: 'id = ?',
-      whereArgs: [id],
-    );
-  }
-
-  Future<void> deleteTable(String tableName) async {
-    final db = await instance.database;
-    await db.execute('DROP TABLE IF EXISTS $tableName');
-  }
-
-  Future<int> deleteAllWords(String tableName) async {
-    final db = await instance.database;
-    return await db.delete(tableName);
-  }
-
-  Future<int> updateFeedback(String tableName, int id, int feedback) async {
-  final db = await instance.database;
-  return await db.update(
-    tableName,
-    {'feedback': feedback},
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-}
-
-Future<int> updateIsSeen(String tableName, int id, int isSeen) async {
-  final db = await instance.database;
-  return await db.update(
-    tableName,
-    {'isSeen': isSeen},
-    where: 'id = ?',
-    whereArgs: [id],
-  );
-}
-
-Future<List<Map<String, dynamic>>> fetchWordsByLevel(
-      String tableName, String level) async {
-    final db = await instance.database;
-    return await db.query(
-      tableName,
-      where: 'level = ?',
-      whereArgs: [level],
-    );
-  }
-
-Future<List<Map<String, dynamic>>> fetchWordsByIsSeen(
-  String tableName,
-  String? level,
-  int feedback,
-  int limit,
-) async {
-  final db = await instance.database;
-  if (level == null) {
-    return await db.query(
-      tableName,
-      where: 'feedback = ?',
-      whereArgs: [feedback],
-      limit: limit,
-    );
-  } else {
-    return await db.query(
-      tableName,
-      where: 'feedback = ? AND level = ?',
-      whereArgs: [feedback, level],
-      limit: limit,
-    );
+  } catch (e) {
+    throw Exception('Failed to get the earliest date: $e');
   }
 }
 
-Future<List<Map<String, dynamic>>> fetchWordsByFeedback(
-  String tableName,
-  String? level,
-  int feedback,
-  int limit,
-) async {
-  final db = await instance.database;
+  
+   Future<void> updateFeedback(String tableName, int id, int feedback) async {
+    try {
+      final db = await database;
+      await db.update(
+        tableName,
+        {'feedback': feedback},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw Exception('Failed to update isSeen: $e');
+    }
+  }
 
-  if (level == null) {
-    return await db.query(
-      tableName,
-      where: 'feedback = ?',
-      whereArgs: [feedback],
-      limit: limit,
-    );
-  } else {
-    return await db.query(
-      tableName,
-      where: 'feedback = ? AND level = ?',
-      whereArgs: [feedback, level],
-      limit: limit,
-    );
+  Future<List<Map<String, dynamic>>> fetchWordsByFeedback(
+      String tableName, String? level, int feedback, int limit) async {
+    try {
+      final db = await database;
+      final whereClause = level != null ? 'level = ? AND feedback = ?' : 'feedback = ?';
+      final whereArgs = level != null ? [level, feedback] : [feedback];
+
+      return await db.query(
+        tableName,
+        where: whereClause,
+        whereArgs: whereArgs,
+        limit: limit,
+      );
+    } catch (e) {
+      throw Exception('Failed to fetch words by feedback: $e');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> fetchWordsByIsSeen(
+      String tableName, String? level, int isSeen, int limit) async {
+    try {
+      final db = await database;
+      final whereClause = level != null ? 'level = ? AND isSeen = ?' : 'isSeen = ?';
+      final whereArgs = level != null ? [level, isSeen] : [isSeen];
+
+      return await db.query(
+        tableName,
+        where: whereClause,
+        whereArgs: whereArgs,
+        limit: limit,
+      );
+    } catch (e) {
+      throw Exception('Failed to fetch words by isSeen: $e');
+    }
+  }
+
+  Future<WordModel?> fetchWordById(String tableName, int id) async {
+    try {
+      final db = await database;
+      final result = await db.query(
+        tableName,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (result.isNotEmpty) {
+        return WordModel.fromMap(result.first);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      throw Exception('Failed to fetch word by ID: $e');
+    }
+  }
+  Future<List<Map<String, dynamic>>> fetchExamWords(
+      String tableName, int id) async {
+    try {
+      final db = await database;
+
+      return await db.query(
+        tableName,
+        where: "id=?",
+        whereArgs: [id],
+      );
+    } catch (e) {
+      throw Exception('Failed to fetch words by isSeen: $e');
+    }
+  }
+Future<List<Map<String, dynamic>>> fetchExamOptions(String tableName) async {
+  try {
+    final db = await database;
+    List<int> randomIds = _generateRandomIds(1, 4799, 3);
+    List<Map<String, dynamic>> options = [];
+    
+    for (int id in randomIds) {
+      final result = await db.query(
+        tableName,
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+
+      if (result.isNotEmpty) {
+        options.add(result.first);
+      }
+    }
+
+    if (options.isEmpty) {
+      print("No options found for $tableName");
+    }
+
+    return options;
+  } catch (e) {
+    throw Exception('Failed to fetch options: $e');
   }
 }
+List<int> _generateRandomIds(int min, int max, int count) {
+  Random random = Random();
+  Set<int> randomIds = Set();
 
-Future<int> feedBackCount(
-  String tableName,
-  String level,
-  int feedback
-) async {
-  final db = await instance.database;
-  return Sqflite.firstIntValue(await db.rawQuery(
-    'SELECT COUNT(DISTINCT feedback) as count FROM $tableName WHERE level = ? AND feedback = ?',
-    [level, feedback]
-  )) ?? 0;
+  while (randomIds.length < count) {
+    randomIds.add(min + random.nextInt(max - min + 1));
+  }
+
+  return randomIds.toList();
 }
-Future<int> isSeenCount(
-  String tableName,
-  String level,
-) async {
-  final db = await instance.database;
-  return Sqflite.firstIntValue(await db.rawQuery(
-    'SELECT COUNT(*) as count FROM $tableName WHERE level = 0',
-    [level]
-  )) ?? 0;
 }
 
-Future<void> insertFavourite(String word, String sentence, String level) async {
-    final db = await instance.database;
-    await db.insert(
-      'fav',
-      {
-        'word': word,
-        'sentence': sentence,
-        'level': level,
-        'isSeen': 0,
-        'feedback': 0, 
-      },
-      conflictAlgorithm: ConflictAlgorithm.replace,
+class WordModel {
+  final int id;
+  final String backText;
+  final String backSentence;
+
+  WordModel({
+    required this.id,
+    required this.backText,
+    required this.backSentence,
+  });
+
+  factory WordModel.fromMap(Map<String, dynamic> map) {
+    return WordModel(
+      id: map['id'],
+      backText: map['word'] ?? '',
+      backSentence: map['sentence'] ?? '',
     );
   }
+
+
+
 }
+

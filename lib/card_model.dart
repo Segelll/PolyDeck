@@ -6,5 +6,12 @@ class CardModel {
   final String backSentence;
   final String level;
 
-  CardModel(this.id,this.frontText, this.frontSentence, this.backText,this.backSentence,this.level);
+  CardModel(
+    this.id, 
+    this.frontText, 
+    this.frontSentence, 
+    this.backText, 
+    this.backSentence, 
+    this.level
+  );
 }

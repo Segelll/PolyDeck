@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/services/database_helper.dart';
 import 'exam_model.dart';
 import 'exam_result_page.dart';
 import 'strings_loader.dart';
-import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/services.dart';
 
@@ -26,83 +26,76 @@ class _ExamPageState extends State<ExamPage> {
     super.initState();
     _loadQuestions();
   }
+Future<void> _loadQuestions() async {
+  try {
+    final db = DBHelper.instance;
+        Map<String, List<int>> levelIntervals = {
+      'A1': [1, 702],
+      'A2': [704,1425],
+      'B1': [1428, 2163],
+      'B2': [2166, 3539],
+      'C1': [3543, 4790],
+    };
 
-  Future<void> _loadQuestions() async {
-    try {
-      final String englishJsonString =
-      await rootBundle.loadString('assets/english_words_a1.json');
-      final List<dynamic> englishJsonData = jsonDecode(englishJsonString);
+    final List<Question> generatedQuestions = [];
 
-      final String turkishJsonString =
-      await rootBundle.loadString('assets/turkish_words_a1.json');
-      final List<dynamic> turkishJsonData = jsonDecode(turkishJsonString);
+    for (String level in levelIntervals.keys) {
+      final interval = levelIntervals[level]!;
+      final randomIds = _generateRandomIds(interval[0], interval[1], 4);
 
-      final Map<int, String> englishWordsById = {};
-      for (var item in englishJsonData) {
-        int id = item['id'];
-        String word = item['word'];
-        englishWordsById[id] = word;
+      for (int id in randomIds) {
+        final englishWords = await db.fetchExamWords('en', id);
+        final turkishWords = await db.fetchExamWords('tr', id);
+
+        if (englishWords.isNotEmpty && turkishWords.isNotEmpty) {
+          String questionText = englishWords.first['word'];
+          String correctAnswerTurkish = turkishWords.first['word'];
+
+          final turkishOptions = await db.fetchExamOptions('tr');
+          List<String> allTurkishWords = turkishOptions.map((e) => e['word'] as String).toList();
+
+          allTurkishWords.remove(correctAnswerTurkish);
+          allTurkishWords.shuffle(Random());
+          List<String> distractors = allTurkishWords.take(3).toList();
+
+          List<String> options = [correctAnswerTurkish, ...distractors];
+          options.shuffle(Random());
+          int correctAnswerIndex = options.indexOf(correctAnswerTurkish);
+
+          Question question = Question(
+            questionText: questionText,
+            options: options,
+            correctAnswerIndex: correctAnswerIndex,
+          );
+
+          generatedQuestions.add(question);
+        }
       }
-
-      final Map<int, String> turkishWordsById = {};
-      for (var item in turkishJsonData) {
-        int id = item['id'];
-        String word = item['word'];
-        turkishWordsById[id] = word;
-      }
-
-      final List<int> commonIds = englishWordsById.keys
-          .toSet()
-          .intersection(turkishWordsById.keys.toSet())
-          .toList();
-
-      commonIds.shuffle(Random());
-
-      final List<Question> generatedQuestions = [];
-
-      for (int i = 0; i < 20; i++) {
-        if (i >= commonIds.length) break;
-
-        int id = commonIds[i];
-
-        String questionText = englishWordsById[id]!;
-        String correctAnswer = turkishWordsById[id]!;
-
-        List<String> allTurkishWords = turkishWordsById.values.toList();
-
-
-        allTurkishWords.remove(correctAnswer);
-
-        allTurkishWords.shuffle(Random());
-
-        List<String> distractors = allTurkishWords.take(3).toList();
-        List<String> options = [correctAnswer, ...distractors];
-
-        options.shuffle(Random());
-
-        int correctAnswerIndex = options.indexOf(correctAnswer);
-
-        Question question = Question(
-          questionText: questionText,
-          options: options,
-          correctAnswerIndex: correctAnswerIndex,
-        );
-
-        generatedQuestions.add(question);
-      }
-
-      setState(() {
-        questions = generatedQuestions;
-        userAnswers = List.filled(questions.length, null);
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error in _loadQuestions: $e');
-      setState(() {
-        _isLoading = false;
-      });
     }
+
+    setState(() {
+      questions = generatedQuestions;
+      userAnswers = List.filled(questions.length, null);
+      _isLoading = false;
+    });
+  } catch (e) {
+    print('Error loading questions: $e');
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
+
+
+List<int> _generateRandomIds(int min, int max, int count) {
+  Random random = Random();
+  Set<int> randomIds = Set();
+
+  while (randomIds.length < count) {
+    randomIds.add(min + random.nextInt(max - min + 1));
+  }
+  return randomIds.toList();
+}
 
   void _selectAnswer(int answerIndex) {
     if (!_answered) {

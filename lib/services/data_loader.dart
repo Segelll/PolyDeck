@@ -1,4 +1,4 @@
-import 'dart:convert';
+/*import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:poly2/models/word_model.dart';
 import 'database_helper.dart';
@@ -53,4 +53,4 @@ if (jsonData is Map<String, dynamic>) {
       await DBHelper.instance.insertWords(tableName, words);
     }
   }
-}
+}*/

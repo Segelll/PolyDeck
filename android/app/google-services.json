@@ -8,9 +8,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1034884339576:android:743a648d726928337c5a8d",
+        "mobilesdk_app_id": "1:1034884339576:android:1e51149cccd6f5a97c5a8d",
         "android_client_info": {
-          "package_name": "com.example.polydeck"
+          "package_name": "com.example.PolyDeck"
         }
       },
       "oauth_client": [
@@ -44,20 +44,12 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1034884339576:android:6795f794b8fd72c97c5a8d",
+        "mobilesdk_app_id": "1:1034884339576:android:743a648d726928337c5a8d",
         "android_client_info": {
-          "package_name": "com.poly2.app"
+          "package_name": "com.example.polydeck"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "1034884339576-baq1kj5v59h458e0v6b71uklcap6ocoi.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.poly2.app",
-            "certificate_hash": "da39a3ee5e6b4b0d3255bfef95601890afd80709"
-          }
-        },
         {
           "client_id": "1034884339576-60mc9ki47f550n07db84ciuknq37cin6.apps.googleusercontent.com",
           "client_type": 3

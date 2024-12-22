@@ -56,9 +56,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyAVzu8vj6kBNmG3Or8yFhPNBT3N6BZR8KQ',
-    appId: '1:1034884339576:android:6795f794b8fd72c97c5a8d',
+    appId: '1:1034884339576:android:1e51149cccd6f5a97c5a8d',
     messagingSenderId: '1034884339576',
     projectId: 'polydeck-words',
+    databaseURL: 'https://polydeck-words-default-rtdb.europe-west1.firebasedatabase.app',
     storageBucket: 'polydeck-words.firebasestorage.app',
   );
+
 }

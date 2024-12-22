@@ -1,26 +1,19 @@
 {
   "project_info": {
     "project_number": "1034884339576",
+    "firebase_url": "https://polydeck-words-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "polydeck-words",
     "storage_bucket": "polydeck-words.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1034884339576:android:dfce9ab1d6521b827c5a8d",
+        "mobilesdk_app_id": "1:1034884339576:android:743a648d726928337c5a8d",
         "android_client_info": {
-          "package_name": "com.example.poly2"
+          "package_name": "com.example.polydeck"
         }
       },
       "oauth_client": [
-        {
-          "client_id": "1034884339576-mlh05saf1km2v0t7fc5o6gcfh2rq1b83.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.poly2",
-            "certificate_hash": "eee28d17b712a4bd877451c8b2e5de5dd6b1c665"
-          }
-        },
         {
           "client_id": "1034884339576-60mc9ki47f550n07db84ciuknq37cin6.apps.googleusercontent.com",
           "client_type": 3

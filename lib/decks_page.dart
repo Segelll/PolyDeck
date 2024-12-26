@@ -190,8 +190,8 @@ class _DecksPageState extends State<DecksPage> {
     return GestureDetector(
       onTap: () => _toggleLevel(code),
       child: SizedBox(
-        width: 120,
-        height: 170,
+        width: 100,
+        height: 140,
         child: Stack(
           alignment: Alignment.center,
           children: [

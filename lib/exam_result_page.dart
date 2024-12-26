@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'strings_loader.dart';
 import 'exam_model.dart';
+import 'package:poly2/decks_page.dart';
 
 class ResultPage extends StatelessWidget {
   final int score;
@@ -15,6 +16,7 @@ class ResultPage extends StatelessWidget {
     required this.questions,
     required this.userAnswers,
   }) : super(key: key);
+
 
   String _getLevel(int score) {
     if (score >= 17) return 'C1';
@@ -32,6 +34,15 @@ class ResultPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(StringsLoader.get('testResult')),
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => const DecksPage()),
+                  (Route<dynamic> route) => false,
+            );
+          },
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
@@ -60,6 +71,7 @@ class ResultPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 10),
+          // Display each question and the user's answer
           ...questions.asMap().entries.map((entry) {
             int idx = entry.key;
             Question question = entry.value;
@@ -72,24 +84,31 @@ class ResultPage extends StatelessWidget {
               child: ListTile(
                 title: Text(
                   '${idx + 1}. ${question.questionText}',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
                 ),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 5),
                     Text(
-                      '${StringsLoader.get('yourAnswer')}: ${question.options[userAnswer ?? 0]}',
+                      '${StringsLoader.get('yourAnswer')}: ${userAnswer != null && userAnswer < question.options.length ? question.options[userAnswer] : 'No Answer'}',
                       style: TextStyle(
                         color: isCorrect ? Colors.green : Colors.red,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 5),
-                    if (!isCorrect)
+                    if (!isCorrect && question.correctAnswerIndex < question.options.length)
                       Text(
                         '${StringsLoader.get('correctAnswer')}: ${question.options[question.correctAnswerIndex]}',
-                        style: const TextStyle(color: Colors.green, fontSize: 16),
+                        style: const TextStyle(
+                          color: Colors.green,
+                          fontSize: 16,
+                        ),
                       ),
                   ],
                 ),

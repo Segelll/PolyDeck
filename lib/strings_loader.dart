@@ -11,7 +11,6 @@ class StringsLoader {
       final Map<String, dynamic> jsonData = json.decode(response);
       _strings = Map<String, String>.from(jsonData[_currentLanguage]);
     } catch (e) {
-      print('Error loading strings.json: $e');
       _strings = {};
     }
   }

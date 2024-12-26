@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/services/auth_service.dart';
-import 'package:poly2/language_selection_page.dart';
 import 'package:poly2/services/data_loader.dart';
 
-class LoginPage extends StatelessWidget {
+/* class LoginPage extends StatelessWidget {
   final AuthService authService = AuthService();
 
   LoginPage({super.key});
@@ -21,7 +20,6 @@ class LoginPage extends StatelessWidget {
             await DataLoader().loadJsonFilesToDatabase();
             try {
               final user = await authService.signInWithGoogle();
-
               if (user != null) {
                 Navigator.pushReplacement(
                   context,
@@ -51,4 +49,4 @@ class LoginPage extends StatelessWidget {
       ),
     );
   }
-}
+} */

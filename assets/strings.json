@@ -1,6 +1,7 @@
 {
   "en": {
     "appTitle": "Polydeck Preview",
+
     "cardFront": "Card Front",
     "cardBack": "Card Back",
     "flipRed": "Flip Red",
@@ -9,33 +10,33 @@
     "reflip": "Reflip",
     "newCard": "New Card",
     "cardCount": "Card {index} / {total}",
+
     "analysis": "Analysis",
+    "analysisResults": "Analysis Results:",
+    "previousDeck": "Previous Deck: {name}",
+    "startNewDeck": "Start New Deck",
+    "cardAnalysis": "Card {index}: {color}",
+
     "decks": "Decks",
+    "deckPage": "Deck Page",
+    "a1Deck": "A1 Deck",
+    "deck": "Deck {index}",
+
+    "question": "Question",
     "nextQuestion": "Next Question",
     "finishExam": "Finish Exam",
+    "exam": "Exam",
     "testResult": "Test Result",
     "recommendation": "Recommended Deck",
     "score": "Score",
-    "deckPage": "Decks Page",
-    "question": "Question",
-    "exam": "Exam",
-    "a1Deck": "A1 Deck",
-    "goExam": "Go Exam",
-    "choosePage": "Choose Page to Go",
-    "deck": "Deck {index}",
     "red": "Red",
     "yellow": "Yellow",
     "green": "Green",
     "grey": "Grey",
-    "cardAnalysis": "Card {index}: {color}",
-    "startNewDeck": "Start New Deck",
-    "previousDeck": "Previous Deck: {name}",
-    "analysisResults": "Analysis Results:",
+
     "instructionsTitle": "Instructions",
     "instructionsContent": "Swipe Left: Mark as Red (Hard)\nSwipe Down: Mark as Yellow (Medium)\nSwipe Right: Mark as Green (Easy)\n\nTap 'Reflip' to reattempt the card.",
-    "close": "Close",
-    "settings": "Settings",
-    "settingsContent": "Settings holder for now.",
+
     "result": "Result",
     "reviewAnswers": "Review Answers",
     "restartExam": "Restart Exam",
@@ -59,10 +60,47 @@
     "yourAnswer": "Your Answer",
     "correctAnswer": "Correct Answer",
     "recommendedDeck": "Recommended Deck",
-    "yourScore": "Score"
+    "yourScore": "Score",
+
+    "settings": "Settings",
+    "settingsContent": "Here you can adjust your preferences.",
+    "logout": "Logout",
+
+    "choosePage": "Choose Page",
+    "goExam": "Go Exam",
+
+    "selectLevel": "Select Levels",
+    "confirmLevels": "Confirm",
+
+    "firstTimeTitle": "Select Languages",
+    "firstTimeContent": "Please select your mother tongue and target language.",
+
+    "close": "Close",
+
+    "weeklyProgress": "Weekly Progress",
+    "monthlyProgress": "Monthly Progress",
+    "chartWeekly": "Weekly Chart",
+    "chartMonthly": "Monthly Chart",
+    "progression": "Your Progression",
+
+    "progress": "Progress",
+    "changeLang": "Change Language",
+    "examIconTooltip": "Take an Exam",
+    "combinedDeck": "Combined Deck",
+    "newDeck": "New Deck",
+    "levelsSelected": "Levels Selected",
+
+    "proceed": "Proceed",
+    "targetLanguage": "Target Language",
+    "motherLanguage": "Mother Language",
+    "firstTimePromptTitle": "Welcome!",
+    "firstTimePromptContent": "Please select your mother language and target language.",
+    "confirm": "Confirm"
   },
+
   "tr": {
     "appTitle": "Polydeck Önizleme",
+
     "cardFront": "Kart Önü",
     "cardBack": "Kart Arkası",
     "flipRed": "Kırmızı Çevir",
@@ -71,33 +109,33 @@
     "reflip": "Tekrar Çevir",
     "newCard": "Yeni Kart",
     "cardCount": "Kart {index} / {total}",
+
     "analysis": "Analiz",
+    "analysisResults": "Analiz Sonuçları:",
+    "previousDeck": "Önceki Deste: {name}",
+    "startNewDeck": "Yeni Deste Başlat",
+    "cardAnalysis": "Kart {index}: {color}",
+
     "decks": "Desteler",
+    "deckPage": "Desteler Sayfası",
+    "a1Deck": "A1 Destesi",
+    "deck": "Deste {index}",
+
+    "question": "Soru",
     "nextQuestion": "Sonraki Soru",
     "finishExam": "Sınavı Bitir",
+    "exam": "Sınav",
     "testResult": "Test Sonucu",
     "recommendation": "Önerilen Deste",
     "score": "Sonuç",
-    "deckPage": "Desteler Sayfası",
-    "question": "Soru",
-    "exam": "Sınav",
-    "a1Deck": "A1 Destesi",
-    "goExam": "Sınava Git",
-    "choosePage": "Gitmek İstediğiniz Sayfayı Seçin",
-    "deck": "Deste {index}",
     "red": "Kırmızı",
     "yellow": "Sarı",
     "green": "Yeşil",
     "grey": "Gri",
-    "cardAnalysis": "Kart {index}: {color}",
-    "startNewDeck": "Yeni Deste Başlat",
-    "previousDeck": "Önceki Deste: {name}",
-    "analysisResults": "Analiz Sonuçları:",
+
     "instructionsTitle": "Talimatlar",
     "instructionsContent": "Sola Kaydır: Kırmızı Olarak İşaretle (Zor)\nAşağı Kaydır: Sarı Olarak İşaretle (Orta)\nSağa Kaydır: Yeşil Olarak İşaretle (Kolay)\n\nKartı tekrar denemek için 'Tekrar Çevir'e dokunun.",
-    "close": "Kapat",
-    "settings": "Ayarlar",
-    "settingsContent": "Ayarlar buraya.",
+
     "result": "Sonuç",
     "reviewAnswers": "Cevapları Gözden Geçir",
     "restartExam": "Sınavı Yeniden Başlat",
@@ -121,6 +159,41 @@
     "yourAnswer": "Cevabınız",
     "correctAnswer": "Doğru Cevap",
     "recommendedDeck": "Önerilen Deste",
-    "yourScore": "Skor"
+    "yourScore": "Skor",
+
+    "settings": "Ayarlar",
+    "settingsContent": "Ayarlar buraya.",
+    "logout": "Çıkış Yap",
+
+    "choosePage": "Gitmek İstediğiniz Sayfayı Seçin",
+    "goExam": "Sınava Git",
+
+    "selectLevel": "Seviyeleri Seç",
+    "confirmLevels": "Onayla",
+
+    "firstTimeTitle": "Dilleri Seçin",
+    "firstTimeContent": "Lütfen anadilinizi ve hedef dilinizi seçiniz.",
+
+    "close": "Kapat",
+
+    "weeklyProgress": "Haftalık İlerleme",
+    "monthlyProgress": "Aylık İlerleme",
+    "chartWeekly": "Haftalık Grafik",
+    "chartMonthly": "Aylık Grafik",
+    "progression": "İlerlemeniz",
+
+    "progress": "İlerleme",
+    "changeLang": "Dili Değiştir",
+    "examIconTooltip": "Sınava Gir",
+    "combinedDeck": "Birleşik Deste",
+    "newDeck": "Yeni Deste",
+    "levelsSelected": "Seçilen Seviyeler",
+
+    "proceed": "İlerle",
+    "targetLanguage": "Hedef Dil",
+    "motherLanguage": "Anadil",
+    "firstTimePromptTitle": "Hoş Geldiniz!",
+    "firstTimePromptContent": "Lütfen anadilinizi ve hedef dilinizi seçiniz.",
+    "confirm": "Onayla"
   }
 }

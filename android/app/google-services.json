@@ -15,11 +15,35 @@
       },
       "oauth_client": [
         {
-          "client_id": "1034884339576-mlh05saf1km2v0t7fc5o6gcfh2rq1b83.apps.googleusercontent.com",
+          "client_id": "1034884339576-0fcss6t9erpksc8mu7m61ohcdl3pbnhn.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.poly2",
             "certificate_hash": "eee28d17b712a4bd877451c8b2e5de5dd6b1c665"
+          }
+        },
+        {
+          "client_id": "1034884339576-ah2hbbo93b54rakojso6kqj1deu0pqkj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.poly2",
+            "certificate_hash": "d54c5992c04d6d3b224b7312fafc057b86c72b31"
+          }
+        },
+        {
+          "client_id": "1034884339576-e82t69jsg58j763uojres7056eh0kad7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.poly2",
+            "certificate_hash": "fa0c605bd0264cea3f8c99fe71ce60b394b0df28"
+          }
+        },
+        {
+          "client_id": "1034884339576-o88eeuu6m85grms4s9sg9aqkmg32r7l1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.poly2",
+            "certificate_hash": "86896cced697dac385eb584953b716253b596836"
           }
         },
         {

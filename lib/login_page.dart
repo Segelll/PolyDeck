@@ -4,10 +4,48 @@ import 'package:poly2/services/auth_service.dart';
 import 'package:poly2/first_time_selection_page.dart';
 import 'package:poly2/decks_page.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
   final AuthService authService = AuthService();
 
-  LoginPage({super.key});
+  @override
+  void initState() {
+    super.initState();
+    _signInWithGoogle();
+  }
+  Future<void> _signInWithGoogle() async {
+    try {
+      final user = await authService.signInWithGoogle();
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const FirstTimeSelectionPage(),
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Google Sign-In failed'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login error: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,38 +67,7 @@ class LoginPage extends StatelessWidget {
             });
             return const SizedBox.shrink();
           } else {
-            return Center(
-              child: ElevatedButton(
-                onPressed: () async {
-                  try {
-                    final user = await authService.signInWithGoogle();
-                    if (user != null) {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const FirstTimeSelectionPage(),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Google Sign-In failed'),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    }
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Login error: $e'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                },
-                child: const Text('Sign in with Google'),
-              ),
-            );
+            return const SizedBox.shrink();
           }
         },
       ),

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,7 @@ class _SettingsPageState extends State<SettingsPage> {
 void _logout() async {
   try {
     User? user = FirebaseAuth.instance.currentUser;
-    String? userId = user?.uid;
+    String? userId = user?.email;
 
     if (userId != null) {
       List<Map<String, dynamic>> favWords = await _dbHelper.fetchAllFavWords();
@@ -51,8 +53,9 @@ void _logout() async {
       print("User logged out successfully.");
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => LoginPage()),
-      );
+        MaterialPageRoute(builder: (context) => exit(0)
+        //LoginPage()),
+      ));
     } else {
       print("No user is logged in.");
     }

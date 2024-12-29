@@ -1,14 +1,13 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:poly2/login_page.dart';
+import 'package:poly2/services/database_helper.dart';
 import 'package:poly2/strings_loader.dart';
-import 'package:poly2/preferences_helper.dart';
-
-
-import 'decks_page.dart';
-import 'first_time_selection_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await StringsLoader.loadStrings();
+  Firebase.initializeApp();
   runApp(const MyApp());
 }
 
@@ -17,8 +16,9 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<bool>(
-      future: PreferencesHelper.isFirstTime(),
+    final dbHelper=DBHelper();
+    return FutureBuilder<Map<String,String>?>(
+      future: dbHelper.getUserChoices('user'),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const MaterialApp(
@@ -28,7 +28,6 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        final isFirstTime = snapshot.data!;
         return MaterialApp(
           theme: ThemeData(
             primarySwatch: Colors.blueGrey,
@@ -39,7 +38,8 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
           themeMode: ThemeMode.light,
-          home: isFirstTime ? const FirstTimeSelectionPage() : const DecksPage(),
+          //home: isFirstTime ? LoginPage() : const DecksPage(),
+          home: LoginPage(),
         );
       },
     );

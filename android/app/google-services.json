@@ -8,48 +8,20 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:1034884339576:android:1e51149cccd6f5a97c5a8d",
+        "mobilesdk_app_id": "1:1034884339576:android:dfce9ab1d6521b827c5a8d",
         "android_client_info": {
           "package_name": "com.example.poly2"
         }
       },
       "oauth_client": [
         {
-          "client_id": "1034884339576-60mc9ki47f550n07db84ciuknq37cin6.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyAVzu8vj6kBNmG3Or8yFhPNBT3N6BZR8KQ"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1034884339576-60mc9ki47f550n07db84ciuknq37cin6.apps.googleusercontent.com",
-              "client_type": 3
-            },
-            {
-              "client_id": "1034884339576-4kuqb7251rf4f1v05st8i5gcce5li0k4.apps.googleusercontent.com",
-              "client_type": 2,
-              "ios_info": {
-                "bundle_id": "com.example.newproject"
-              }
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1034884339576:android:743a648d726928337c5a8d",
-        "android_client_info": {
-          "package_name": "com.example.polydeck"
-        }
-      },
-      "oauth_client": [
+          "client_id": "1034884339576-mlh05saf1km2v0t7fc5o6gcfh2rq1b83.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.poly2",
+            "certificate_hash": "eee28d17b712a4bd877451c8b2e5de5dd6b1c665"
+          }
+        },
         {
           "client_id": "1034884339576-60mc9ki47f550n07db84ciuknq37cin6.apps.googleusercontent.com",
           "client_type": 3

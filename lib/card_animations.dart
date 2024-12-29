@@ -49,7 +49,7 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 700),
       vsync: this,
     );
 

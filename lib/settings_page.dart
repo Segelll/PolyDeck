@@ -1,9 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:poly2/preferences_helper.dart';
+import 'package:poly2/login_page.dart';
 import 'package:poly2/strings_loader.dart';
 import 'weekly_page.dart';
 import 'monthly_page.dart';
 import 'decks_page.dart';
+import 'package:poly2/services/database_helper.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -16,6 +19,7 @@ class _SettingsPageState extends State<SettingsPage> {
   final List<String> _languages = ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp'];
   String? _motherLang;
   String? _targetLang;
+  final DBHelper _dbHelper = DBHelper();
 
   @override
   void initState() {
@@ -23,32 +27,76 @@ class _SettingsPageState extends State<SettingsPage> {
     _loadPrefs();
   }
 
+void _logout() async {
+  try {
+    User? user = FirebaseAuth.instance.currentUser;
+    String? userId = user?.uid;
+
+    if (userId != null) {
+      List<Map<String, dynamic>> favWords = await _dbHelper.fetchAllFavWords();
+      Map<String, List<Map<String, dynamic>>> seenWords = {};
+
+      for (String language in _languages) {
+        List<Map<String, dynamic>> seenWordsForLanguage = await _dbHelper.fetchAllIsSeenId(language);
+        seenWords[language] = seenWordsForLanguage;
+      }
+      await FirebaseFirestore.instance.collection('user_data').doc(userId).set({
+        'favWords': favWords,
+        'seenWords': seenWords,
+      });
+
+      print("Database uploaded successfully.");
+
+      await FirebaseAuth.instance.signOut();
+      print("User logged out successfully.");
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => LoginPage()),
+      );
+    } else {
+      print("No user is logged in.");
+    }
+  } catch (e) {
+    print("Error uploading database: $e");
+  }
+}
   Future<void> _loadPrefs() async {
-    final mother = await PreferencesHelper.getMotherLanguage() ?? 'en';
-    final target = await PreferencesHelper.getTargetLanguage() ?? 'tr';
+    final userSettings = await _dbHelper.getUserChoices('user');
+    print(userSettings);
     setState(() {
-      _motherLang = mother;
-      _targetLang = target;
+      _motherLang = userSettings?['mainLanguage']??"en";
+      _targetLang = userSettings?['targetLanguage']??"tr";
     });
   }
 
-  void _saveSettings() async {
-    if (_motherLang != null && _targetLang != null) {
-      await PreferencesHelper.setMotherLanguage(_motherLang!);
-      await PreferencesHelper.setTargetLanguage(_targetLang!);
+void _saveSettings() async {
+
+  if (_motherLang != null && _targetLang != null) {
+    try {
+      await _dbHelper.saveUserChoices('user', _motherLang!, _targetLang!);
+      await _loadPrefs();
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const DecksPage()),
       );
+    } catch (e) {
+      print('Failed to save settings: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(StringsLoader.get('saveFailed')),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(StringsLoader.get('selectLanguages')),
+        backgroundColor: Colors.orange,
+      ),
+    );
   }
-
-  void _logout() {
-
-    print("Logout");
-  }
-
-  @override
+}  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -141,7 +189,9 @@ class _SettingsPageState extends State<SettingsPage> {
             ElevatedButton.icon(
               icon: const Icon(Icons.logout),
               label: Text(StringsLoader.get('logout')),
-              onPressed: _logout,
+              onPressed: () async{
+                _logout();
+              },
             ),
           ],
         ),

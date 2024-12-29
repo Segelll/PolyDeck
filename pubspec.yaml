@@ -45,6 +45,9 @@ dependencies:
   firebase_database: ^11.2.0
   sqlite3_flutter_libs: ^0.5.27
   sqflite_common_ffi: ^2.3.4+3
+  firebase_storage: ^12.3.7
+  path_provider: ^2.1.5
+  cloud_firestore: ^5.6.0
 
 dev_dependencies:
   flutter_test:
@@ -63,14 +66,8 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/language_data.db
     - assets/strings.json
-    - assets/json/tr.json
-    - assets/json/en.json
-    - assets/json/de.json
-    - assets/json/it.json
-    - assets/json/pr.json
-    - assets/json/esp.json
-    - assets/json/fr.json
 
   uses-material-design: true
 

@@ -63,8 +63,7 @@ class AuthService {
       print('Sign Out Error: $error');
     }
   }
-
-  User? getCurrentUser() {
+    Future<User?> getCurrentUser() async {
     return _auth.currentUser;
   }
 }

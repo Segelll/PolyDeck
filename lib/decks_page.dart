@@ -5,7 +5,8 @@ import 'package:poly2/settings_page.dart';
 import 'card_flip_page.dart';
 
 class DecksPage extends StatefulWidget {
-  const DecksPage({Key? key}) : super(key: key);
+
+  const DecksPage({Key ? key}) : super(key: key);
 
   @override
   State<DecksPage> createState() => _DecksPageState();
@@ -19,25 +20,27 @@ class _DecksPageState extends State<DecksPage> {
     {"code": "B1", "label": "Intermediate"},
     {"code": "B2", "label": "Upper-Interm."},
     {"code": "C1", "label": "Advanced"},
+    {"code": "fav", "label": "Favourites"},
   ];
 
 
-  final List<String> _selectedLevels = [];
+  String? _selectedLevels;
+  String? _selectedLanguage;
 
   void _toggleLevel(String code) {
     setState(() {
-      if (_selectedLevels.contains(code)) {
-        _selectedLevels.remove(code);
+      if (_selectedLevels==code) {
+        _selectedLevels= null;
       } else {
-        _selectedLevels.add(code);
+        _selectedLevels=code;
       }
     });
   }
 
   void _proceedToDeck() {
-    if (_selectedLevels.isEmpty) {
+    if (_selectedLevels==null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one level!')),
+        const SnackBar(content: Text('Please select one level!')),
       );
       return;
     }
@@ -45,7 +48,7 @@ class _DecksPageState extends State<DecksPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CardFlipPage(levels: _selectedLevels),
+        builder: (_) => CardFlipPage(levels: _selectedLevels!,),
       ),
     );
   }
@@ -118,11 +121,12 @@ class _DecksPageState extends State<DecksPage> {
             ),
             const SizedBox(height: 24),
 
-            // Row 3 => C1 in center
+            // Row 3 => C1, Favourites
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 _buildDeck(allLevels[4]["code"]!, allLevels[4]["label"]!),
+                _buildDeck(allLevels[5]["code"]!, allLevels[5]["label"]!),
               ],
             ),
 
@@ -143,7 +147,7 @@ class _DecksPageState extends State<DecksPage> {
 
 
   Widget _buildDeck(String code, String label) {
-    final bool isSelected = _selectedLevels.contains(code);
+    final bool isSelected = _selectedLevels==(code);
 
 
     final frontGradient = isSelected

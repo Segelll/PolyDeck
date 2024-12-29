@@ -1,11 +1,9 @@
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:poly2/strings_loader.dart';
-import 'package:poly2/preferences_helper.dart';
+import 'package:poly2/services/database_helper.dart';
 import 'exam_model.dart';
 import 'exam_result_page.dart';
+import 'strings_loader.dart';
+import 'dart:math';
 
 class ExamPage extends StatefulWidget {
   const ExamPage({Key? key}) : super(key: key);
@@ -15,112 +13,107 @@ class ExamPage extends StatefulWidget {
 }
 
 class _ExamPageState extends State<ExamPage> {
-  List<Question> questions = [];
+  int currentQuestionIndex = 0;
   List<int?> userAnswers = [];
+  List<Question> questions = [];
   bool _isLoading = true;
   bool _answered = false;
-  int _currentQuestionIndex = 0;
   int? _selectedAnswerIndex;
-
-  final List<String> selectedLevels = ['A1', 'A2'];
 
   @override
   void initState() {
     super.initState();
-    _loadExam();
+    _loadQuestions();
   }
+Future<void> _loadQuestions() async {
+  try {
+    final db = DBHelper.instance;
+        Map<String, List<int>> levelIntervals = {
+      'A1': [1, 702],
+      'A2': [704,1425],
+      'B1': [1428, 2163],
+      'B2': [2166, 3539],
+      'C1': [3543, 4790],
+    };
 
-  Future<void> _loadExam() async {
-    setState(() => _isLoading = true);
-    try {
-      final motherLang = await PreferencesHelper.getMotherLanguage() ?? 'en';
-      final targetLang = await PreferencesHelper.getTargetLanguage() ?? 'tr';
+    final List<Question> generatedQuestions = [];
 
-      final allQuestions = <Question>[];
+    for (String level in levelIntervals.keys) {
+      final interval = levelIntervals[level]!;
+      final randomIds = _generateRandomIds(interval[0], interval[1], 4);
 
-      for (String level in selectedLevels) {
-        final chunk = await _buildQuestions(level, motherLang, targetLang, 4);
-        allQuestions.addAll(chunk);
+      for (int id in randomIds) {
+        final englishWords = await db.fetchExamWords('en', id);
+        final turkishWords = await db.fetchExamWords('tr', id);
+
+        if (englishWords.isNotEmpty && turkishWords.isNotEmpty) {
+          String questionText = englishWords.first['word'];
+          String correctAnswerTurkish = turkishWords.first['word'];
+
+          final turkishOptions = await db.fetchExamOptions('tr');
+          List<String> allTurkishWords = turkishOptions.map((e) => e['word'] as String).toList();
+
+          allTurkishWords.remove(correctAnswerTurkish);
+          allTurkishWords.shuffle(Random());
+          List<String> distractors = allTurkishWords.take(3).toList();
+
+          List<String> options = [correctAnswerTurkish, ...distractors];
+          options.shuffle(Random());
+          int correctAnswerIndex = options.indexOf(correctAnswerTurkish);
+
+          Question question = Question(
+            questionText: questionText,
+            options: options,
+            correctAnswerIndex: correctAnswerIndex,
+          );
+
+          generatedQuestions.add(question);
+        }
       }
-      allQuestions.shuffle(Random());
-
-      setState(() {
-        questions = allQuestions;
-        userAnswers = List.filled(questions.length, null);
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error in exam load: $e');
-      setState(() => _isLoading = false);
     }
+
+    setState(() {
+      questions = generatedQuestions;
+      userAnswers = List.filled(questions.length, null);
+      _isLoading = false;
+    });
+  } catch (e) {
+    print('Error loading questions: $e');
+    setState(() {
+      _isLoading = false;
+    });
   }
+}
 
-  Future<List<Question>> _buildQuestions(
-      String level,
-      String motherLang,
-      String targetLang,
-      int count,
-      ) async {
-    final targetJson = await rootBundle.loadString('assets/json/$targetLang.json');
-    final motherJson = await rootBundle.loadString('assets/json/$motherLang.json');
-    final List<dynamic> targetArr = jsonDecode(targetJson);
-    final List<dynamic> motherArr = jsonDecode(motherJson);
 
-    final targetItems = targetArr.where((e) => e['level'] == level).toList();
-    final motherItems = motherArr.where((e) => e['level'] == level).toList();
+List<int> _generateRandomIds(int min, int max, int count) {
+  Random random = Random();
+  Set<int> randomIds = Set();
 
-    final Map<int, String> tMap = { for (var x in targetItems) x['id']: x['word'] };
-    final Map<int, String> mMap = { for (var x in motherItems) x['id']: x['word'] };
-
-    final commonIds = tMap.keys.toSet().intersection(mMap.keys.toSet()).toList();
-    commonIds.shuffle(Random());
-
-    final needed = count <= commonIds.length ? count : commonIds.length;
-    List<Question> result = [];
-
-    for (int i = 0; i < needed; i++) {
-      final id = commonIds[i];
-      final questionText = tMap[id]!;
-      final correctAnswer = mMap[id]!;
-
-      final distractors = mMap.values.toList();
-      distractors.remove(correctAnswer);
-      distractors.shuffle(Random());
-
-      final options = [correctAnswer, ...distractors.take(3)];
-      options.shuffle(Random());
-      final correctIndex = options.indexOf(correctAnswer);
-
-      result.add(
-        Question(
-          questionText: questionText,
-          options: options,
-          correctAnswerIndex: correctIndex,
-        ),
-      );
-    }
-    return result;
+  while (randomIds.length < count) {
+    randomIds.add(min + random.nextInt(max - min + 1));
   }
+  return randomIds.toList();
+}
 
-  void _selectAnswer(int idx) {
+  void _selectAnswer(int answerIndex) {
     if (!_answered) {
       setState(() {
-        _selectedAnswerIndex = idx;
+        _selectedAnswerIndex = answerIndex;
         _answered = true;
-        userAnswers[_currentQuestionIndex] = idx;
+        userAnswers[currentQuestionIndex] = answerIndex;
       });
     }
   }
 
   void _nextQuestion() {
-    if (_currentQuestionIndex < questions.length - 1) {
+    if (currentQuestionIndex < questions.length - 1) {
       setState(() {
-        _currentQuestionIndex++;
+        currentQuestionIndex++;
         _answered = false;
         _selectedAnswerIndex = null;
       });
     } else {
-      // score
       int score = 0;
       for (int i = 0; i < questions.length; i++) {
         if (userAnswers[i] == questions[i].correctAnswerIndex) {
@@ -131,7 +124,7 @@ class _ExamPageState extends State<ExamPage> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ResultPage(
+          builder: (context) => ResultPage(
             score: score,
             totalQuestions: questions.length,
             questions: questions,
@@ -143,40 +136,51 @@ class _ExamPageState extends State<ExamPage> {
   }
 
   Widget _buildOption(int idx, String option) {
-    Color bgColor;
-    Color txtColor = Colors.white;
+    Color? buttonColor;
+    Color textColor = Colors.white;
 
     if (_answered) {
-      if (idx == questions[_currentQuestionIndex].correctAnswerIndex) {
-        bgColor = Colors.green.shade700;
+      if (idx == questions[currentQuestionIndex].correctAnswerIndex) {
+        buttonColor = Colors.green[700];
       } else if (idx == _selectedAnswerIndex) {
-        bgColor = Colors.red.shade700;
+        buttonColor = Colors.red[700];
       } else {
-        bgColor = Colors.blueGrey.shade100;
-        txtColor = Colors.black;
+        buttonColor = Theme.of(context).colorScheme.surface;
+        textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
       }
     } else {
       if (_selectedAnswerIndex == idx) {
-        bgColor = Colors.blueAccent;
+        buttonColor = Theme.of(context).colorScheme.primary;
       } else {
-        bgColor = Colors.blueGrey.shade50;
-        txtColor = Colors.black;
+        buttonColor = Theme.of(context).colorScheme.surface;
+        textColor = Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
       }
     }
 
     return GestureDetector(
       onTap: _answered ? null : () => _selectAnswer(idx),
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
-          color: bgColor,
-          borderRadius: BorderRadius.circular(6),
-          border: Border.all(color: Colors.blueGrey.shade300, width: 1.5),
+          color: buttonColor,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: Colors.grey[400]!,
+            width: 1.5,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey[400]!,
+              offset: const Offset(2, 2),
+              blurRadius: 2,
+            ),
+          ],
         ),
         child: Text(
           option,
-          style: TextStyle(fontSize: 18, color: txtColor),
+          style: TextStyle(fontSize: 18, color: textColor),
           textAlign: TextAlign.center,
         ),
       ),
@@ -187,7 +191,10 @@ class _ExamPageState extends State<ExamPage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(title: Text(StringsLoader.get('exam'))),
+        appBar: AppBar(
+          title: Text(StringsLoader.get('exam')),
+          centerTitle: true,
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -197,38 +204,41 @@ class _ExamPageState extends State<ExamPage> {
         title: Text(StringsLoader.get('exam')),
         centerTitle: true,
       ),
-      body: Container(
-        color: Colors.white,
-        padding: const EdgeInsets.all(16),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             LinearProgressIndicator(
-              value: (_currentQuestionIndex + 1) / questions.length,
+              value: (currentQuestionIndex + 1) / questions.length,
               backgroundColor: Colors.grey[300],
-              color: Colors.blueAccent,
+              color: Theme.of(context).colorScheme.primary,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Text(
-              '${StringsLoader.get('question')} ${_currentQuestionIndex + 1}/${questions.length}',
+              '${StringsLoader.get('question')} ${currentQuestionIndex + 1}/${questions.length}',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Card(
-              color: Colors.blue.shade50,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-              child: Padding(
+              elevation: 4,
+              margin: const EdgeInsets.symmetric(vertical: 8.0),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              color: Theme.of(context).colorScheme.surface,
+              child: Container(
                 padding: const EdgeInsets.all(20.0),
                 child: Text(
-                  questions[_currentQuestionIndex].questionText,
+                  questions[currentQuestionIndex].questionText,
                   style: const TextStyle(fontSize: 28),
                   textAlign: TextAlign.center,
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             Expanded(
               child: ListView(
-                children: questions[_currentQuestionIndex]
+                children: questions[currentQuestionIndex]
                     .options
                     .asMap()
                     .entries
@@ -236,19 +246,25 @@ class _ExamPageState extends State<ExamPage> {
                     .toList(),
               ),
             ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _answered ? _nextQuestion : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: _answered ? Colors.blue : Colors.grey,
+                backgroundColor: _answered
+                    ? Theme.of(context).colorScheme.primary
+                    : Colors.grey,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8.0),
+                ),
               ),
               child: Text(
-                _currentQuestionIndex < questions.length - 1
+                currentQuestionIndex < questions.length - 1
                     ? StringsLoader.get('nextQuestion')
                     : StringsLoader.get('finishExam'),
                 style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
-            )
+            ),
           ],
         ),
       ),

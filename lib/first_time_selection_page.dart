@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/preferences_helper.dart';
 import 'package:poly2/strings_loader.dart';
 import 'package:poly2/decks_page.dart';
+import 'package:poly2/services/database_helper.dart';
 
 class FirstTimeSelectionPage extends StatefulWidget {
   const FirstTimeSelectionPage({Key? key}) : super(key: key);
@@ -14,6 +14,8 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
   final List<String> _languages = ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp'];
   String? _selectedMotherLanguage;
   String? _selectedTargetLanguage;
+
+  final DBHelper _dbHelper = DBHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -85,17 +87,22 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-              onPressed: (_selectedMotherLanguage != null && _selectedTargetLanguage != null)
+                  onPressed: (_selectedMotherLanguage != null && _selectedTargetLanguage != null)
                   ? () async {
-                await PreferencesHelper.setMotherLanguage(_selectedMotherLanguage!);
-                await PreferencesHelper.setTargetLanguage(_selectedTargetLanguage!);
-                await PreferencesHelper.setFirstTime(false);
+                try {
+                  await _dbHelper.saveUserChoices('user', _selectedMotherLanguage!, _selectedTargetLanguage!);
 
-                if (!mounted) return;
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const DecksPage()),
-                );
+                  if (!mounted) return;
+
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => DecksPage()),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error saving choices: $e')),
+                  );
+                }
               }
                   : null,
             ),

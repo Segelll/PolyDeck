@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/decks_page.dart';
 import 'analysis_result.dart';
 import 'strings_loader.dart';
 
@@ -64,6 +65,13 @@ class AnalysisPage extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 50),
               ),
             ),
+            ElevatedButton(onPressed: (){
+            Navigator.push(context, 
+            MaterialPageRoute(builder: (_) => const DecksPage()));
+            }, child: Text("Decks Page"), style: ElevatedButton.styleFrom(
+              minimumSize: const Size(double.infinity, 50),
+            ),
+            )
           ],
         ),
       ),

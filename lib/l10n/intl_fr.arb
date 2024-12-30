@@ -1,0 +1,159 @@
+{
+  "@@locale": "fr",
+
+  "appTitle": "Aperçu Polydeck",
+
+  "cardFront": "Recto de la Carte",
+  "cardBack": "Verso de la Carte",
+  "flipRed": "Retourner Rouge",
+  "flipYellow": "Retourner Jaune",
+  "flipGreen": "Retourner Vert",
+  "reflip": "Retourner à Nouveau",
+  "newCard": "Nouvelle Carte",
+
+  "cardCount": "Carte {index} / {total}",
+  "@cardCount": {
+    "description": "Affiche l'index de la carte actuelle et le nombre total de cartes",
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
+
+  "analysis": "Analyse",
+  "analysisResults": "Résultats de l'Analyse :",
+  "previousDeck": "Deck Précédent : {deckName}",
+  "@previousDeck": {
+    "description": "Affiche le nom du deck précédent",
+    "placeholders": {
+      "deckName": {}
+    }
+  },
+  "startNewDeck": "Commencer un Nouveau Deck",
+
+  "cardAnalysis": "Carte {index} : {color}",
+  "@cardAnalysis": {
+    "description": "Affiche l'analyse d'une carte avec son index et sa couleur",
+    "placeholders": {
+      "index": {},
+      "color": {}
+    }
+  },
+
+  "decks": "Decks",
+  "deckPage": "Page du Deck",
+  "a1Deck": "Deck A1",
+
+  "deck": "Deck {index}",
+  "@deck": {
+    "description": "Label du deck avec index",
+    "placeholders": {
+      "index": {}
+    }
+  },
+
+  "question": "Question",
+  "nextQuestion": "Question Suivante",
+  "finishExam": "Terminer l'Examen",
+  "exam": "Examen",
+  "testResult": "Résultat de l'Examen",
+  "recommendation": "Deck Recommandé",
+  "score": "Score",
+  "red": "Rouge",
+  "yellow": "Jaune",
+  "green": "Vert",
+  "grey": "Gris",
+
+  "instructionsTitle": "Instructions",
+  "instructionsContent": "Glisser à Gauche : Marquer en Rouge (Difficile)\nGlisser vers le Bas : Marquer en Jaune (Moyen)\nGlisser à Droite : Marquer en Vert (Facile)\n\nAppuyez sur 'Retourner à Nouveau' pour réessayer la carte.",
+
+  "result": "Résultat",
+  "reviewAnswers": "Revoir les Réponses",
+  "restartExam": "Redémarrer l'Examen",
+  "help": "Aide",
+  "confirmRestart": "Êtes-vous sûr de vouloir redémarrer l'examen ?",
+  "yes": "Oui",
+  "no": "Non",
+  "correct": "Correct",
+  "incorrect": "Incorrect",
+  "unanswered": "Sans Réponse",
+  "review": "Revoir",
+
+  "totalQuestions": "Total des Questions : {total}",
+  "@totalQuestions": {
+    "description": "Affiche le nombre total de questions",
+    "placeholders": {
+      "total": {}
+    }
+  },
+  "answered": "Répondu",
+
+  "unansweredCount": "Sans Réponse : {count}",
+  "@unansweredCount": {
+    "description": "Affiche le nombre de questions sans réponse",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "resultTitle": "Résultats de l'Examen",
+  "pass": "Félicitations ! Vous avez réussi l'examen.",
+  "fail": "Vous n'avez pas réussi l'examen. Bonne chance la prochaine fois !",
+
+  "percentage": "Votre Score : {percentage}%",
+  "@percentage": {
+    "description": "Affiche le score de l'utilisateur en pourcentage",
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+
+  "backToDeck": "Retour au Deck",
+  "backToHome": "Retour à l'Accueil",
+  "yourAnswer": "Votre Réponse",
+  "correctAnswer": "Réponse Correcte",
+  "recommendedDeck": "Deck Recommandé",
+  "yourScore": "Score",
+
+  "settings": "Paramètres",
+  "settingsContent": "Ici, vous pouvez ajuster vos préférences.",
+  "logout": "Se Déconnecter",
+
+  "choosePage": "Choisir une Page",
+  "goExam": "Aller à l'Examen",
+
+  "selectLevel": "Sélectionner les Niveaux",
+  "confirmLevels": "Confirmer",
+
+  "firstTimeTitle": "Sélectionner les Langues",
+  "firstTimeContent": "Veuillez sélectionner votre langue maternelle et votre langue cible.",
+
+  "close": "Fermer",
+
+  "weeklyProgress": "Progression Hebdomadaire",
+  "monthlyProgress": "Progression Mensuelle",
+  "chartWeekly": "Graphique Hebdomadaire",
+  "chartMonthly": "Graphique Mensuel",
+  "progression": "Votre Progression",
+
+  "progress": "Progression",
+  "changeLang": "Changer de Langue",
+  "examIconTooltip": "Passer un Examen",
+  "combinedDeck": "Deck Combiné",
+  "newDeck": "Nouveau Deck",
+  "levelsSelected": "Niveaux Sélectionnés",
+
+  "proceed": "Procéder",
+  "targetLanguage": "Langue Cible",
+  "motherLanguage": "Langue Maternelle",
+
+  "firstTimePromptTitle": "Bienvenue !",
+  "firstTimePromptContent": "Veuillez sélectionner votre langue maternelle et votre langue cible.",
+
+  "confirm": "Confirmer",
+
+  "saveFailed": "Échec de la sauvegarde des paramètres",
+  "selectLanguages": "Veuillez sélectionner les langues.",
+
+  "decksPage": "Decks Page"
+}

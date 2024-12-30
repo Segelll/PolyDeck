@@ -1,9 +1,10 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'exam_model.dart';
 import 'exam_result_page.dart';
-import 'strings_loader.dart';
-import 'dart:math';
+// remove 'strings_loader.dart'
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExamPage extends StatefulWidget {
   const ExamPage({Key? key}) : super(key: key);
@@ -25,76 +26,77 @@ class _ExamPageState extends State<ExamPage> {
     super.initState();
     _loadQuestions();
   }
-Future<void> _loadQuestions() async {
-  try {
-    final db = DBHelper.instance;
-        Map<String, List<int>> levelIntervals = {
-      'A1': [1, 702],
-      'A2': [704,1425],
-      'B1': [1428, 2163],
-      'B2': [2166, 3539],
-      'C1': [3543, 4790],
-    };
 
-    final List<Question> generatedQuestions = [];
+  Future<void> _loadQuestions() async {
+    try {
+      final db = DBHelper.instance;
+      Map<String, List<int>> levelIntervals = {
+        'A1': [1, 702],
+        'A2': [704, 1425],
+        'B1': [1428, 2163],
+        'B2': [2166, 3539],
+        'C1': [3543, 4790],
+      };
 
-    for (String level in levelIntervals.keys) {
-      final interval = levelIntervals[level]!;
-      final randomIds = _generateRandomIds(interval[0], interval[1], 4);
+      final List<Question> generatedQuestions = [];
 
-      for (int id in randomIds) {
-        final englishWords = await db.fetchExamWords('en', id);
-        final turkishWords = await db.fetchExamWords('tr', id);
+      for (String level in levelIntervals.keys) {
+        final interval = levelIntervals[level]!;
+        final randomIds = _generateRandomIds(interval[0], interval[1], 4);
 
-        if (englishWords.isNotEmpty && turkishWords.isNotEmpty) {
-          String questionText = englishWords.first['word'];
-          String correctAnswerTurkish = turkishWords.first['word'];
+        for (int id in randomIds) {
+          final englishWords = await db.fetchExamWords('en', id);
+          final turkishWords = await db.fetchExamWords('tr', id);
 
-          final turkishOptions = await db.fetchExamOptions('tr');
-          List<String> allTurkishWords = turkishOptions.map((e) => e['word'] as String).toList();
+          if (englishWords.isNotEmpty && turkishWords.isNotEmpty) {
+            String questionText = englishWords.first['word'];
+            String correctAnswerTurkish = turkishWords.first['word'];
 
-          allTurkishWords.remove(correctAnswerTurkish);
-          allTurkishWords.shuffle(Random());
-          List<String> distractors = allTurkishWords.take(3).toList();
+            final turkishOptions = await db.fetchExamOptions('tr');
+            List<String> allTurkishWords =
+            turkishOptions.map((e) => e['word'] as String).toList();
 
-          List<String> options = [correctAnswerTurkish, ...distractors];
-          options.shuffle(Random());
-          int correctAnswerIndex = options.indexOf(correctAnswerTurkish);
+            allTurkishWords.remove(correctAnswerTurkish);
+            allTurkishWords.shuffle(Random());
+            List<String> distractors = allTurkishWords.take(3).toList();
 
-          Question question = Question(
-            questionText: questionText,
-            options: options,
-            correctAnswerIndex: correctAnswerIndex,
-          );
+            List<String> options = [correctAnswerTurkish, ...distractors];
+            options.shuffle(Random());
+            int correctAnswerIndex = options.indexOf(correctAnswerTurkish);
 
-          generatedQuestions.add(question);
+            Question question = Question(
+              questionText: questionText,
+              options: options,
+              correctAnswerIndex: correctAnswerIndex,
+            );
+
+            generatedQuestions.add(question);
+          }
         }
       }
+
+      setState(() {
+        questions = generatedQuestions;
+        userAnswers = List.filled(questions.length, null);
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Error loading questions: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    setState(() {
-      questions = generatedQuestions;
-      userAnswers = List.filled(questions.length, null);
-      _isLoading = false;
-    });
-  } catch (e) {
-    print('Error loading questions: $e');
-    setState(() {
-      _isLoading = false;
-    });
   }
-}
 
+  List<int> _generateRandomIds(int min, int max, int count) {
+    Random random = Random();
+    Set<int> randomIds = {};
 
-List<int> _generateRandomIds(int min, int max, int count) {
-  Random random = Random();
-  Set<int> randomIds = Set();
-
-  while (randomIds.length < count) {
-    randomIds.add(min + random.nextInt(max - min + 1));
+    while (randomIds.length < count) {
+      randomIds.add(min + random.nextInt(max - min + 1));
+    }
+    return randomIds.toList();
   }
-  return randomIds.toList();
-}
 
   void _selectAnswer(int answerIndex) {
     if (!_answered) {
@@ -136,6 +138,7 @@ List<int> _generateRandomIds(int min, int max, int count) {
   }
 
   Widget _buildOption(int idx, String option) {
+    final local = AppLocalizations.of(context)!;
     Color? buttonColor;
     Color textColor = Colors.white;
 
@@ -189,10 +192,12 @@ List<int> _generateRandomIds(int min, int max, int count) {
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!;
+
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(StringsLoader.get('exam')),
+          title: Text(local.exam),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -201,7 +206,7 @@ List<int> _generateRandomIds(int min, int max, int count) {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get('exam')),
+        title: Text(local.exam),
         centerTitle: true,
       ),
       body: Padding(
@@ -215,7 +220,7 @@ List<int> _generateRandomIds(int min, int max, int count) {
             ),
             const SizedBox(height: 20),
             Text(
-              '${StringsLoader.get('question')} ${currentQuestionIndex + 1}/${questions.length}',
+              '${local.question} ${currentQuestionIndex + 1}/${questions.length}',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
@@ -251,17 +256,16 @@ List<int> _generateRandomIds(int min, int max, int count) {
               onPressed: _answered ? _nextQuestion : null,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
-                backgroundColor: _answered
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey,
+                backgroundColor:
+                _answered ? Theme.of(context).colorScheme.primary : Colors.grey,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),
                 ),
               ),
               child: Text(
                 currentQuestionIndex < questions.length - 1
-                    ? StringsLoader.get('nextQuestion')
-                    : StringsLoader.get('finishExam'),
+                    ? local.nextQuestion
+                    : local.finishExam,
                 style: const TextStyle(fontSize: 18, color: Colors.white),
               ),
             ),

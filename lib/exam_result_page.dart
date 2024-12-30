@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'strings_loader.dart';
 import 'exam_model.dart';
 import 'package:poly2/decks_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ResultPage extends StatelessWidget {
   final int score;
@@ -17,7 +17,6 @@ class ResultPage extends StatelessWidget {
     required this.userAnswers,
   }) : super(key: key);
 
-
   String _getLevel(int score) {
     if (score >= 17) return 'C1';
     if (score >= 13) return 'B2';
@@ -28,11 +27,12 @@ class ResultPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!;
     final level = _getLevel(score);
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get('testResult')),
+        title: Text(local.testResult),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -50,14 +50,14 @@ class ResultPage extends StatelessWidget {
           const SizedBox(height: 20),
           Center(
             child: Text(
-              '${StringsLoader.get('yourScore')}: $score / $totalQuestions',
+              '${local.yourScore}: $score / $totalQuestions',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 10),
           Center(
             child: Text(
-              '${StringsLoader.get('recommendedDeck')}: $level',
+              '${local.recommendedDeck}: $level',
               style: const TextStyle(fontSize: 20),
             ),
           ),
@@ -66,7 +66,7 @@ class ResultPage extends StatelessWidget {
           const SizedBox(height: 10),
           Center(
             child: Text(
-              StringsLoader.get('reviewAnswers'),
+              local.reviewAnswers,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
           ),
@@ -95,16 +95,17 @@ class ResultPage extends StatelessWidget {
                   children: [
                     const SizedBox(height: 5),
                     Text(
-                      '${StringsLoader.get('yourAnswer')}: ${userAnswer != null && userAnswer < question.options.length ? question.options[userAnswer] : 'No Answer'}',
+                      '${local.yourAnswer}: ${userAnswer != null && userAnswer < question.options.length ? question.options[userAnswer] : 'No Answer'}',
                       style: TextStyle(
                         color: isCorrect ? Colors.green : Colors.red,
                         fontSize: 16,
                       ),
                     ),
                     const SizedBox(height: 5),
-                    if (!isCorrect && question.correctAnswerIndex < question.options.length)
+                    if (!isCorrect &&
+                        question.correctAnswerIndex < question.options.length)
                       Text(
-                        '${StringsLoader.get('correctAnswer')}: ${question.options[question.correctAnswerIndex]}',
+                        '${local.correctAnswer}: ${question.options[question.correctAnswerIndex]}',
                         style: const TextStyle(
                           color: Colors.green,
                           fontSize: 16,

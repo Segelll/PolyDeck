@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/strings_loader.dart';
 import 'package:poly2/exam_page.dart';
 import 'package:poly2/settings_page.dart';
 import 'card_flip_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DecksPage extends StatefulWidget {
 
-  const DecksPage({Key ? key}) : super(key: key);
+  const DecksPage({Key? key}) : super(key: key);
 
   @override
   State<DecksPage> createState() => _DecksPageState();
@@ -23,24 +23,23 @@ class _DecksPageState extends State<DecksPage> {
     {"code": "fav", "label": "Favourites"},
   ];
 
-
   String? _selectedLevels;
   String? _selectedLanguage;
 
   void _toggleLevel(String code) {
     setState(() {
-      if (_selectedLevels==code) {
-        _selectedLevels= null;
+      if (_selectedLevels == code) {
+        _selectedLevels = null;
       } else {
-        _selectedLevels=code;
+        _selectedLevels = code;
       }
     });
   }
 
-  void _proceedToDeck() {
-    if (_selectedLevels==null) {
+  void _proceedToDeck(AppLocalizations local) {
+    if (_selectedLevels == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select one level!')),
+        SnackBar(content: Text(local.selectLanguages)), // Use localized string
       );
       return;
     }
@@ -48,7 +47,7 @@ class _DecksPageState extends State<DecksPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CardFlipPage(levels: _selectedLevels!,),
+        builder: (_) => CardFlipPage(levels: _selectedLevels!),
       ),
     );
   }
@@ -65,20 +64,21 @@ class _DecksPageState extends State<DecksPage> {
       context,
       MaterialPageRoute(builder: (_) => const SettingsPage()),
     ).then((_) {
-
       setState(() {});
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!; // Access localization
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get("deckPage")),
+        title: Text(local.deckPage),
         centerTitle: true,
         actions: [
           IconButton(
-            tooltip: StringsLoader.get('examIconTooltip'),
+            tooltip: local.examIconTooltip,
             icon: const Icon(Icons.quiz),
             onPressed: _goToExam,
           ),
@@ -96,47 +96,44 @@ class _DecksPageState extends State<DecksPage> {
             Icon(Icons.view_agenda, size: 60, color: Colors.blueGrey[700]),
             const SizedBox(height: 10),
             Text(
-              StringsLoader.get('selectLevel'),
+              local.selectLevel,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
 
-            // Row 1 => A1, A2
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildDeck(allLevels[0]["code"]!, allLevels[0]["label"]!),
-                _buildDeck(allLevels[1]["code"]!, allLevels[1]["label"]!),
+                _buildDeck(allLevels[0]["code"]!, allLevels[0]["label"]!, local),
+                _buildDeck(allLevels[1]["code"]!, allLevels[1]["label"]!, local),
               ],
             ),
             const SizedBox(height: 24),
 
-            // Row 2 => B1, B2
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildDeck(allLevels[2]["code"]!, allLevels[2]["label"]!),
-                _buildDeck(allLevels[3]["code"]!, allLevels[3]["label"]!),
+                _buildDeck(allLevels[2]["code"]!, allLevels[2]["label"]!, local),
+                _buildDeck(allLevels[3]["code"]!, allLevels[3]["label"]!, local),
               ],
             ),
             const SizedBox(height: 24),
 
-            // Row 3 => C1, Favourites
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildDeck(allLevels[4]["code"]!, allLevels[4]["label"]!),
-                _buildDeck(allLevels[5]["code"]!, allLevels[5]["label"]!),
+                _buildDeck(allLevels[4]["code"]!, allLevels[4]["label"]!, local),
+                _buildDeck(allLevels[5]["code"]!, allLevels[5]["label"]!, local),
               ],
             ),
 
             const Spacer(),
             ElevatedButton(
-              onPressed: _proceedToDeck,
+              onPressed: () => _proceedToDeck(local), // Pass localization
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(180, 50),
               ),
-              child: Text(StringsLoader.get('proceed')),
+              child: Text(local.proceed), // Use localized string
             ),
             const SizedBox(height: 40),
           ],
@@ -146,9 +143,8 @@ class _DecksPageState extends State<DecksPage> {
   }
 
 
-  Widget _buildDeck(String code, String label) {
-    final bool isSelected = _selectedLevels==(code);
-
+  Widget _buildDeck(String code, String label, AppLocalizations local) {
+    final bool isSelected = _selectedLevels == code;
 
     final frontGradient = isSelected
         ? const LinearGradient(
@@ -162,7 +158,6 @@ class _DecksPageState extends State<DecksPage> {
       end: Alignment.bottomRight,
     );
 
-
     final middleGradient = isSelected
         ? const LinearGradient(
       colors: [Color(0xFF64B5F6), Color(0xFF90CAF9)],
@@ -175,7 +170,6 @@ class _DecksPageState extends State<DecksPage> {
       end: Alignment.bottomRight,
     );
 
-
     final backGradient = isSelected
         ? const LinearGradient(
       colors: [Color(0xFFBBDEFB), Color(0xFFE3F2FD)],
@@ -187,7 +181,6 @@ class _DecksPageState extends State<DecksPage> {
       begin: Alignment.topLeft,
       end: Alignment.bottomRight,
     );
-
 
     final textColor = isSelected ? Colors.white : Colors.black87;
 
@@ -261,7 +254,7 @@ class _DecksPageState extends State<DecksPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    code, // e.g. "A1"
+                    code,
                     style: TextStyle(
                       fontSize: 18,
                       color: textColor,
@@ -270,7 +263,7 @@ class _DecksPageState extends State<DecksPage> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    label, // e.g. "Beginner"
+                    label,
                     style: TextStyle(
                       fontSize: 12,
                       color: textColor,

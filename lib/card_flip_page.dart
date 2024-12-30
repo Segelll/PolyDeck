@@ -2,12 +2,12 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:poly2/card_animations.dart';
-import 'package:poly2/strings_loader.dart';
 import 'package:poly2/card_deck.dart';
 import 'package:poly2/card_model.dart';
 import 'package:poly2/analysis_page.dart';
 import 'package:poly2/analysis_result.dart';
 import 'package:poly2/settings_page.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CardFlipPage extends StatefulWidget {
   final String levels;
@@ -35,7 +35,6 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   FlipDirection _flipDirection = FlipDirection.leftToRight;
   final GlobalKey<CardFlipAnimationState> _cardKey = GlobalKey<CardFlipAnimationState>();
 
-
   AnimationController? _drawCardController;
   Animation<Offset>? _drawCardAnimation;
 
@@ -49,6 +48,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     _loadDeck();
     _checkIfFavorite();
   }
+
   Future<void> _checkIfFavorite() async {
     final isFav = await _dbHelper.isFavorite(_deck.cards[_currentCardIndex].frontText);
     setState(() {
@@ -64,42 +64,42 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     });
   }
 
-Future<void> _loadDeck() async {
-  setState(() => _isLoading = true);
+  Future<void> _loadDeck() async {
+    setState(() => _isLoading = true);
 
-  try {
-    List<CardModel> combined = [];
+    try {
+      List<CardModel> combined = [];
+      await _deck.loadCards(level: widget.levels);
+      combined.addAll(_deck.cards);
 
-    await _deck.loadCards(level: widget.levels);
-    combined.addAll(_deck.cards);
+      combined.shuffle(Random());
 
-    combined.shuffle(Random());
+      final selected = combined.take(10).toList();
+      _deck.cards.clear();
+      _deck.cards.addAll(selected);
+    } catch (e) {
+      print('Error in _loadDeck: $e');
+    }
 
-    final selected = combined.take(10).toList();
-    _deck.cards.clear();
-    _deck.cards.addAll(selected);
-  } catch (e) {
-    print('Error in _loadDeck: $e');
+    setState(() {
+      _isLoading = false;
+      _initDrawCardAnimation();
+    });
   }
 
-  setState(() {
-    _isLoading = false;
-    _initDrawCardAnimation();
-  });
-}
-Future<void> updateFeedback(String tableName, int id, int feedback) async {
+  Future<void> updateFeedback(String tableName, int id, int feedback) async {
     setState(() {
-      print("Feedback güncelleniyor...");
+      print("Feedback updating...");
     });
 
     try {
       await DBHelper.instance.updateFeedback(tableName, id, feedback);
       setState(() {
-        print("Feedback başarıyla güncellendi.");
+        print("Feedback updated successfully.");
       });
     } catch (e) {
       setState(() {
-        print("Hata: Feedback güncellenirken bir sorun oluştu: $e");
+        print("Error: Feedback could not be updated: $e");
       });
     }
   }
@@ -119,13 +119,14 @@ Future<void> updateFeedback(String tableName, int id, int feedback) async {
   }
 
   void _flipCard(Color color, FlipDirection direction) {
+    final currentCard = _deck.cards[_currentCardIndex];
+
     setState(() {
       _isFlipped = true;
       _backCardColor = color;
       _flipDirection = direction;
       _colorTracker[_currentCardIndex] = color;
 
-      final currentCard = _deck.cards[_currentCardIndex];
       _analysisResults.add(
         AnalysisResult(
           word: currentCard.frontText,
@@ -173,7 +174,7 @@ Future<void> updateFeedback(String tableName, int id, int feedback) async {
     setState(() => _isFlipped = false);
   }
 
-  void _nextCard() async{
+  void _nextCard() async {
     if (_currentCardIndex < _deck.cards.length - 1) {
       setState(() {
         _currentCardIndex++;
@@ -190,8 +191,9 @@ Future<void> updateFeedback(String tableName, int id, int feedback) async {
   }
 
   void _showAnalysis() {
-    String deckLabel =
-    StringsLoader.get('deck').replaceAll('{index}', _deckIndex.toString());
+    final local = AppLocalizations.of(context)!;
+    String deckLabel = local.deck(_deckIndex);
+
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -219,14 +221,15 @@ Future<void> updateFeedback(String tableName, int id, int feedback) async {
   }
 
   void _showInstructions() {
+    final local = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text(StringsLoader.get('instructionsTitle')),
-        content: Text(StringsLoader.get('instructionsContent')),
+        title: Text(local.instructionsTitle),
+        content: Text(local.instructionsContent),
         actions: [
           TextButton(
-            child: Text(StringsLoader.get('close')),
+            child: Text(local.close),
             onPressed: () => Navigator.pop(context),
           ),
         ],
@@ -241,34 +244,33 @@ Future<void> updateFeedback(String tableName, int id, int feedback) async {
     );
   }
 
-void _toggleFavorite() async {
-  final currentCard = _deck.cards[_currentCardIndex];
-  try {
-    if (_isFavorite) {
-      await _dbHelper.removeFromFavorites(currentCard.frontText);
-      setState(() {
-        _isFavorite = false; 
-      });
-    } else {
-      await _dbHelper.addToFavorites(
-        currentCard.frontText, 
-        currentCard.frontSentence,
-        currentCard.level,
-        currentCard.backText,
-        currentCard.backSentence,
+  void _toggleFavorite() async {
+    final currentCard = _deck.cards[_currentCardIndex];
+    try {
+      if (_isFavorite) {
+        await _dbHelper.removeFromFavorites(currentCard.frontText);
+        setState(() {
+          _isFavorite = false;
+        });
+      } else {
+        await _dbHelper.addToFavorites(
+          currentCard.frontText,
+          currentCard.frontSentence,
+          currentCard.level,
+          currentCard.backText,
+          currentCard.backSentence,
+        );
+        setState(() {
+          _isFavorite = true;
+        });
+      }
+    } catch (e) {
+      print('Error toggling favorite: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Error updating favorite status!')),
       );
-      setState(() {
-        _isFavorite = true;
-      });
     }
-  } catch (e) {
-    print('Error toggling favorite: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Error updating favorite status!')),
-    );
   }
-}
-
 
   @override
   void dispose() {
@@ -281,10 +283,12 @@ void _toggleFavorite() async {
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!;
+
     if (_isLoading || _deck.cards.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(StringsLoader.get('appTitle')),
+          title: Text(local.appTitle),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -296,7 +300,7 @@ void _toggleFavorite() async {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get('appTitle')),
+        title: Text(local.appTitle),
         centerTitle: true,
         actions: [
           IconButton(
@@ -305,7 +309,7 @@ void _toggleFavorite() async {
               color: Colors.yellow.shade700,
             ),
             onPressed: _toggleFavorite,
-          ),  
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: _openSettings,
@@ -325,15 +329,11 @@ void _toggleFavorite() async {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-
                 Text(
-                  StringsLoader
-                      .get('deck')
-                      .replaceAll('{index}', _deckIndex.toString()),
+                  local.deck(_deckIndex),
                   style: const TextStyle(fontSize: 24),
                 ),
                 const SizedBox(height: 20),
-
 
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -375,7 +375,6 @@ void _toggleFavorite() async {
                 ),
                 const SizedBox(height: 20),
 
-
                 Expanded(
                   child: Stack(
                     children: [
@@ -388,7 +387,6 @@ void _toggleFavorite() async {
                               if (details.primaryVelocity! < 0) {
                                 _flipCard(Colors.red, FlipDirection.leftToRight);
                                 updateFeedback(_targetLang!, currentCard.id, 1);
-
                               } else if (details.primaryVelocity! > 0) {
                                 _flipCard(Colors.green, FlipDirection.rightToLeft);
                                 updateFeedback(_targetLang!, currentCard.id, 2);
@@ -398,7 +396,10 @@ void _toggleFavorite() async {
                             onVerticalDragEnd: !_isFlipped
                                 ? (details) {
                               if (details.primaryVelocity! > 0) {
-                                _flipCard(const Color.fromARGB(255, 179, 130, 8), FlipDirection.topToBottom);
+                                _flipCard(
+                                  const Color.fromARGB(255, 179, 130, 8),
+                                  FlipDirection.topToBottom,
+                                );
                                 updateFeedback(_targetLang!, currentCard.id, 3);
                               }
                             }
@@ -420,7 +421,6 @@ void _toggleFavorite() async {
                           ),
                         ),
                       ),
-                      
                     ],
                   ),
                 ),
@@ -434,7 +434,6 @@ void _toggleFavorite() async {
                 ),
                 const SizedBox(height: 10),
 
-
                 if (_isFlipped)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -442,18 +441,17 @@ void _toggleFavorite() async {
                       ElevatedButton.icon(
                         icon: const Icon(Icons.refresh),
                         onPressed: _reflipCard,
-                        label: Text(StringsLoader.get('reflip')),
+                        label: Text(local.reflip),
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.skip_next),
                         onPressed: _nextCard,
-                        label: Text(StringsLoader.get('newCard')),
+                        label: Text(local.newCard),
                       ),
                     ],
                   ),
                 const SizedBox(height: 20),
-
               ],
             ),
           ),

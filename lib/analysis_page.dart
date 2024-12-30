@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/decks_page.dart';
 import 'analysis_result.dart';
-import 'strings_loader.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AnalysisPage extends StatelessWidget {
   final List<AnalysisResult> analysisResults;
@@ -18,9 +18,11 @@ class AnalysisPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get('analysis')),
+        title: Text(local.analysis),
         centerTitle: true,
       ),
       body: Padding(
@@ -28,12 +30,12 @@ class AnalysisPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              StringsLoader.get('previousDeck').replaceAll('{name}', previousDeckName),
+               previousDeckName,
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 20),
             Text(
-              StringsLoader.get('analysisResults'),
+              local.analysisResults,
               style: const TextStyle(fontSize: 24),
             ),
             const SizedBox(height: 10),
@@ -42,7 +44,7 @@ class AnalysisPage extends StatelessWidget {
                 itemCount: analysisResults.length,
                 itemBuilder: (context, index) {
                   final result = analysisResults[index];
-                  
+
                   return ListTile(
                     leading: CircleAvatar(
                       backgroundColor: result.color,
@@ -60,18 +62,23 @@ class AnalysisPage extends StatelessWidget {
                 onNewDeck();
                 Navigator.of(context).pop();
               },
-              child: Text(StringsLoader.get('startNewDeck')),
+              child: Text(local.startNewDeck), // Use localized string
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
             ),
-            ElevatedButton(onPressed: (){
-            Navigator.push(context, 
-            MaterialPageRoute(builder: (_) => const DecksPage()));
-            }, child: Text("Decks Page"), style: ElevatedButton.styleFrom(
-              minimumSize: const Size(double.infinity, 50),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const DecksPage()),
+                );
+              },
+              child: Text(local.decksPage), // Use localized string
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 50),
+              ),
             ),
-            )
           ],
         ),
       ),

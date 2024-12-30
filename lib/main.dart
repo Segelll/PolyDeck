@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:poly2/decks_page.dart';
 import 'package:poly2/login_page.dart';
 import 'package:poly2/services/database_helper.dart';
-import 'package:poly2/strings_loader.dart';
-
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'dart:io';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await StringsLoader.loadStrings();
   Firebase.initializeApp();
   runApp(const MyApp());
 }
@@ -29,6 +30,22 @@ class MyApp extends StatelessWidget {
         }
 
         return MaterialApp(
+          title: 'PolyDeck',
+          localizationsDelegates: [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: [
+            Locale('en'),
+            Locale('es'),
+            Locale('pt'),
+            Locale('tr'),
+            Locale('it'),
+            Locale('de'),
+            Locale('fr')
+          ],
           theme: ThemeData(
             primarySwatch: Colors.blueGrey,
             brightness: Brightness.light,
@@ -38,7 +55,7 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.dark,
           ),
           themeMode: ThemeMode.light,
-          //home: isFirstTime ? LoginPage() : const DecksPage(),
+          locale: Locale(Platform.localeName),
           home: LoginPage(),
         );
       },

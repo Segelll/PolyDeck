@@ -1,0 +1,159 @@
+{
+  "@@locale": "tr",
+
+  "appTitle": "Polydeck Önizleme",
+
+  "cardFront": "Kart Önü",
+  "cardBack": "Kart Arkası",
+  "flipRed": "Kırmızı Çevir",
+  "flipYellow": "Sarı Çevir",
+  "flipGreen": "Yeşil Çevir",
+  "reflip": "Tekrar Çevir",
+  "newCard": "Yeni Kart",
+
+  "cardCount": "Kart {index} / {total}",
+  "@cardCount": {
+    "description": "Kartın mevcut indeksini ve toplam kart sayısını gösterir",
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
+
+  "analysis": "Analiz",
+  "analysisResults": "Analiz Sonuçları:",
+  "previousDeck": "Önceki Deste: {deckName}",
+  "@previousDeck": {
+    "description": "Önceki destenin adını gösterir",
+    "placeholders": {
+      "deckName": {}
+    }
+  },
+  "startNewDeck": "Yeni Deste Başlat",
+
+  "cardAnalysis": "Kart {index}: {color}",
+  "@cardAnalysis": {
+    "description": "Kartın indeksini ve rengini içeren analizi gösterir",
+    "placeholders": {
+      "index": {},
+      "color": {}
+    }
+  },
+
+  "decks": "Desteler",
+  "deckPage": "Desteler Sayfası",
+  "a1Deck": "A1 Destesi",
+
+  "deck": "Deste {index}",
+  "@deck": {
+    "description": "Deste etiketi ile indeks",
+    "placeholders": {
+      "index": {}
+    }
+  },
+
+  "question": "Soru",
+  "nextQuestion": "Sonraki Soru",
+  "finishExam": "Sınavı Bitir",
+  "exam": "Sınav",
+  "testResult": "Test Sonucu",
+  "recommendation": "Önerilen Deste",
+  "score": "Sonuç",
+  "red": "Kırmızı",
+  "yellow": "Sarı",
+  "green": "Yeşil",
+  "grey": "Gri",
+
+  "instructionsTitle": "Talimatlar",
+  "instructionsContent": "Sola Kaydır: Kırmızı Olarak İşaretle (Zor)\nAşağı Kaydır: Sarı Olarak İşaretle (Orta)\nSağa Kaydır: Yeşil Olarak İşaretle (Kolay)\n\nKartı tekrar denemek için 'Tekrar Çevir'e dokunun.",
+
+  "result": "Sonuç",
+  "reviewAnswers": "Cevapları Gözden Geçir",
+  "restartExam": "Sınavı Yeniden Başlat",
+  "help": "Yardım",
+  "confirmRestart": "Sınavı yeniden başlatmak istediğinizden emin misiniz?",
+  "yes": "Evet",
+  "no": "Hayır",
+  "correct": "Doğru",
+  "incorrect": "Yanlış",
+  "unanswered": "Yanıtlanmamış",
+  "review": "Gözden Geçir",
+
+  "totalQuestions": "Toplam Soru: {total}",
+  "@totalQuestions": {
+    "description": "Toplam soru sayısını gösterir",
+    "placeholders": {
+      "total": {}
+    }
+  },
+  "answered": "Yanıtlandı",
+
+  "unansweredCount": "Yanıtlanmamış: {count}",
+  "@unansweredCount": {
+    "description": "Yanıtlanmamış soru sayısını gösterir",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "resultTitle": "Sınav Sonuçları",
+  "pass": "Tebrikler! Sınavı geçtiniz.",
+  "fail": "Sınavı geçemediniz. Bir dahaki sefere daha iyi!",
+
+  "percentage": "Puanınız: {percentage}%",
+  "@percentage": {
+    "description": "Kullanıcının puanını yüzde olarak gösterir",
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+
+  "backToDeck": "Desteye Dön",
+  "backToHome": "Ana Sayfaya Dön",
+  "yourAnswer": "Cevabınız",
+  "correctAnswer": "Doğru Cevap",
+  "recommendedDeck": "Önerilen Deste",
+  "yourScore": "Skor",
+
+  "settings": "Ayarlar",
+  "settingsContent": "Ayarlar buraya.",
+  "logout": "Çıkış Yap",
+
+  "choosePage": "Gitmek İstediğiniz Sayfayı Seçin",
+  "goExam": "Sınava Git",
+
+  "selectLevel": "Seviyeleri Seç",
+  "confirmLevels": "Onayla",
+
+  "firstTimeTitle": "Dilleri Seçin",
+  "firstTimeContent": "Lütfen anadilinizi ve hedef dilinizi seçiniz.",
+
+  "close": "Kapat",
+
+  "weeklyProgress": "Haftalık İlerleme",
+  "monthlyProgress": "Aylık İlerleme",
+  "chartWeekly": "Haftalık Grafik",
+  "chartMonthly": "Aylık Grafik",
+  "progression": "İlerlemeniz",
+
+  "progress": "İlerleme",
+  "changeLang": "Dili Değiştir",
+  "examIconTooltip": "Sınava Gir",
+  "combinedDeck": "Birleşik Deste",
+  "newDeck": "Yeni Deste",
+  "levelsSelected": "Seçilen Seviyeler",
+
+  "proceed": "İlerle",
+  "targetLanguage": "Hedef Dil",
+  "motherLanguage": "Anadil",
+
+  "firstTimePromptTitle": "Hoş Geldiniz!",
+  "firstTimePromptContent": "Lütfen anadilinizi ve hedef dilinizi seçiniz.",
+
+  "confirm": "Onayla",
+
+  "saveFailed": "Ayarlar kaydedilemedi",
+  "selectLanguages": "Lütfen dilleri seçiniz.",
+
+  "decksPage": "Desteler Sayfası"
+}

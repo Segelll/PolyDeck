@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/strings_loader.dart';
 import 'package:poly2/services/database_helper.dart';
+// remove 'strings_loader.dart'
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MonthlyPage extends StatefulWidget {
   const MonthlyPage({Key? key}) : super(key: key);
@@ -12,7 +13,7 @@ class MonthlyPage extends StatefulWidget {
 class _MonthlyPageState extends State<MonthlyPage> {
   List<int> data = [];
   List<String> monthLabels = [];
-  List<String> languageTables = ['fr', 'de', 'en','it','pr','tr','esp'];
+  List<String> languageTables = ['fr', 'de', 'en', 'it', 'pr', 'tr', 'esp'];
 
   @override
   void initState() {
@@ -20,69 +21,70 @@ class _MonthlyPageState extends State<MonthlyPage> {
     _loadMonthlyData();
   }
 
-Future<void> _loadMonthlyData() async {
-  try {
-    DateTime? earliestDate;
-    for (String table in languageTables) {
-      final tableEarliestDate = await DBHelper.instance.getEarliestDate(table);
-      if (tableEarliestDate != null) {
-        final date = DateTime.parse(tableEarliestDate.trim());
-        if (earliestDate == null || date.isBefore(earliestDate)) {
-          earliestDate = date;
+  Future<void> _loadMonthlyData() async {
+    try {
+      DateTime? earliestDate;
+      for (String table in languageTables) {
+        final tableEarliestDate = await DBHelper.instance.getEarliestDate(table);
+        if (tableEarliestDate != null) {
+          final date = DateTime.parse(tableEarliestDate.trim());
+          if (earliestDate == null || date.isBefore(earliestDate)) {
+            earliestDate = date;
+          }
         }
       }
-    }
 
-    if (earliestDate != null) {
-      await _fetchMonthlyCounts(earliestDate);
+      if (earliestDate != null) {
+        await _fetchMonthlyCounts(earliestDate);
+      }
+    } catch (e) {
+      print('Error loading monthly data: $e');
     }
-  } catch (e) {
-    print('Error loading monthly data: $e');
   }
-}
-
 
   Future<void> _fetchMonthlyCounts(DateTime startDate) async {
-  try {
-    final db = await DBHelper().database;
-    List<int> monthlyCounts = [];
-    List<String> labels = [];
+    try {
+      final db = await DBHelper().database;
+      List<int> monthlyCounts = [];
+      List<String> labels = [];
 
-    for (int i = 0; i < 4; i++) {
-      final currentDate = DateTime(startDate.year, startDate.month + i);
-      final nextMonth = DateTime(currentDate.year, currentDate.month + 1);
+      for (int i = 0; i < 4; i++) {
+        final currentDate = DateTime(startDate.year, startDate.month + i);
+        final nextMonth = DateTime(currentDate.year, currentDate.month + 1);
 
-      int totalCount = 0;
-      for (String table in languageTables) {
-        final result = await db.rawQuery(
-          'SELECT COUNT(*) as count FROM $table WHERE date BETWEEN ? AND ?',
-          [
-            '${currentDate.year}-${currentDate.month.toString().padLeft(2, "0")}-01',
-            '${nextMonth.year}-${nextMonth.month.toString().padLeft(2, "0")}-01'
-          ]
-        );
+        int totalCount = 0;
+        for (String table in languageTables) {
+          final result = await db.rawQuery(
+            'SELECT COUNT(*) as count FROM $table WHERE date BETWEEN ? AND ?',
+            [
+              '${currentDate.year}-${currentDate.month.toString().padLeft(2, "0")}-01',
+              '${nextMonth.year}-${nextMonth.month.toString().padLeft(2, "0")}-01',
+            ],
+          );
 
-        totalCount += result.first['count'] as int;
+          totalCount += result.first['count'] as int;
+        }
+        monthlyCounts.add(totalCount);
+        labels.add('${currentDate.year}-${currentDate.month.toString().padLeft(2, "0")}');
       }
-      monthlyCounts.add(totalCount);
-      labels.add('${currentDate.year}-${currentDate.month.toString().padLeft(2, "0")}');
-    }
 
-    setState(() {
-      data = monthlyCounts;
-      monthLabels = labels;
-    });
-  } catch (e) {
-    print('Error fetching monthly counts: $e');
+      setState(() {
+        data = monthlyCounts;
+        monthLabels = labels;
+      });
+    } catch (e) {
+      print('Error fetching monthly counts: $e');
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!;
+
     if (data.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(StringsLoader.get('monthlyProgress')),
+          title: Text(local.monthlyProgress),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -93,7 +95,7 @@ Future<void> _loadMonthlyData() async {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get('monthlyProgress')),
+        title: Text(local.monthlyProgress),
         centerTitle: true,
       ),
       body: Container(
@@ -102,7 +104,7 @@ Future<void> _loadMonthlyData() async {
           children: [
             const SizedBox(height: 20),
             Text(
-              StringsLoader.get('chartMonthly'),
+              local.chartMonthly,
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),

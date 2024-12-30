@@ -1,0 +1,159 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Polydeck Preview",
+
+  "cardFront": "Card Front",
+  "cardBack": "Card Back",
+  "flipRed": "Flip Red",
+  "flipYellow": "Flip Yellow",
+  "flipGreen": "Flip Green",
+  "reflip": "Reflip",
+  "newCard": "New Card",
+
+  "cardCount": "Card {index} / {total}",
+  "@cardCount": {
+    "description": "Displays the current card index and total number of cards",
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
+
+  "analysis": "Analysis",
+  "analysisResults": "Analysis Results:",
+  "previousDeck": "Previous Deck: {deckName}",
+  "@previousDeck": {
+    "description": "Shows the name of the previous deck",
+    "placeholders": {
+      "deckName": {}
+    }
+  },
+  "startNewDeck": "Start New Deck",
+
+  "cardAnalysis": "Card {index}: {color}",
+  "@cardAnalysis": {
+    "description": "Displays analysis of a card with its index and color",
+    "placeholders": {
+      "index": {},
+      "color": {}
+    }
+  },
+
+  "decks": "Decks",
+  "deckPage": "Deck Page",
+  "a1Deck": "A1 Deck",
+
+  "deck": "Deck {index}",
+  "@deck": {
+    "description": "Deck label with index",
+    "placeholders": {
+      "index": {}
+    }
+  },
+
+  "question": "Question",
+  "nextQuestion": "Next Question",
+  "finishExam": "Finish Exam",
+  "exam": "Exam",
+  "testResult": "Test Result",
+  "recommendation": "Recommended Deck",
+  "score": "Score",
+  "red": "Red",
+  "yellow": "Yellow",
+  "green": "Green",
+  "grey": "Grey",
+
+  "instructionsTitle": "Instructions",
+  "instructionsContent": "Swipe Left: Mark as Red (Hard)\nSwipe Down: Mark as Yellow (Medium)\nSwipe Right: Mark as Green (Easy)\n\nTap 'Reflip' to reattempt the card.",
+
+  "result": "Result",
+  "reviewAnswers": "Review Answers",
+  "restartExam": "Restart Exam",
+  "help": "Help",
+  "confirmRestart": "Are you sure you want to restart the exam?",
+  "yes": "Yes",
+  "no": "No",
+  "correct": "Correct",
+  "incorrect": "Incorrect",
+  "unanswered": "Unanswered",
+  "review": "Review",
+
+  "totalQuestions": "Total Questions: {total}",
+  "@totalQuestions": {
+    "description": "Displays the total number of questions",
+    "placeholders": {
+      "total": {}
+    }
+  },
+  "answered": "Answered",
+
+  "unansweredCount": "Unanswered: {count}",
+  "@unansweredCount": {
+    "description": "Displays the count of unanswered questions",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "resultTitle": "Exam Results",
+  "pass": "Congratulations! You passed the exam.",
+  "fail": "You did not pass the exam. Better luck next time!",
+
+  "percentage": "Your Score: {percentage}%",
+  "@percentage": {
+    "description": "Displays the user's score as a percentage",
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+
+  "backToDeck": "Back to Deck",
+  "backToHome": "Back to Home",
+  "yourAnswer": "Your Answer",
+  "correctAnswer": "Correct Answer",
+  "recommendedDeck": "Recommended Deck",
+  "yourScore": "Score",
+
+  "settings": "Settings",
+  "settingsContent": "Here you can adjust your preferences.",
+  "logout": "Logout",
+
+  "choosePage": "Choose Page",
+  "goExam": "Go Exam",
+
+  "selectLevel": "Select Levels",
+  "confirmLevels": "Confirm",
+
+  "firstTimeTitle": "Select Languages",
+  "firstTimeContent": "Please select your mother tongue and target language.",
+
+  "close": "Close",
+
+  "weeklyProgress": "Weekly Progress",
+  "monthlyProgress": "Monthly Progress",
+  "chartWeekly": "Weekly Chart",
+  "chartMonthly": "Monthly Chart",
+  "progression": "Your Progression",
+
+  "progress": "Progress",
+  "changeLang": "Change Language",
+  "examIconTooltip": "Take an Exam",
+  "combinedDeck": "Combined Deck",
+  "newDeck": "New Deck",
+  "levelsSelected": "Levels Selected",
+
+  "proceed": "Proceed",
+  "targetLanguage": "Target Language",
+  "motherLanguage": "Mother Language",
+
+  "firstTimePromptTitle": "Welcome!",
+  "firstTimePromptContent": "Please select your mother language and target language.",
+
+  "confirm": "Confirm",
+
+  "saveFailed": "Failed to save settings",
+  "selectLanguages": "Please select languages.",
+
+  "decksPage": "Decks Page"
+}

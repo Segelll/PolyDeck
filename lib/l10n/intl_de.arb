@@ -1,0 +1,159 @@
+{
+  "@@locale": "de",
+
+  "appTitle": "Polydeck Vorschau",
+
+  "cardFront": "Kartenvorderseite",
+  "cardBack": "Kartenrückseite",
+  "flipRed": "Rot Drehen",
+  "flipYellow": "Gelb Drehen",
+  "flipGreen": "Grün Drehen",
+  "reflip": "Erneut Drehen",
+  "newCard": "Neue Karte",
+
+  "cardCount": "Karte {index} / {total}",
+  "@cardCount": {
+    "description": "Zeigt den aktuellen Kartenindex und die Gesamtzahl der Karten an",
+    "placeholders": {
+      "index": {},
+      "total": {}
+    }
+  },
+
+  "analysis": "Analyse",
+  "analysisResults": "Analyseergebnisse:",
+  "previousDeck": "Vorheriges Deck: {deckName}",
+  "@previousDeck": {
+    "description": "Zeigt den Namen des vorherigen Decks an",
+    "placeholders": {
+      "deckName": {}
+    }
+  },
+  "startNewDeck": "Neues Deck Starten",
+
+  "cardAnalysis": "Karte {index}: {color}",
+  "@cardAnalysis": {
+    "description": "Zeigt die Analyse einer Karte mit ihrem Index und ihrer Farbe",
+    "placeholders": {
+      "index": {},
+      "color": {}
+    }
+  },
+
+  "decks": "Decks",
+  "deckPage": "Deck-Seite",
+  "a1Deck": "A1 Deck",
+
+  "deck": "Deck {index}",
+  "@deck": {
+    "description": "Deck-Label mit Index",
+    "placeholders": {
+      "index": {}
+    }
+  },
+
+  "question": "Frage",
+  "nextQuestion": "Nächste Frage",
+  "finishExam": "Prüfung Beenden",
+  "exam": "Prüfung",
+  "testResult": "Testergebnis",
+  "recommendation": "Empfohlenes Deck",
+  "score": "Punktzahl",
+  "red": "Rot",
+  "yellow": "Gelb",
+  "green": "Grün",
+  "grey": "Grau",
+
+  "instructionsTitle": "Anweisungen",
+  "instructionsContent": "Nach links Wischen: Als Rot markieren (Schwer)\nNach unten Wischen: Als Gelb markieren (Mittel)\nNach rechts Wischen: Als Grün markieren (Leicht)\n\nTippen Sie auf 'Erneut Drehen', um die Karte erneut zu versuchen.",
+
+  "result": "Ergebnis",
+  "reviewAnswers": "Antworten Überprüfen",
+  "restartExam": "Prüfung Neustarten",
+  "help": "Hilfe",
+  "confirmRestart": "Sind Sie sicher, dass Sie die Prüfung neu starten möchten?",
+  "yes": "Ja",
+  "no": "Nein",
+  "correct": "Richtig",
+  "incorrect": "Falsch",
+  "unanswered": "Unbeantwortet",
+  "review": "Überprüfen",
+
+  "totalQuestions": "Gesamtfragen: {total}",
+  "@totalQuestions": {
+    "description": "Zeigt die Gesamtzahl der Fragen an",
+    "placeholders": {
+      "total": {}
+    }
+  },
+  "answered": "Beantwortet",
+
+  "unansweredCount": "Unbeantwortet: {count}",
+  "@unansweredCount": {
+    "description": "Zeigt die Anzahl unbeantworteter Fragen an",
+    "placeholders": {
+      "count": {}
+    }
+  },
+
+  "resultTitle": "Prüfungsergebnisse",
+  "pass": "Herzlichen Glückwunsch! Sie haben die Prüfung bestanden.",
+  "fail": "Sie haben die Prüfung nicht bestanden. Viel Glück beim nächsten Mal!",
+
+  "percentage": "Ihre Punktzahl: {percentage}%",
+  "@percentage": {
+    "description": "Zeigt die Punktzahl des Benutzers als Prozentsatz an",
+    "placeholders": {
+      "percentage": {}
+    }
+  },
+
+  "backToDeck": "Zurück zum Deck",
+  "backToHome": "Zurück zur Startseite",
+  "yourAnswer": "Ihre Antwort",
+  "correctAnswer": "Richtige Antwort",
+  "recommendedDeck": "Empfohlenes Deck",
+  "yourScore": "Punktzahl",
+
+  "settings": "Einstellungen",
+  "settingsContent": "Hier können Sie Ihre Einstellungen anpassen.",
+  "logout": "Abmelden",
+
+  "choosePage": "Seite Wählen",
+  "goExam": "Zur Prüfung Gehen",
+
+  "selectLevel": "Level Auswählen",
+  "confirmLevels": "Bestätigen",
+
+  "firstTimeTitle": "Sprachen Auswählen",
+  "firstTimeContent": "Bitte wählen Sie Ihre Muttersprache und Zielsprache aus.",
+
+  "close": "Schließen",
+
+  "weeklyProgress": "Wöchentlicher Fortschritt",
+  "monthlyProgress": "Monatlicher Fortschritt",
+  "chartWeekly": "Wöchentliche Grafik",
+  "chartMonthly": "Monatliche Grafik",
+  "progression": "Ihr Fortschritt",
+
+  "progress": "Fortschritt",
+  "changeLang": "Sprache Ändern",
+  "examIconTooltip": "Zur Prüfung Gehen",
+  "combinedDeck": "Kombiniertes Deck",
+  "newDeck": "Neues Deck",
+  "levelsSelected": "Ausgewählte Levels",
+
+  "proceed": "Fortfahren",
+  "targetLanguage": "Zielsprache",
+  "motherLanguage": "Muttersprache",
+
+  "firstTimePromptTitle": "Willkommen!",
+  "firstTimePromptContent": "Bitte wählen Sie Ihre Muttersprache und Zielsprache aus.",
+
+  "confirm": "Bestätigen",
+
+  "saveFailed": "Einstellungen konnten nicht gespeichert werden",
+  "selectLanguages": "Bitte wählen Sie Sprachen aus.",
+
+  "decksPage": "Deck-Seite"
+}

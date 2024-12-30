@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/strings_loader.dart';
 import 'package:poly2/decks_page.dart';
 import 'package:poly2/services/database_helper.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FirstTimeSelectionPage extends StatefulWidget {
   const FirstTimeSelectionPage({Key? key}) : super(key: key);
@@ -19,9 +19,11 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
 
   @override
   Widget build(BuildContext context) {
+    final local = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(StringsLoader.get('firstTimePromptTitle')),
+        title: Text(local.firstTimePromptTitle),
         leading: const Icon(Icons.language),
         centerTitle: true,
       ),
@@ -33,7 +35,7 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
             Icon(Icons.flag, size: 80, color: Colors.blueGrey[600]),
             const SizedBox(height: 20),
             Text(
-              StringsLoader.get('firstTimePromptContent'),
+              local.firstTimePromptContent,
               style: const TextStyle(fontSize: 18),
               textAlign: TextAlign.center,
             ),
@@ -41,7 +43,7 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
             // MOTHER
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: StringsLoader.get('motherLanguage'),
+                labelText: local.motherLanguage,
                 prefixIcon: const Icon(Icons.home),
                 border: const OutlineInputBorder(),
               ),
@@ -63,7 +65,7 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
             // TARGET
             DropdownButtonFormField<String>(
               decoration: InputDecoration(
-                labelText: StringsLoader.get('targetLanguage'),
+                labelText: local.targetLanguage,
                 prefixIcon: const Icon(Icons.flag),
                 border: const OutlineInputBorder(),
               ),
@@ -83,20 +85,25 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
             const Spacer(),
             ElevatedButton.icon(
               icon: const Icon(Icons.check),
-              label: Text(StringsLoader.get('confirm')),
+              label: Text(local.confirm),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-                  onPressed: (_selectedMotherLanguage != null && _selectedTargetLanguage != null)
+              onPressed: (_selectedMotherLanguage != null &&
+                  _selectedTargetLanguage != null)
                   ? () async {
                 try {
-                  await _dbHelper.saveUserChoices('user', _selectedMotherLanguage!, _selectedTargetLanguage!);
+                  await _dbHelper.saveUserChoices(
+                    'user',
+                    _selectedMotherLanguage!,
+                    _selectedTargetLanguage!,
+                  );
 
                   if (!mounted) return;
 
                   Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => DecksPage()),
+                    MaterialPageRoute(builder: (context) => const DecksPage()),
                   );
                 } catch (e) {
                   ScaffoldMessenger.of(context).showSnackBar(

@@ -45,14 +45,19 @@ class _ExamPageState extends State<ExamPage> {
         final randomIds = _generateRandomIds(interval[0], interval[1], 4);
 
         for (int id in randomIds) {
-          final englishWords = await db.fetchExamWords('en', id);
-          final turkishWords = await db.fetchExamWords('tr', id);
 
-          if (englishWords.isNotEmpty && turkishWords.isNotEmpty) {
-            String questionText = englishWords.first['word'];
-            String correctAnswerTurkish = turkishWords.first['word'];
+          final userSettings = await db.getUserChoices('user');
+          String ?questionLanguage = userSettings?['targetLanguage'] ?? "tr";
+          String ?answerLanguage = userSettings?['mainLanguage'] ?? "en";
 
-            final turkishOptions = await db.fetchExamOptions('tr');
+          final questiona = await db.fetchExamWords(questionLanguage, id);
+          final answer = await db.fetchExamWords(answerLanguage, id);
+
+          if (questiona.isNotEmpty && answer.isNotEmpty) {
+            String questionText = questiona.first['word'];
+            String correctAnswerTurkish = answer.first['word'];
+
+            final turkishOptions = await db.fetchExamOptions(answerLanguage);
             List<String> allTurkishWords =
             turkishOptions.map((e) => e['word'] as String).toList();
 

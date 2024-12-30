@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'package:poly2/card_model.dart';
+import 'package:poly2/models/card_model.dart';
 import 'package:poly2/services/database_helper.dart';
 
 class CardDeck {

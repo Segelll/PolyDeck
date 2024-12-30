@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:poly2/card_animations.dart';
 import 'package:poly2/card_deck.dart';
-import 'package:poly2/card_model.dart';
-import 'package:poly2/analysis_page.dart';
-import 'package:poly2/analysis_result.dart';
-import 'package:poly2/settings_page.dart';
+import 'package:poly2/models/card_model.dart';
+import 'package:poly2/pages/analysis_page.dart';
+import 'package:poly2/models/analysis_result.dart';
+import 'package:poly2/pages/settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CardFlipPage extends StatefulWidget {

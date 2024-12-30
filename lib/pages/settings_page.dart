@@ -3,8 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:poly2/login_page.dart';
-// remove 'strings_loader.dart'
+
 import 'weekly_page.dart';
 import 'monthly_page.dart';
 import 'decks_page.dart';

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/decks_page.dart';
+import 'package:poly2/pages/decks_page.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 

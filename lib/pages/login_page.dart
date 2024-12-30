@@ -1,8 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/auth_service.dart';
-import 'package:poly2/first_time_selection_page.dart';
-import 'package:poly2/decks_page.dart';
+import 'package:poly2/pages/first_time_selection_page.dart';
+import 'package:poly2/pages/decks_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

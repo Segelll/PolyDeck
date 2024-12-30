@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
-import 'exam_model.dart';
+import '../models/exam_model.dart';
 import 'exam_result_page.dart';
 // remove 'strings_loader.dart'
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';

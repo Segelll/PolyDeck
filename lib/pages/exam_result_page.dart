@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'exam_model.dart';
-import 'package:poly2/decks_page.dart';
+import '../models/exam_model.dart';
+import 'package:poly2/pages/decks_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ResultPage extends StatelessWidget {

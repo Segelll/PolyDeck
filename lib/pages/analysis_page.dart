@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/decks_page.dart';
-import 'analysis_result.dart';
+import 'package:poly2/pages/decks_page.dart';
+import '../models/analysis_result.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AnalysisPage extends StatelessWidget {

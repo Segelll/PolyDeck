@@ -24,13 +24,14 @@ class AnalysisPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(local.analysis),
         centerTitle: true,
+        automaticallyImplyLeading: false, // Removes the default back button
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             Text(
-               previousDeckName,
+              previousDeckName,
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 20),
@@ -57,28 +58,37 @@ class AnalysisPage extends StatelessWidget {
                 },
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                onNewDeck();
-                Navigator.of(context).pop();
-              },
-              child: Text(local.startNewDeck), // Use localized string
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
+            // Row containing "New Deck" and "Back to Decks Page" buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                // "New Deck" Button
+                ElevatedButton(
+                  onPressed: () {
+                    onNewDeck();
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(local.startNewDeck), // Use localized string
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(150, 50),
+                  ),
+                ),
+                // "Back to Decks Page" Button
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const DecksPage()),
+                    );
+                  },
+                  child: Text(local.decksPage), // Use localized string
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: const Size(150, 50),
+                  ),
+                ),
+              ],
             ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const DecksPage()),
-                );
-              },
-              child: Text(local.decksPage), // Use localized string
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 50),
-              ),
-            ),
+            const SizedBox(height: 20), // Adds space below the buttons
           ],
         ),
       ),

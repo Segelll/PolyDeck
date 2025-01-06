@@ -32,13 +32,13 @@ class MyApp extends StatelessWidget {
 
         return MaterialApp(
           title: 'PolyDeck',
-          localizationsDelegates: [
+          localizationsDelegates: const [
             AppLocalizations.delegate,
             GlobalMaterialLocalizations.delegate,
             GlobalWidgetsLocalizations.delegate,
             GlobalCupertinoLocalizations.delegate,
           ],
-          supportedLocales: [
+          supportedLocales: const [
             Locale('en'),
             Locale('es'),
             Locale('pt'),
@@ -57,7 +57,7 @@ class MyApp extends StatelessWidget {
           ),
           themeMode: ThemeMode.light,
           locale: Locale(Platform.localeName),
-          home: LoginPage(),
+          home: const LoginPage(),
         );
       },
     );

@@ -1,10 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 // remove 'strings_loader.dart'
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MonthlyPage extends StatefulWidget {
-  const MonthlyPage({Key? key}) : super(key: key);
+  const MonthlyPage({super.key});
 
   @override
   _MonthlyPageState createState() => _MonthlyPageState();
@@ -38,7 +39,9 @@ class _MonthlyPageState extends State<MonthlyPage> {
         await _fetchMonthlyCounts(earliestDate);
       }
     } catch (e) {
-      print('Error loading monthly data: $e');
+      if (kDebugMode) {
+        print('Error loading monthly data: $e');
+      }
     }
   }
 
@@ -73,7 +76,9 @@ class _MonthlyPageState extends State<MonthlyPage> {
         monthLabels = labels;
       });
     } catch (e) {
-      print('Error fetching monthly counts: $e');
+      if (kDebugMode) {
+        print('Error fetching monthly counts: $e');
+      }
     }
   }
 

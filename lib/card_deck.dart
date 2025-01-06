@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:poly2/models/card_model.dart';
 import 'package:poly2/services/database_helper.dart';
 
@@ -22,7 +23,9 @@ class CardDeck {
     try {
       await DBHelper.instance.updateIsSeenDate(tableName, id);
     } catch (e) {
-      print('Error updating isSeen: $e');
+      if (kDebugMode) {
+        print('Error updating isSeen: $e');
+      }
     }
   }
 
@@ -91,7 +94,9 @@ Future<void> loadCards({String? level}) async {
       await updateIsSeen(_targetLang!, card.id);
     }
   } catch (e) {
-    print('Error loading cards: $e');
+    if (kDebugMode) {
+      print('Error loading cards: $e');
+    }
     _cards = [];
   }
 }

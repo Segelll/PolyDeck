@@ -6,7 +6,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class DecksPage extends StatefulWidget {
 
-  const DecksPage({Key? key}) : super(key: key);
+  const DecksPage({super.key});
 
   @override
   State<DecksPage> createState() => _DecksPageState();

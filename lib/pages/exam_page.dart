@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import '../models/exam_model.dart';
@@ -7,7 +8,7 @@ import 'exam_result_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExamPage extends StatefulWidget {
-  const ExamPage({Key? key}) : super(key: key);
+  const ExamPage({super.key});
 
   @override
   State<ExamPage> createState() => _ExamPageState();
@@ -86,7 +87,9 @@ class _ExamPageState extends State<ExamPage> {
         _isLoading = false;
       });
     } catch (e) {
-      print('Error loading questions: $e');
+      if (kDebugMode) {
+        print('Error loading questions: $e');
+      }
       setState(() {
         _isLoading = false;
       });

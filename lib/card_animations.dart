@@ -21,7 +21,7 @@ class CardFlipAnimation extends StatefulWidget {
   final String level;
 
   const CardFlipAnimation({
-    Key? key,
+    super.key,
     required this.isFlipped,
     required this.frontCardColor,
     required this.backCardColor,
@@ -33,7 +33,7 @@ class CardFlipAnimation extends StatefulWidget {
     required this.cardNumber,
     required this.flipDirection,
     required this.level,
-  }) : super(key: key);
+  });
 
   @override
   CardFlipAnimationState createState() => CardFlipAnimationState();

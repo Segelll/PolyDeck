@@ -4,7 +4,7 @@ import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class FirstTimeSelectionPage extends StatefulWidget {
-  const FirstTimeSelectionPage({Key? key}) : super(key: key);
+  const FirstTimeSelectionPage({super.key});
 
   @override
   State<FirstTimeSelectionPage> createState() => _FirstTimeSelectionPageState();

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'weekly_page.dart';
@@ -11,7 +12,7 @@ import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+  const SettingsPage({super.key});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -48,25 +49,35 @@ class _SettingsPageState extends State<SettingsPage> {
           'seenWords': seenWords,
         });
 
-        print("Database uploaded successfully.");
+        if (kDebugMode) {
+          print("Database uploaded successfully.");
+        }
 
         await FirebaseAuth.instance.signOut();
-        print("User logged out successfully.");
+        if (kDebugMode) {
+          print("User logged out successfully.");
+        }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => exit(0)),
         );
       } else {
-        print("No user is logged in.");
+        if (kDebugMode) {
+          print("No user is logged in.");
+        }
       }
     } catch (e) {
-      print("Error uploading database: $e");
+      if (kDebugMode) {
+        print("Error uploading database: $e");
+      }
     }
   }
 
   Future<void> _loadPrefs() async {
     final userSettings = await _dbHelper.getUserChoices('user');
-    print(userSettings);
+    if (kDebugMode) {
+      print(userSettings);
+    }
     setState(() {
       _motherLang = userSettings?['mainLanguage'] ?? "en";
       _targetLang = userSettings?['targetLanguage'] ?? "tr";
@@ -84,7 +95,9 @@ class _SettingsPageState extends State<SettingsPage> {
           MaterialPageRoute(builder: (_) => const DecksPage()),
         );
       } catch (e) {
-        print('Failed to save settings: $e');
+        if (kDebugMode) {
+          print('Failed to save settings: $e');
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(local.saveFailed),

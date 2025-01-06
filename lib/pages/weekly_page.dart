@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WeeklyPage extends StatefulWidget {
-  const WeeklyPage({Key? key}) : super(key: key);
+  const WeeklyPage({super.key});
 
   @override
   _WeeklyPageState createState() => _WeeklyPageState();
@@ -49,7 +50,9 @@ class _WeeklyPageState extends State<WeeklyPage> {
         });
       }
     } catch (e) {
-      print('Error loading weekly data: $e');
+      if (kDebugMode) {
+        print('Error loading weekly data: $e');
+      }
     }
   }
 
@@ -74,7 +77,9 @@ class _WeeklyPageState extends State<WeeklyPage> {
         data = weekDates.map((date) => dateCounts[date] ?? 0).toList();
       });
     } catch (e) {
-      print('Error fetching date counts: $e');
+      if (kDebugMode) {
+        print('Error fetching date counts: $e');
+      }
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Failed to fetch data: $e')));
     }

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:poly2/card_animations.dart';
@@ -12,7 +13,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class CardFlipPage extends StatefulWidget {
   final String levels;
 
-  const CardFlipPage({Key? key, required this.levels}) : super(key: key);
+  const CardFlipPage({super.key, required this.levels});
 
   @override
   State<CardFlipPage> createState() => _CardFlipPageState();
@@ -26,7 +27,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   bool _isFlipped = false;
   Color _backCardColor = Colors.grey;
   List<Color> _colorTracker = List.generate(10, (_) => Colors.grey);
-  List<AnalysisResult> _analysisResults = [];
+  final List<AnalysisResult> _analysisResults = [];
   int _deckIndex = 1;
   String? _targetLang;
   String? _motherLang;
@@ -78,7 +79,9 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
       _deck.cards.clear();
       _deck.cards.addAll(selected);
     } catch (e) {
-      print('Error in _loadDeck: $e');
+      if (kDebugMode) {
+        print('Error in _loadDeck: $e');
+      }
     }
 
     setState(() {
@@ -89,17 +92,23 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
 
   Future<void> updateFeedback(String tableName, int id, int feedback) async {
     setState(() {
-      print("Feedback updating...");
+      if (kDebugMode) {
+        print("Feedback updating...");
+      }
     });
 
     try {
       await DBHelper.instance.updateFeedback(tableName, id, feedback);
       setState(() {
-        print("Feedback updated successfully.");
+        if (kDebugMode) {
+          print("Feedback updated successfully.");
+        }
       });
     } catch (e) {
       setState(() {
-        print("Error: Feedback could not be updated: $e");
+        if (kDebugMode) {
+          print("Error: Feedback could not be updated: $e");
+        }
       });
     }
   }
@@ -265,7 +274,9 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
         });
       }
     } catch (e) {
-      print('Error toggling favorite: $e');
+      if (kDebugMode) {
+        print('Error toggling favorite: $e');
+      }
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error updating favorite status!')),
       );

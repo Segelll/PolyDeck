@@ -9,7 +9,7 @@ class AnalysisPage extends StatelessWidget {
   final Function onNewDeck;
   final int deckIndex;
 
-  AnalysisPage({
+  const AnalysisPage({super.key,
     required this.analysisResults,
     required this.previousDeckName,
     required this.onNewDeck,
@@ -67,11 +67,11 @@ class AnalysisPage extends StatelessWidget {
                   onPressed: () {
                     onNewDeck();
                     Navigator.of(context).pop();
-                  },
-                  child: Text(local.startNewDeck), // Use localized string
+                  }, // Use localized string
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(150, 50),
                   ),
+                  child: Text(local.startNewDeck),
                 ),
                 // "Back to Decks Page" Button
                 ElevatedButton(
@@ -80,11 +80,11 @@ class AnalysisPage extends StatelessWidget {
                       context,
                       MaterialPageRoute(builder: (_) => const DecksPage()),
                     );
-                  },
-                  child: Text(local.decksPage), // Use localized string
+                  }, // Use localized string
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(150, 50),
                   ),
+                  child: Text(local.decksPage),
                 ),
               ],
             ),

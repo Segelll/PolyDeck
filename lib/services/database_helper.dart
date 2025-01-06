@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
@@ -53,7 +54,9 @@ class DBHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
-    print(dateFormatted);
+    if (kDebugMode) {
+      print(dateFormatted);
+    }
   } catch (e) {
     throw Exception('Failed to update isSeen: $e');
   }
@@ -72,7 +75,9 @@ Future<void> saveUserChoices(String tableName, String mainLanguage, String targe
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
-     print("User choices saved: $mainLanguage, $targetLanguage");
+     if (kDebugMode) {
+       print("User choices saved: $mainLanguage, $targetLanguage");
+     }
   } catch (e) {
     throw Exception('Failed to save user choices: $e');
   }
@@ -225,7 +230,9 @@ Future<List<Map<String, dynamic>>> fetchExamOptions(String tableName) async {
     }
 
     if (options.isEmpty) {
-      print("No options found for $tableName");
+      if (kDebugMode) {
+        print("No options found for $tableName");
+      }
     }
 
     return options;
@@ -272,7 +279,9 @@ Future<bool> isFavorite(String word) async {
 
     return result.isNotEmpty;
   } catch (e) {
-    print('Error checking favorite: $e');
+    if (kDebugMode) {
+      print('Error checking favorite: $e');
+    }
     return false;
   }
 }
@@ -283,7 +292,9 @@ Future<List<Map<String, dynamic>>> fetchAllFavWords() async {
       
       return favWords;
     } catch (e) {
-      print('Error fetching all favorite words: $e');
+      if (kDebugMode) {
+        print('Error fetching all favorite words: $e');
+      }
       return [];
     }
   }
@@ -292,7 +303,7 @@ Future<List<Map<String, dynamic>>> fetchAllFavWords() async {
 
 List<int> _generateRandomIds(int min, int max, int count) {
   Random random = Random();
-  Set<int> randomIds = Set();
+  Set<int> randomIds = {};
 
   while (randomIds.length < count) {
     randomIds.add(min + random.nextInt(max - min + 1));

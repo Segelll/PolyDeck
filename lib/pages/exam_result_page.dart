@@ -10,12 +10,12 @@ class ResultPage extends StatelessWidget {
   final List<int?> userAnswers;
 
   const ResultPage({
-    Key? key,
+    super.key,
     required this.score,
     required this.totalQuestions,
     required this.questions,
     required this.userAnswers,
-  }) : super(key: key);
+  });
 
   String _getLevel(int score) {
     if (score >= 17) return 'C1';
@@ -115,7 +115,7 @@ class ResultPage extends StatelessWidget {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

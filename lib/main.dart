@@ -1,8 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:poly2/pages/decks_page.dart';
 
-import 'package:poly2/pages/login_page.dart';
+import 'package:poly2/pages/splash_screen.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -57,7 +56,7 @@ class MyApp extends StatelessWidget {
           ),
           themeMode: ThemeMode.light,
           locale: Locale(Platform.localeName),
-          home: const LoginPage(),
+          home: const SplashScreen(),
         );
       },
     );

@@ -70,6 +70,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/language_data.db
+    - assets/images/polydeckic.png
     - lib/l10n/intl_en.arb
     - lib/l10n/intl_de.arb
     - lib/l10n/intl_fr.arb

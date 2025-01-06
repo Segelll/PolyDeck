@@ -3,7 +3,7 @@ import 'package:poly2/pages/exam_page.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'card_flip_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/Half_Color.dart';
+import '../models/half_color.dart';
 class DecksPage extends StatefulWidget {
 
   const DecksPage({super.key});

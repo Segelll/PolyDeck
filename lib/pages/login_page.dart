@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:poly2/services/auth_service.dart';
 import 'package:poly2/pages/first_time_selection_page.dart';
 import 'package:poly2/pages/decks_page.dart';
-import '../models/Half_Color.dart';
+import '../models/half_color.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

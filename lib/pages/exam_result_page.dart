@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/exam_model.dart';
 import 'package:poly2/pages/decks_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/Half_Color.dart';
+import '../models/half_color.dart';
 class ResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;

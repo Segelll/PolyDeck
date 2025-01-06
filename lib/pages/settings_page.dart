@@ -10,7 +10,7 @@ import 'monthly_page.dart';
 import 'decks_page.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/Half_Color.dart';
+import '../models/half_color.dart';
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 

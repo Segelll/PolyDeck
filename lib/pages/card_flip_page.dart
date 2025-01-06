@@ -9,7 +9,7 @@ import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/models/analysis_result.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/Half_Color.dart';
+import '../models/half_color.dart';
 class CardFlipPage extends StatefulWidget {
   final String levels;
 

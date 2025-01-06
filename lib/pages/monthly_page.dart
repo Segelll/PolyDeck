@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
-import '../models/Half_Color.dart';
+import '../models/half_color.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class MonthlyPage extends StatefulWidget {
@@ -107,11 +107,7 @@ class _MonthlyPageState extends State<MonthlyPage> {
         color: Colors.blueGrey.shade50,
         child: Column(
           children: [
-            const SizedBox(height: 20),
-            Text(
-              local.chartMonthly,
-              style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-            ),
+
             const SizedBox(height: 20),
             Expanded(
               child: Row(

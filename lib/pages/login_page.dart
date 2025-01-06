@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:poly2/services/auth_service.dart';
 import 'package:poly2/pages/first_time_selection_page.dart';
 import 'package:poly2/pages/decks_page.dart';
+import '../models/Half_Color.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -51,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: halfColoredTitle('Login'),
       ),
       body: FutureBuilder<User?>(
         future: authService.getCurrentUser(),

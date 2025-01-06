@@ -9,7 +9,7 @@ import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/models/analysis_result.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import '../models/Half_Color.dart';
 class CardFlipPage extends StatefulWidget {
   final String levels;
 
@@ -299,7 +299,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     if (_isLoading || _deck.cards.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(local.appTitle),
+          title: halfColoredTitle(local.appTitle),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -311,7 +311,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(local.appTitle),
+        title: halfColoredTitle(local.appTitle),
         centerTitle: true,
         actions: [
           IconButton(

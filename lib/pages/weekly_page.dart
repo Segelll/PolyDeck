@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import '../models/Half_Color.dart';
 class WeeklyPage extends StatefulWidget {
   const WeeklyPage({super.key});
 
@@ -103,7 +103,7 @@ class _WeeklyPageState extends State<WeeklyPage> {
     if (data.isEmpty || dates.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(local.weeklyProgress),
+          title: halfColoredTitle(local.weeklyProgress),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -114,7 +114,7 @@ class _WeeklyPageState extends State<WeeklyPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(local.weeklyProgress),
+        title: halfColoredTitle(local.weeklyProgress),
         centerTitle: true,
       ),
       body: Container(

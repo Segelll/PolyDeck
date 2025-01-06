@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:poly2/pages/decks_page.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import '../models/Half_Color.dart';
 class FirstTimeSelectionPage extends StatefulWidget {
   const FirstTimeSelectionPage({super.key});
 
@@ -23,7 +23,7 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(local.firstTimePromptTitle),
+        title: halfColoredTitle(local.firstTimePromptTitle),
         leading: const Icon(Icons.language),
         centerTitle: true,
       ),

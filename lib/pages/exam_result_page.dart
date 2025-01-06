@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/exam_model.dart';
 import 'package:poly2/pages/decks_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-
+import '../models/Half_Color.dart';
 class ResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;
@@ -32,7 +32,7 @@ class ResultPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(local.testResult),
+        title: halfColoredTitle(local.testResult),
         centerTitle: true,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),

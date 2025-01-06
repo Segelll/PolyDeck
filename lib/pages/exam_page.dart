@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:poly2/services/database_helper.dart';
 import '../models/exam_model.dart';
 import 'exam_result_page.dart';
-// remove 'strings_loader.dart'
+import '../models/Half_Color.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class ExamPage extends StatefulWidget {
@@ -205,7 +205,7 @@ class _ExamPageState extends State<ExamPage> {
     if (_isLoading) {
       return Scaffold(
         appBar: AppBar(
-          title: Text(local.exam),
+          title: halfColoredTitle(local.exam),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
@@ -214,7 +214,7 @@ class _ExamPageState extends State<ExamPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(local.exam),
+        title: halfColoredTitle(local.exam),
         centerTitle: true,
       ),
       body: Padding(

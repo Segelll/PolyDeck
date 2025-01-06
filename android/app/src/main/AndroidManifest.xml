@@ -4,7 +4,8 @@
     <application
         android:label="PolyDeck"
         android:name="${applicationName}"
-        android:icon="@mipmap/polydeckic">
+        android:icon="@mipmap/polydeckic"
+        android:roundIcon="@mipmap/polydeckic">
         <activity
             android:name=".MainActivity"
             android:exported="true"

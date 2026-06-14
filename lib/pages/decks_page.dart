@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/proficiency_level.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/presentation/providers/deck_config_provider.dart';
@@ -255,13 +256,13 @@ class _DailyProgressBar extends ConsumerWidget {
                   _StatChip(
                     icon: Icons.fiber_new,
                     color: Colors.blue,
-                    label: local.newCount(newCount, config.maxNewPerDay),
+                    label: local.newCount(newCount, config['maxNewPerDay'] as int),
                   ),
                   const SizedBox(width: 16),
                   _StatChip(
                     icon: Icons.replay,
                     color: Colors.orange,
-                    label: local.reviewCount(reviewCount, config.maxReviewsPerDay),
+                    label: local.reviewCount(reviewCount, config['maxReviewsPerDay'] as int),
                   ),
                 ],
               ),

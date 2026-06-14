@@ -1,10 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/data/repositories/progress_repository.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/core/utils/date_utils.dart';
 
 /// Provides the [ProgressRepository] instance.
 final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
-  return ProgressRepository();
+  return ProgressRepository(ref.read(appDatabaseProvider));
 });
 
 /// Holds weekly progress data.

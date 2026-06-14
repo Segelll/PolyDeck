@@ -5,6 +5,7 @@ import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/domain/models/exam_model.dart';
 import 'package:poly2/domain/state/exam_state.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
@@ -50,7 +51,10 @@ class ExamNotifier extends StateNotifier<ExamState> {
             final questionText = questionData.first['word'] as String;
             final correctAnswer = answerData.first['word'] as String;
 
-            final turkishOptions = await _wordRepo.fetchExamOptions(answerTable);
+            final optionIds = generateRandomIds(
+              AppConstants.minWordId, AppConstants.maxWordId,
+              AppConstants.distractorsPerQuestion + 10);
+            final turkishOptions = await _wordRepo.fetchExamOptions(answerTable, optionIds);
             final allWords =
                 turkishOptions.map((e) => e['word'] as String).toList();
 

@@ -36,7 +36,8 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   @override
   void initState() {
     super.initState();
-    _loadDeck();
+    // Schedule after first frame to avoid modifying provider during build
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDeck());
   }
 
   Future<void> _loadDeck() async {

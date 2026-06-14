@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/proficiency_level.dart';
-import 'package:poly2/domain/models/deck_config.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/deck_config_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 
-/// Settings page for FSRS / spaced repetition configuration.
 class SrsSettingsPage extends ConsumerWidget {
   const SrsSettingsPage({super.key});
 
@@ -25,8 +24,8 @@ class SrsSettingsPage extends ConsumerWidget {
         children: [
           _SectionHeader(local.dailyLimits),
           const SizedBox(height: 8),
-          for (final level
-              in ProficiencyLevel.values.where((l) => l != ProficiencyLevel.favourites))
+          for (final level in ProficiencyLevel.values
+              .where((l) => l != ProficiencyLevel.favourites))
             _LevelConfigTile(level: level.code),
           const Divider(height: 32),
           _SectionHeader(local.globalSettings),
@@ -42,10 +41,8 @@ class SrsSettingsPage extends ConsumerWidget {
   }
 }
 
-/// Displays and edits per-level limits.
 class _LevelConfigTile extends ConsumerWidget {
   final String level;
-
   const _LevelConfigTile({required this.level});
 
   @override
@@ -54,33 +51,29 @@ class _LevelConfigTile extends ConsumerWidget {
     final configAsync = ref.watch(deckConfigProvider(level));
 
     return configAsync.when(
-      loading: () => ListTile(
-          title: Text(local.level(level)), subtitle: Text(local.loading)),
+      loading: () =>
+          ListTile(title: Text(local.level(level)), subtitle: Text(local.loading)),
       error: (_, __) => const SizedBox.shrink(),
       data: (config) {
+        final maxNew = config['maxNewPerDay'] as int;
+        final maxReviews = config['maxReviewsPerDay'] as int;
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ExpansionTile(
             title: Text(local.level(level)),
-            subtitle: Text(local.newReviewsPerDay(
-                config.maxNewPerDay, config.maxReviewsPerDay)),
+            subtitle: Text(local.newReviewsPerDay(maxNew, maxReviews)),
             children: [
               _SliderSetting(
                 label: local.maxNewPerDay,
-                value: config.maxNewPerDay.toDouble(),
-                min: 1,
-                max: 50,
-                divisions: 49,
-                onChanged: (v) => _save(ref, config.copyWith(maxNewPerDay: v.toInt())),
+                value: maxNew.toDouble(),
+                min: 1, max: 50, divisions: 49,
+                onChanged: (v) => _save(ref, _mut(config, 'maxNewPerDay', v.toInt())),
               ),
               _SliderSetting(
                 label: local.maxReviewsPerDay,
-                value: config.maxReviewsPerDay.toDouble(),
-                min: 1,
-                max: 200,
-                divisions: 199,
-                onChanged: (v) =>
-                    _save(ref, config.copyWith(maxReviewsPerDay: v.toInt())),
+                value: maxReviews.toDouble(),
+                min: 1, max: 200, divisions: 199,
+                onChanged: (v) => _save(ref, _mut(config, 'maxReviewsPerDay', v.toInt())),
               ),
             ],
           ),
@@ -89,14 +82,22 @@ class _LevelConfigTile extends ConsumerWidget {
     );
   }
 
-  void _save(WidgetRef ref, DeckConfig config) {
+  Map<String, dynamic> _mut(Map<String, dynamic> c, String k, dynamic v) => {...c, k: v};
+
+  void _save(WidgetRef ref, Map<String, dynamic> config) {
     final repo = ref.read(wordRepositoryProvider);
-    repo.saveDeckConfig(config);
+    repo.saveDeckConfig(
+      level: config['level'] as String,
+      maxNewPerDay: config['maxNewPerDay'] as int,
+      maxReviewsPerDay: config['maxReviewsPerDay'] as int,
+      learningSteps: config['learningSteps'] as String,
+      enableFuzz: config['enableFuzz'] == true || config['enableFuzz'] == 1,
+      requestRetention: (config['requestRetention'] as num).toDouble(),
+    );
     ref.invalidate(deckConfigProvider(level));
   }
 }
 
-/// Global retention + fuzz settings.
 class _GlobalConfigTile extends ConsumerWidget {
   const _GlobalConfigTile();
 
@@ -109,31 +110,42 @@ class _GlobalConfigTile extends ConsumerWidget {
       loading: () => ListTile(title: Text(local.loading)),
       error: (_, __) => const SizedBox.shrink(),
       data: (config) {
+        final retention = (config['requestRetention'] as num).toDouble();
+        final fuzz = config['enableFuzz'] == true || config['enableFuzz'] == 1;
         return Card(
           child: Column(
             children: [
               _SliderSetting(
-                label:
-                    '${local.requestRetention}: ${config.requestRetention.toStringAsFixed(2)}',
-                value: config.requestRetention,
-                min: 0.70,
-                max: 0.97,
-                divisions: 27,
+                label: '${local.requestRetention}: ${retention.toStringAsFixed(2)}',
+                value: retention,
+                min: 0.70, max: 0.97, divisions: 27,
                 onChanged: (v) {
-                  final newConfig = config.copyWith(requestRetention: v);
                   final repo = ref.read(wordRepositoryProvider);
-                  repo.saveDeckConfig(newConfig);
+                  repo.saveDeckConfig(
+                    level: 'default',
+                    maxNewPerDay: config['maxNewPerDay'] as int,
+                    maxReviewsPerDay: config['maxReviewsPerDay'] as int,
+                    learningSteps: config['learningSteps'] as String,
+                    enableFuzz: fuzz,
+                    requestRetention: v,
+                  );
                   ref.invalidate(deckConfigProvider('default'));
                 },
               ),
               SwitchListTile(
                 title: Text(local.enableFuzz),
                 subtitle: Text(local.fuzzDescription),
-                value: config.enableFuzz,
+                value: fuzz,
                 onChanged: (v) {
-                  final newConfig = config.copyWith(enableFuzz: v);
                   final repo = ref.read(wordRepositoryProvider);
-                  repo.saveDeckConfig(newConfig);
+                  repo.saveDeckConfig(
+                    level: 'default',
+                    maxNewPerDay: config['maxNewPerDay'] as int,
+                    maxReviewsPerDay: config['maxReviewsPerDay'] as int,
+                    learningSteps: config['learningSteps'] as String,
+                    enableFuzz: v,
+                    requestRetention: retention,
+                  );
                   ref.invalidate(deckConfigProvider('default'));
                 },
               ),
@@ -145,7 +157,6 @@ class _GlobalConfigTile extends ConsumerWidget {
   }
 }
 
-/// Resets all SRS state to New.
 class _ResetSrsButton extends ConsumerWidget {
   const _ResetSrsButton();
 
@@ -173,15 +184,14 @@ class _ResetSrsButton extends ConsumerWidget {
                       child: Text(local.cancel)),
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: Text(local.reset,
-                          style: const TextStyle(color: Colors.red))),
+                      child:
+                          Text(local.reset, style: const TextStyle(color: Colors.red))),
                 ],
               ),
             );
             if (confirmed == true) {
               final repo = ref.read(wordRepositoryProvider);
-              for (final lang
-                  in ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp', 'fav']) {
+              for (final lang in ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp', 'fav']) {
                 await repo.resetSrsState(lang);
               }
               if (context.mounted) {
@@ -191,15 +201,13 @@ class _ResetSrsButton extends ConsumerWidget {
               }
             }
           },
-          child: Text(local.reset,
-              style: const TextStyle(color: Colors.white)),
+          child: Text(local.reset, style: const TextStyle(color: Colors.white)),
         ),
       ),
     );
   }
 }
 
-/// Label row in settings.
 class _SectionHeader extends StatelessWidget {
   final String text;
   const _SectionHeader(this.text);
@@ -208,13 +216,12 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Text(text,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+      child:
+          Text(text, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
     );
   }
 }
 
-/// Slider with a label.
 class _SliderSetting extends StatelessWidget {
   final String label;
   final double value;
@@ -249,26 +256,6 @@ class _SliderSetting extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-// Helper extensions for DeckConfig (needed for copyWith-like fluent API)
-extension _DeckConfigMut on DeckConfig {
-  DeckConfig copyWith({
-    int? maxNewPerDay,
-    int? maxReviewsPerDay,
-    double? requestRetention,
-    bool? enableFuzz,
-  }) {
-    return DeckConfig(
-      level: level,
-      maxNewPerDay: maxNewPerDay ?? this.maxNewPerDay,
-      maxReviewsPerDay: maxReviewsPerDay ?? this.maxReviewsPerDay,
-      learningSteps: learningSteps,
-      enableFuzz: enableFuzz ?? this.enableFuzz,
-      requestRetention: requestRetention ?? this.requestRetention,
-      w: w,
     );
   }
 }

@@ -37,13 +37,13 @@ dependencies:
   # State management
   flutter_riverpod: ^2.6.1
 
-  # Local database
-  sqflite: ^2.4.1
+  # Local database — Drift (type-safe SQLite)
+  drift: ^2.21.0
+  sqlite3_flutter_libs: ^0.5.27
   path: ^1.9.0
   path_provider: ^2.1.5
 
-  # Desktop SQLite support
-  sqlite3_flutter_libs: ^0.5.27
+  # Desktop SQLite support (for tests/tooling)
   sqflite_common_ffi: ^2.3.4+3
 
   # Key-value storage
@@ -75,12 +75,17 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
 
+  # Drift code generation
+  drift_dev: ^2.21.0
+  build_runner: ^2.4.0
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
 flutter:
   assets:
+    - assets/polydesk.db
     - assets/language_data.db
     - assets/images/polydeckic.png
   uses-material-design: true

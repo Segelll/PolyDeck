@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,21 +7,15 @@ import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/domain/models/card_model.dart';
 import 'package:poly2/domain/models/analysis_result.dart';
-import 'package:poly2/domain/models/revlog_entry.dart';
 import 'package:poly2/domain/enums/rating.dart';
-import 'package:poly2/domain/enums/card_state.dart';
 import 'package:poly2/domain/state/deck_state.dart';
 import 'package:poly2/services/fsrs_service.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/core/utils/date_utils.dart';
-
-/// Provides the [WordRepository] instance.
-final wordRepositoryProvider = Provider<WordRepository>((ref) {
-  return WordRepository();
-});
 
 /// Manages a FSRS-driven flashcard session.
 class DeckNotifier extends StateNotifier<DeckState> {
@@ -46,7 +41,6 @@ class DeckNotifier extends StateNotifier<DeckState> {
       List<Map<String, dynamic>> allWords = [];
 
       if (level == 'fav') {
-        // Favorites: unchanged random selection (no SRS)
         final favWords = await _wordRepo.fetchAllFavorites();
         final random = Random();
         final randomIndices = <int>{};
@@ -60,26 +54,21 @@ class DeckNotifier extends StateNotifier<DeckState> {
       } else {
         // FSRS-driven selection
         final config = await _wordRepo.getDeckConfig(level);
-        // Single combined query instead of two separate COUNT queries
         final todayCounts =
             await _wordRepo.getTodayCounts(targetLang, level);
 
         final remainingNew =
-            (config.maxNewPerDay - todayCounts.newCount).clamp(0, 999);
+            ((config['maxNewPerDay'] as int) - todayCounts.newCount).clamp(0, 999);
         final remainingReviews =
-            (config.maxReviewsPerDay - todayCounts.reviewCount).clamp(0, 999);
+            ((config['maxReviewsPerDay'] as int) - todayCounts.reviewCount).clamp(0, 999);
 
-        // Fetch due cards first (reviews)
         final dueWords =
             await _wordRepo.fetchDueCards(targetLang, level, remainingReviews);
-
-        // Fetch new cards
         final newWords =
             await _wordRepo.fetchNewCards(targetLang, level, remainingNew);
 
         allWords = [...dueWords, ...newWords];
 
-        // If not enough cards, fill with random unseen words
         final missing = AppConstants.cardsPerDeck - allWords.length;
         if (missing > 0) {
           final fillers = await _wordRepo.fetchWordsByIsSeen(
@@ -91,7 +80,6 @@ class DeckNotifier extends StateNotifier<DeckState> {
       // Build CardModel list with translations (batch query)
       final List<CardModel> allCards = [];
       if (allWords.isNotEmpty) {
-        // Batch-fetch all translations in a single query
         final wordIds = allWords.map((w) => w['id'] as int).toList();
         final translations =
             await _wordRepo.fetchWordsByIds(motherLang, wordIds);
@@ -122,10 +110,10 @@ class DeckNotifier extends StateNotifier<DeckState> {
       allCards.shuffle(Random());
       final selected = allCards.take(AppConstants.cardsPerDeck).toList();
 
-      // Mark all selected cards as seen in a single batch query
       if (selected.isNotEmpty) {
         await _wordRepo.markMultipleAsSeen(
-            targetLang, selected.map((c) => c.id).toList(), formatDate(DateTime.now()));
+            targetLang, selected.map((c) => c.id).toList(),
+            formatDate(DateTime.now()));
       }
 
       state = state.copyWith(
@@ -151,7 +139,6 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
   // ── Card review (FSRS) ──
 
-  /// Reviews the current card with a [Rating] and persists the FSRS result.
   Future<void> reviewCard(Rating rating) async {
     if (state.isEmpty || !state.isFlipped) return;
 
@@ -160,62 +147,56 @@ class DeckNotifier extends StateNotifier<DeckState> {
     if (tableName == null) return;
 
     try {
-      // Load the word with its current FSRS state
-      final word =
-          await _wordRepo.fetchWordById(tableName, card.id);
+      final word = await _wordRepo.fetchWordById(tableName, card.id);
       if (word == null) return;
 
-      // Build FSRS card from DB state
       final fsrsCard = _fsrs.cardFromDb(
-        cardId: word.id,
-        cardStateValue: word.cardState,
-        stability: word.stability,
-        difficulty: word.difficulty,
-        elapsedDays: word.elapsedDays,
-        lastReview: word.lastReview,
-        due: word.due,
+        cardId: word['id'] as int,
+        cardStateValue: word['card_state'] as int? ?? 0,
+        stability: (word['stability'] as num?)?.toDouble() ?? 0.0,
+        difficulty: (word['difficulty'] as num?)?.toDouble() ?? 0.0,
+        elapsedDays: word['elapsed_days'] as int? ?? 0,
+        lastReview: word['last_review'] as String?,
+        due: word['due'] as String?,
       );
 
-      // Run FSRS review
       final result = _fsrs.review(card: fsrsCard, rating: rating);
 
-      // Persist new FSRS state (including legacy feedback in same query)
       final legacyFeedback = rating == Rating.again
           ? 1
           : rating == Rating.hard
               ? 3
-              : 2; // Good/Easy map to 2
+              : 2;
 
       await _wordRepo.updateSrsState(
-        tableName,
-        card.id,
+        tableName, card.id,
         cardState: result.cardState.value,
         stability: result.stability,
         difficulty: result.difficulty,
         due: result.due,
         elapsedDays: 0,
         scheduledDays: result.scheduledDays,
-        reps: word.reps + 1,
-        lapses: rating == Rating.again ? word.lapses + 1 : word.lapses,
+        reps: (word['reps'] as int? ?? 0) + 1,
+        lapses: rating == Rating.again
+            ? (word['lapses'] as int? ?? 0) + 1
+            : (word['lapses'] as int? ?? 0),
         lastReview: result.lastReview,
         legacyFeedback: legacyFeedback,
       );
 
-      // Insert revlog entry
-      final revlogEntry = RevlogEntry(
+      await _wordRepo.insertRevlog(
         cardId: card.id,
         deckTable: tableName,
         rating: rating.value,
-        state: word.cardState,
-        due: word.due ?? '',
+        state: word['card_state'] as int? ?? 0,
+        due: word['due'] as String? ?? '',
         stability: result.stability,
         difficulty: result.difficulty,
-        elapsedDays: word.elapsedDays,
-        lastElapsedDays: word.elapsedDays,
+        elapsedDays: word['elapsed_days'] as int? ?? 0,
+        lastElapsedDays: word['elapsed_days'] as int? ?? 0,
         scheduledDays: result.scheduledDays,
         reviewDate: result.lastReview,
       );
-      await _wordRepo.insertRevlog(revlogEntry);
 
       // Update color tracker
       final color = _colorForRating(rating);
@@ -241,24 +222,19 @@ class DeckNotifier extends StateNotifier<DeckState> {
   }
 
   Color _colorForRating(Rating rating) {
-    switch (rating) {
-      case Rating.again:
-        return AppTheme.ratingAgain;
-      case Rating.hard:
-        return AppTheme.ratingHard;
-      case Rating.good:
-        return AppTheme.ratingGood;
-      case Rating.easy:
-        return AppTheme.ratingEasy;
-    }
+    return switch (rating) {
+      Rating.again => AppTheme.ratingAgain,
+      Rating.hard => AppTheme.ratingHard,
+      Rating.good => AppTheme.ratingGood,
+      Rating.easy => AppTheme.ratingEasy,
+    };
   }
 
-  // ── Legacy flip (called by swipe gestures in UI) ──
+  // ── Legacy flip ──
 
   Future<void> flipCard(Color color) async {
     if (state.isEmpty || state.isFlipped) return;
 
-    // Convert legacy color to Rating for FSRS
     Rating rating;
     if (color == AppTheme.cardRed || color == Colors.red.shade200) {
       rating = Rating.again;
@@ -270,7 +246,6 @@ class DeckNotifier extends StateNotifier<DeckState> {
       rating = Rating.good;
     }
 
-    // Mark as flipped first so the UI updates immediately
     final newColorTracker = List<Color>.from(state.colorTracker);
     newColorTracker[state.currentIndex] = color;
 
@@ -279,16 +254,13 @@ class DeckNotifier extends StateNotifier<DeckState> {
       colorTracker: newColorTracker,
     );
 
-    // Then run the FSRS review
     await reviewCard(rating);
   }
 
   void reflipCard() {
     if (!state.isFlipped) return;
-
     final newColorTracker = List<Color>.from(state.colorTracker);
     newColorTracker[state.currentIndex] = AppTheme.cardDefault;
-
     state = state.copyWith(
       isFlipped: false,
       colorTracker: newColorTracker,
@@ -300,7 +272,6 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
   Future<void> nextCard() async {
     if (state.isLastCard) return;
-
     final newIndex = state.currentIndex + 1;
     state = state.copyWith(
       currentIndex: newIndex,
@@ -308,7 +279,6 @@ class DeckNotifier extends StateNotifier<DeckState> {
       isFavorite: false,
       lastRating: null,
     );
-
     final fav = await _wordRepo.isFavorite(state.currentCard.frontText);
     state = state.copyWith(isFavorite: fav);
   }

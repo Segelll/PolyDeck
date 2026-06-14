@@ -14,6 +14,7 @@ import 'decks_page.dart';
 import 'package:poly2/data/repositories/progress_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';

@@ -55,13 +55,14 @@ dependencies:
   # i18n
   intl: any
   flutter_localizations:
+    sdk: flutter
 
   # Export/Import
   share_plus: ^10.1.4
   file_picker: ^8.1.7
 
   # FSRS Spaced Repetition
-  fsrs: ^5.2.0
+  fsrs: ^2.0.1
 
 dev_dependencies:
   flutter_test:

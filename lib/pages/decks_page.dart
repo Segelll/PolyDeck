@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/proficiency_level.dart';
+import 'package:poly2/presentation/providers/deck_provider.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
+import 'package:poly2/presentation/providers/deck_config_provider.dart';
+import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/pages/exam_page.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'card_flip_page.dart';
@@ -77,7 +81,11 @@ class _DecksPageState extends ConsumerState<DecksPage> {
         color: Colors.blueGrey.shade50,
         child: Column(
           children: [
-            const SizedBox(height: 30),
+            const SizedBox(height: 10),
+            // Daily progress indicator
+            if (_selectedLevel != null && _selectedLevel != 'fav')
+              _DailyProgressBar(level: _selectedLevel!),
+            const SizedBox(height: 20),
             Icon(Icons.view_agenda, size: 60, color: Colors.blueGrey[700]),
             const SizedBox(height: 10),
             Text(
@@ -205,6 +213,98 @@ class _DecksPageState extends ConsumerState<DecksPage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Widget showing today's new/review counts for a level.
+class _DailyProgressBar extends ConsumerWidget {
+  final String level;
+
+  const _DailyProgressBar({required this.level});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final configAsync = ref.watch(deckConfigProvider(level));
+
+    return configAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (config) {
+        // Fetch counts in a FutureBuilder since we need async
+        return FutureBuilder<({int newCount, int reviewCount})>(
+          future: _fetchCounts(ref, level),
+          builder: (context, snapshot) {
+            final newCount = snapshot.data?.newCount ?? 0;
+            final reviewCount = snapshot.data?.reviewCount ?? 0;
+
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(color: Colors.black12, blurRadius: 2),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _StatChip(
+                    icon: Icons.fiber_new,
+                    color: Colors.blue,
+                    label: '$newCount / ${config.maxNewPerDay} new',
+                  ),
+                  const SizedBox(width: 16),
+                  _StatChip(
+                    icon: Icons.replay,
+                    color: Colors.orange,
+                    label: '$reviewCount / ${config.maxReviewsPerDay} reviews',
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<({int newCount, int reviewCount})> _fetchCounts(
+      WidgetRef ref, String level) async {
+    final repo = ref.read(wordRepositoryProvider);
+    final userSettings =
+        await ref.read(userRepositoryProvider).getUserChoices();
+    final tableName = LanguageCodes.tableNameFor(
+        userSettings?['targetLanguage'] ?? 'tr');
+    final newCount = await repo.getTodayNewCardCount(tableName, level);
+    final reviewCount = await repo.getTodayReviewCount(tableName, level);
+    return (newCount: newCount, reviewCount: reviewCount);
+  }
+}
+
+/// Small chip showing an icon + label for daily stats.
+class _StatChip extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+
+  const _StatChip({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 16, color: color),
+        const SizedBox(width: 4),
+        Text(label, style: const TextStyle(fontSize: 12)),
+      ],
     );
   }
 }

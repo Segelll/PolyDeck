@@ -1,22 +1,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:poly2/domain/models/word.dart';
-import 'package:poly2/domain/models/card_model.dart';
+import 'package:poly2/domain/models/revlog_entry.dart';
+import 'package:poly2/domain/models/deck_config.dart';
+import 'package:poly2/core/utils/date_utils.dart';
 
-/// Repository for word-related data operations.
-///
-/// Wraps [DBHelper] to provide a clean API for the presentation layer.
+/// Repository for word-related data operations including FSRS scheduling.
 class WordRepository {
   final DBHelper _dbHelper;
 
-  WordRepository([DBHelper? dbHelper]) : _dbHelper = dbHelper ?? DBHelper.instance;
+  WordRepository([DBHelper? dbHelper])
+      : _dbHelper = dbHelper ?? DBHelper.instance;
 
-  /// Fetches a word by its ID from the given language table.
+  // ── Basic word queries ──
+
   Future<Word?> fetchWordById(String tableName, int id) async {
     return _dbHelper.fetchWordById(tableName, id);
   }
 
-  /// Fetches words matching a specific feedback value.
   Future<List<Map<String, dynamic>>> fetchWordsByFeedback(
     String tableName,
     String? level,
@@ -26,7 +27,6 @@ class WordRepository {
     return _dbHelper.fetchWordsByFeedback(tableName, level, feedback, limit);
   }
 
-  /// Fetches unseen words.
   Future<List<Map<String, dynamic>>> fetchWordsByIsSeen(
     String tableName,
     String? level,
@@ -36,7 +36,6 @@ class WordRepository {
     return _dbHelper.fetchWordsByIsSeen(tableName, level, isSeen, limit);
   }
 
-  /// Updates the feedback for a word.
   Future<void> updateFeedback(String tableName, int id, int feedback) async {
     try {
       await _dbHelper.updateFeedback(tableName, id, feedback);
@@ -45,7 +44,6 @@ class WordRepository {
     }
   }
 
-  /// Marks a word as seen with today's date.
   Future<void> markAsSeen(String tableName, int id) async {
     try {
       await _dbHelper.updateIsSeenDate(tableName, id);
@@ -54,7 +52,8 @@ class WordRepository {
     }
   }
 
-  /// Fetches exam words for a given language and ID.
+  // ── Exam queries ──
+
   Future<List<Map<String, dynamic>>> fetchExamWords(
     String tableName,
     int id,
@@ -62,8 +61,8 @@ class WordRepository {
     return _dbHelper.fetchExamWords(tableName, id);
   }
 
-  /// Fetches random distractor options for exam questions.
-  Future<List<Map<String, dynamic>>> fetchExamOptions(String tableName) async {
+  Future<List<Map<String, dynamic>>> fetchExamOptions(
+      String tableName) async {
     return _dbHelper.fetchExamOptions(tableName);
   }
 
@@ -76,7 +75,8 @@ class WordRepository {
     String? backWord,
     String? backSentence,
   }) async {
-    await _dbHelper.addToFavorites(word, sentence, level, backWord, backSentence);
+    await _dbHelper.addToFavorites(
+        word, sentence, level, backWord, backSentence);
   }
 
   Future<void> removeFromFavorites(String word) async {
@@ -89,5 +89,86 @@ class WordRepository {
 
   Future<List<Map<String, dynamic>>> fetchAllFavorites() async {
     return _dbHelper.fetchAllFavWords();
+  }
+
+  // ── FSRS scheduling methods ──
+
+  /// Fetches cards due for review today (or earlier) for a given level.
+  Future<List<Map<String, dynamic>>> fetchDueCards(
+    String tableName,
+    String? level,
+    int limit,
+  ) async {
+    final today = formatDate(DateTime.now());
+    return _dbHelper.fetchDueCards(tableName, level, today, limit);
+  }
+
+  /// Fetches new (never-reviewed) cards for a given level.
+  Future<List<Map<String, dynamic>>> fetchNewCards(
+    String tableName,
+    String? level,
+    int limit,
+  ) async {
+    return _dbHelper.fetchNewCards(tableName, level, limit);
+  }
+
+  /// Updates the full FSRS scheduling state for a card after review.
+  Future<void> updateSrsState(
+    String tableName,
+    int id, {
+    required int cardState,
+    required double stability,
+    required double difficulty,
+    String? due,
+    required int elapsedDays,
+    required int scheduledDays,
+    required int reps,
+    required int lapses,
+    String? lastReview,
+  }) async {
+    await _dbHelper.updateSrsState(
+      tableName,
+      id,
+      cardState: cardState,
+      stability: stability,
+      difficulty: difficulty,
+      due: due,
+      elapsedDays: elapsedDays,
+      scheduledDays: scheduledDays,
+      reps: reps,
+      lapses: lapses,
+      lastReview: lastReview,
+    );
+  }
+
+  /// Records a review in the revlog table.
+  Future<void> insertRevlog(RevlogEntry entry) async {
+    await _dbHelper.insertRevlog(entry);
+  }
+
+  /// Returns today's review count for a level.
+  Future<int> getTodayReviewCount(String tableName, String? level) async {
+    return _dbHelper.getTodayReviewCount(tableName, level);
+  }
+
+  /// Returns today's new card count for a level.
+  Future<int> getTodayNewCardCount(String tableName, String? level) async {
+    return _dbHelper.getTodayNewCardCount(tableName, level);
+  }
+
+  /// Loads deck configuration from the database.
+  Future<DeckConfig> getDeckConfig(String level) async {
+    final config = await _dbHelper.getDeckConfig(level);
+    return config ?? DeckConfig.defaults().copyWithLevel(level);
+  }
+
+  /// Saves deck configuration to the database.
+  Future<void> saveDeckConfig(DeckConfig config) async {
+    await _dbHelper.saveDeckConfig(config);
+  }
+
+  /// Resets FSRS scheduling state for a given table (all cards become New).
+  Future<void> resetSrsState(String tableName) async {
+    await _dbHelper.resetSrsState(tableName);
   }
 }

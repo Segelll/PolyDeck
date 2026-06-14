@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
+import 'package:poly2/domain/enums/rating.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/core/theme/app_theme.dart';
@@ -22,6 +23,7 @@ class CardFlipPage extends ConsumerStatefulWidget {
 class _CardFlipPageState extends ConsumerState<CardFlipPage>
     with TickerProviderStateMixin {
   FlipDirection _flipDirection = FlipDirection.leftToRight;
+  bool _isFlippedLocally = false;
   final GlobalKey<CardFlipAnimationState> _cardKey =
       GlobalKey<CardFlipAnimationState>();
 
@@ -58,14 +60,39 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     _drawCardController!.forward();
   }
 
+  Widget _buildRatingButton({
+    required String label,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ElevatedButton(
+          onPressed: onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: color,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.all(12),
+            shape: const CircleBorder(),
+          ),
+          child: Icon(icon, size: 28),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 11)),
+      ],
+    );
+  }
+
   Color _colorForFeedback(int feedback) {
     switch (feedback) {
       case 1:
-        return AppTheme.cardRed;
+        return AppTheme.ratingAgain;
       case 2:
-        return AppTheme.cardGreen;
+        return AppTheme.ratingGood;
       case 3:
-        return AppTheme.cardYellow;
+        return AppTheme.ratingHard;
       default:
         return AppTheme.cardDefault;
     }
@@ -95,6 +122,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   }
 
   void _reflipCard() {
+    _isFlippedLocally = false;
     _cardKey.currentState?.addStatusListener((status) {
       if (status == AnimationStatus.dismissed) {
         ref.read(deckProvider.notifier).reflipCard();
@@ -108,6 +136,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     if (notifier.state.isLastCard) {
       _showAnalysis();
     } else {
+      _isFlippedLocally = false;
       await notifier.nextCard();
       _drawCardController!.reset();
       _drawCardController!.forward();
@@ -297,30 +326,44 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           position: _drawCardAnimation!,
                           child: Center(
                             child: GestureDetector(
+                              // Tap to flip (no rating yet)
+                              onTap: !state.isFlipped
+                                  ? () => setState(() => _isFlippedLocally = true)
+                                  : null,
+                              // Swipe shortcuts for rating
                               onHorizontalDragEnd: !state.isFlipped
                                   ? (details) {
                                       if (details.primaryVelocity! < 0) {
-                                        _flipCard(AppTheme.cardRed,
-                                            FlipDirection.leftToRight);
+                                        ref
+                                            .read(deckProvider.notifier)
+                                            .flipCard(AppTheme.ratingAgain);
+                                        setState(() => _isFlippedLocally = true);
                                       } else if (details.primaryVelocity! > 0) {
-                                        _flipCard(AppTheme.cardGreen,
-                                            FlipDirection.rightToLeft);
+                                        ref
+                                            .read(deckProvider.notifier)
+                                            .flipCard(AppTheme.ratingGood);
+                                        setState(() => _isFlippedLocally = true);
                                       }
                                     }
                                   : null,
                               onVerticalDragEnd: !state.isFlipped
                                   ? (details) {
-                                      if (details.primaryVelocity! > 0) {
-                                        _flipCard(
-                                          AppTheme.cardYellow,
-                                          FlipDirection.topToBottom,
-                                        );
+                                      if (details.primaryVelocity! < 0) {
+                                        ref
+                                            .read(deckProvider.notifier)
+                                            .flipCard(AppTheme.ratingEasy);
+                                        setState(() => _isFlippedLocally = true);
+                                      } else if (details.primaryVelocity! > 0) {
+                                        ref
+                                            .read(deckProvider.notifier)
+                                            .flipCard(AppTheme.ratingHard);
+                                        setState(() => _isFlippedLocally = true);
                                       }
                                     }
                                   : null,
                               child: CardFlipAnimation(
                                 key: _cardKey,
-                                isFlipped: state.isFlipped,
+                                isFlipped: state.isFlipped || _isFlippedLocally,
                                 frontCardColor: Colors.blue.shade200,
                                 backCardColor: backColor,
                                 frontText: currentCard.frontText,
@@ -339,6 +382,63 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                   ),
                 ),
                 const SizedBox(height: 10),
+
+                // 4-button FSRS rating (visible after flip)
+                if (state.isFlipped || _isFlippedLocally)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _buildRatingButton(
+                          label: local.red, // "Again" / "Zor"
+                          color: AppTheme.ratingAgain,
+                          icon: Icons.replay,
+                          onPressed: () {
+                            ref
+                                .read(deckProvider.notifier)
+                                .reviewCard(Rating.again);
+                            setState(() => _isFlippedLocally = false);
+                          },
+                        ),
+                        _buildRatingButton(
+                          label: local.yellow, // "Hard" / "Orta"
+                          color: AppTheme.ratingHard,
+                          icon: Icons.trending_down,
+                          onPressed: () {
+                            ref
+                                .read(deckProvider.notifier)
+                                .reviewCard(Rating.hard);
+                            setState(() => _isFlippedLocally = false);
+                          },
+                        ),
+                        _buildRatingButton(
+                          label: local.green, // "Good" / "İyi"
+                          color: AppTheme.ratingGood,
+                          icon: Icons.check,
+                          onPressed: () {
+                            ref
+                                .read(deckProvider.notifier)
+                                .reviewCard(Rating.good);
+                            setState(() => _isFlippedLocally = false);
+                          },
+                        ),
+                        _buildRatingButton(
+                          label: 'Easy',
+                          color: AppTheme.ratingEasy,
+                          icon: Icons.thumb_up,
+                          onPressed: () {
+                            ref
+                                .read(deckProvider.notifier)
+                                .reviewCard(Rating.easy);
+                            setState(() => _isFlippedLocally = false);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.bottomRight,
                   child: IconButton(
@@ -348,7 +448,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 ),
                 const SizedBox(height: 10),
 
-                if (state.isFlipped)
+                if (state.isFlipped || _isFlippedLocally)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

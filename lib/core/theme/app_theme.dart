@@ -12,6 +12,12 @@ class AppTheme {
   static const Color cardYellow = Color.fromARGB(255, 179, 130, 8);
   static const Color cardDefault = Colors.grey;
 
+  // FSRS 4-button rating colors
+  static const Color ratingAgain = Colors.red;
+  static const Color ratingHard = Colors.orange;
+  static const Color ratingGood = Color(0xFF8BC34A); // Light green
+  static const Color ratingEasy = Colors.blue;
+
   // ── Gradients ──
 
   static const LinearGradient selectedDeckGradient = LinearGradient(

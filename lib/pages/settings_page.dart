@@ -9,6 +9,7 @@ import 'package:file_picker/file_picker.dart';
 
 import 'weekly_page.dart';
 import 'monthly_page.dart';
+import 'srs_settings_page.dart';
 import 'decks_page.dart';
 import 'package:poly2/data/repositories/progress_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
@@ -278,6 +279,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               onPressed: _saveSettings,
             ),
             const SizedBox(height: 30),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.tune),
+              label: const Text('SRS Settings'),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const SrsSettingsPage()),
+                );
+              },
+            ),
             ElevatedButton.icon(
               icon: const Icon(Icons.calendar_view_week),
               label: Text(local.weeklyProgress),

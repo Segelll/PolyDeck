@@ -15,6 +15,7 @@ class DeckState {
   final String? motherLang;
   final bool isFavorite;
   final String? errorMessage;
+  final int? lastRating;
 
   const DeckState({
     this.cards = const [],
@@ -28,6 +29,7 @@ class DeckState {
     this.motherLang,
     this.isFavorite = false,
     this.errorMessage,
+    this.lastRating,
   });
 
   DeckState copyWith({
@@ -43,6 +45,7 @@ class DeckState {
     bool? isFavorite,
     String? errorMessage,
     bool clearError = false,
+    int? lastRating,
   }) {
     return DeckState(
       cards: cards ?? this.cards,
@@ -56,6 +59,7 @@ class DeckState {
       motherLang: motherLang ?? this.motherLang,
       isFavorite: isFavorite ?? this.isFavorite,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
+      lastRating: lastRating ?? this.lastRating,
     );
   }
 

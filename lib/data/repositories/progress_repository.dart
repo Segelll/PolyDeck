@@ -91,12 +91,26 @@ class ProgressRepository {
     }
   }
 
-  /// Resets all progress data across all language tables.
+  /// Resets all progress and SRS data across all language tables.
   Future<void> resetAllData() async {
     final db = await _dbHelper.database;
     for (final lang in languageTables) {
-      await db.update(lang, {'isSeen': 0, 'date': '', 'feedback': 0});
+      await db.update(lang, {
+        'isSeen': 0,
+        'date': '',
+        'feedback': 0,
+        'card_state': 0,
+        'stability': 0.0,
+        'difficulty': 0.0,
+        'due': null,
+        'elapsed_days': 0,
+        'scheduled_days': 0,
+        'reps': 0,
+        'lapses': 0,
+        'last_review': null,
+      });
     }
     await db.delete('fav');
+    await db.delete('revlog');
   }
 }

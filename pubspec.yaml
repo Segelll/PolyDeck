@@ -59,6 +59,9 @@ dependencies:
   # Export/Import
   share_plus: ^10.1.4
   file_picker: ^8.1.7
+
+  # FSRS Spaced Repetition
+  fsrs: ^5.2.0
     sdk: flutter
 
 dev_dependencies:

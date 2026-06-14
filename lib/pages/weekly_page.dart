@@ -1,157 +1,69 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:poly2/services/database_helper.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/half_color.dart';
-class WeeklyPage extends StatefulWidget {
+import 'package:poly2/presentation/widgets/half_colored_title.dart';
+
+class WeeklyPage extends ConsumerWidget {
   const WeeklyPage({super.key});
 
   @override
-  _WeeklyPageState createState() => _WeeklyPageState();
-}
-
-class _WeeklyPageState extends State<WeeklyPage> {
-  List<int> data = [];
-  List<String> dates = [];
-  Map<String, int> dateCounts = {};
-  List<String> languageTables = ['fr', 'de', 'en', 'it', 'pr', 'tr', 'esp'];
-
-  @override
-  void initState() {
-    super.initState();
-    _loadWeeklyData();
-  }
-
-  Future<void> _loadWeeklyData() async {
-    try {
-      String? earliestDate;
-      for (String table in languageTables) {
-        String? tableEarliestDate = await DBHelper.instance.getEarliestDate(table);
-        if (tableEarliestDate != null) {
-          tableEarliestDate = tableEarliestDate.trim();
-
-          if (RegExp(r'^\d{4}-\d{2}-\d{2}$').hasMatch(tableEarliestDate)) {
-            final date = DateTime.parse(tableEarliestDate);
-            if (earliestDate == null || date.isBefore(DateTime.parse(earliestDate))) {
-              earliestDate = tableEarliestDate;
-            }
-          } else {
-            throw FormatException('Invalid date format: $tableEarliestDate');
-          }
-        }
-      }
-
-      if (earliestDate != null) {
-        final startDate = DateTime.parse(earliestDate);
-        List<String> weekDates = _generateWeekDates(startDate);
-        setState(() {
-          dates = weekDates;
-          _fetchDateCounts(weekDates);
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error loading weekly data: $e');
-      }
-    }
-  }
-
-  Future<void> _fetchDateCounts(List<String> weekDates) async {
-    try {
-      final db = await DBHelper().database;
-      Map<String, int> combinedCounts = {};
-
-      for (String table in languageTables) {
-        final result = await db.rawQuery(
-            'SELECT date, COUNT(*) as count FROM $table WHERE date IS NOT NULL AND date != "0" GROUP BY date ORDER BY date ASC'
-        );
-        for (var row in result) {
-          String date = row['date'] as String;
-          int count = row['count'] as int;
-          combinedCounts[date] = (combinedCounts[date] ?? 0) + count;
-        }
-      }
-
-      setState(() {
-        dateCounts = combinedCounts;
-        data = weekDates.map((date) => dateCounts[date] ?? 0).toList();
-      });
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching date counts: $e');
-      }
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed to fetch data: $e')));
-    }
-  }
-
-  List<String> _generateWeekDates(DateTime startDate) {
-    List<String> weekDates = [];
-    for (int i = 0; i < 7; i++) {
-      final date = startDate.add(Duration(days: i));
-      weekDates.add(
-        '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-      );
-    }
-    return weekDates;
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final local = AppLocalizations.of(context)!;
-
-    if (data.isEmpty || dates.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: halfColoredTitle(local.weeklyProgress),
-          centerTitle: true,
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    final maxVal = data.reduce((a, b) => a > b ? a : b);
+    final progressAsync = ref.watch(weeklyProgressProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: halfColoredTitle(local.weeklyProgress),
+        title: HalfColoredTitle(local.weeklyProgress),
         centerTitle: true,
       ),
-      body: Container(
-        color: Colors.blueGrey.shade50,
-        child: Column(
-          children: [
+      body: progressAsync.when(
+        loading: () =>
+            const Center(child: CircularProgressIndicator()),
+        error: (err, _) => Center(child: Text('Error: $err')),
+        data: (progress) {
+          if (progress.data.isEmpty || progress.dates.isEmpty) {
+            return const Center(child: Text('No data yet.'));
+          }
 
-            const SizedBox(height: 20),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: data.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final value = entry.value;
-                  final date = DateTime.parse(dates[index]);
-                  final dayLabel = '${date.month}/${date.day}';
-                  final barHeight = (value / maxVal) * 200.0;
+          final maxVal = progress.data.reduce((a, b) => a > b ? a : b).toDouble();
+          final safeMax = maxVal == 0 ? 1.0 : maxVal;
 
-                  return Column(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 20,
-                        height: barHeight,
-                        color: Colors.blueAccent,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(dayLabel, style: const TextStyle(fontSize: 14)),
-                      Text('$value', style: const TextStyle(fontSize: 14)),
-                    ],
-                  );
-                }).toList(),
-              ),
+          return Container(
+            color: Colors.blueGrey.shade50,
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: progress.data.asMap().entries.map((entry) {
+                      final value = entry.value;
+                      final date = DateTime.parse(progress.dates[entry.key]);
+                      final dayLabel = '${date.month}/${date.day}';
+                      final barHeight = (value / safeMax) * 200.0;
+
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            width: 20,
+                            height: barHeight,
+                            color: Colors.blueAccent,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(dayLabel, style: const TextStyle(fontSize: 14)),
+                          Text('$value', style: const TextStyle(fontSize: 14)),
+                        ],
+                      );
+                    }).toList(),
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
             ),
-            const SizedBox(height: 20),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

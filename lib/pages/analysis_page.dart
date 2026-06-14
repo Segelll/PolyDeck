@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/pages/decks_page.dart';
 import '../models/analysis_result.dart';
-import '../models/half_color.dart';
+import 'package:poly2/presentation/widgets/half_colored_title.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class AnalysisPage extends StatelessWidget {
@@ -23,7 +23,7 @@ class AnalysisPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: halfColoredTitle(local.analysis),
+        title: HalfColoredTitle(local.analysis),
         centerTitle: true,
         automaticallyImplyLeading: false, // Removes the default back button
       ),

@@ -1,40 +1,27 @@
 import 'dart:math';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:poly2/services/database_helper.dart';
-import 'package:poly2/card_animations.dart';
-import 'package:poly2/card_deck.dart';
-import 'package:poly2/models/card_model.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/presentation/widgets/card_flip_animation.dart';
+import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/pages/analysis_page.dart';
-import 'package:poly2/models/analysis_result.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/half_color.dart';
-class CardFlipPage extends StatefulWidget {
+import 'package:poly2/presentation/widgets/half_colored_title.dart';
+
+class CardFlipPage extends ConsumerStatefulWidget {
   final String levels;
 
   const CardFlipPage({super.key, required this.levels});
 
   @override
-  State<CardFlipPage> createState() => _CardFlipPageState();
+  ConsumerState<CardFlipPage> createState() => _CardFlipPageState();
 }
 
-class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMixin {
-  final CardDeck _deck = CardDeck();
-  final DBHelper _dbHelper = DBHelper();
-  bool _isLoading = true;
-  int _currentCardIndex = 0;
-  bool _isFlipped = false;
-  Color _backCardColor = Colors.grey;
-  List<Color> _colorTracker = List.generate(10, (_) => Colors.grey);
-  final List<AnalysisResult> _analysisResults = [];
-  int _deckIndex = 1;
-  String? _targetLang;
-  String? _motherLang;
-  bool _isFavorite = false;
-
+class _CardFlipPageState extends ConsumerState<CardFlipPage>
+    with TickerProviderStateMixin {
   FlipDirection _flipDirection = FlipDirection.leftToRight;
-  final GlobalKey<CardFlipAnimationState> _cardKey = GlobalKey<CardFlipAnimationState>();
+  final GlobalKey<CardFlipAnimationState> _cardKey =
+      GlobalKey<CardFlipAnimationState>();
 
   AnimationController? _drawCardController;
   Animation<Offset>? _drawCardAnimation;
@@ -45,75 +32,17 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   @override
   void initState() {
     super.initState();
-    _loadPrefss();
     _loadDeck();
-    _checkIfFavorite();
-  }
-
-  Future<void> _checkIfFavorite() async {
-    final isFav = await _dbHelper.isFavorite(_deck.cards[_currentCardIndex].frontText);
-    setState(() {
-      _isFavorite = isFav;
-    });
-  }
-
-  Future<void> _loadPrefss() async {
-    final userSettings = await _dbHelper.getUserChoices('user');
-    setState(() {
-      _motherLang = userSettings?['mainLanguage'];
-      _targetLang = userSettings?['targetLanguage'];
-    });
   }
 
   Future<void> _loadDeck() async {
-    setState(() => _isLoading = true);
-
-    try {
-      List<CardModel> combined = [];
-      await _deck.loadCards(level: widget.levels);
-      combined.addAll(_deck.cards);
-
-      combined.shuffle(Random());
-
-      final selected = combined.take(10).toList();
-      _deck.cards.clear();
-      _deck.cards.addAll(selected);
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error in _loadDeck: $e');
-      }
-    }
-
-    setState(() {
-      _isLoading = false;
-      _initDrawCardAnimation();
-    });
-  }
-
-  Future<void> updateFeedback(String tableName, int id, int feedback) async {
-    setState(() {
-      if (kDebugMode) {
-        print("Feedback updating...");
-      }
-    });
-
-    try {
-      await DBHelper.instance.updateFeedback(tableName, id, feedback);
-      setState(() {
-        if (kDebugMode) {
-          print("Feedback updated successfully.");
-        }
-      });
-    } catch (e) {
-      setState(() {
-        if (kDebugMode) {
-          print("Error: Feedback could not be updated: $e");
-        }
-      });
-    }
+    final notifier = ref.read(deckProvider.notifier);
+    await notifier.loadDeck(widget.levels);
+    _initDrawCardAnimation();
   }
 
   void _initDrawCardAnimation() {
+    _drawCardController?.dispose();
     _drawCardController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
@@ -127,42 +56,38 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     _drawCardController!.forward();
   }
 
-  void _flipCard(Color color, FlipDirection direction) {
-    final currentCard = _deck.cards[_currentCardIndex];
+  Color _colorForFeedback(int feedback) {
+    switch (feedback) {
+      case 1:
+        return Colors.red;
+      case 2:
+        return Colors.green;
+      case 3:
+        return const Color.fromARGB(255, 179, 130, 8);
+      default:
+        return Colors.grey;
+    }
+  }
 
-    setState(() {
-      _isFlipped = true;
-      _backCardColor = color;
-      _flipDirection = direction;
-      _colorTracker[_currentCardIndex] = color;
-
-      _analysisResults.add(
-        AnalysisResult(
-          word: currentCard.frontText,
-          meaning: currentCard.backText,
-          color: color,
-        ),
-      );
-      _animateIndicator(_currentCardIndex);
-    });
+  void _flipCard(Color color, FlipDirection direction) async {
+    final notifier = ref.read(deckProvider.notifier);
+    setState(() => _flipDirection = direction);
+    await notifier.flipCard(color);
+    _animateIndicator(notifier.state.currentIndex);
   }
 
   void _animateIndicator(int index) {
-    if (_indicatorControllers.length < _colorTracker.length) {
-      for (int i = 0; i < _colorTracker.length; i++) {
-        _indicatorControllers.add(AnimationController(
-          duration: const Duration(milliseconds: 400),
-          vsync: this,
-        ));
-        _indicatorAnimations.add(
-          Tween<double>(begin: 0, end: 1).animate(
-            CurvedAnimation(
-              parent: _indicatorControllers[i],
-              curve: Curves.easeOut,
-            ),
-          ),
-        );
-      }
+    while (_indicatorControllers.length < 10) {
+      final ctrl = AnimationController(
+        duration: const Duration(milliseconds: 400),
+        vsync: this,
+      );
+      _indicatorControllers.add(ctrl);
+      _indicatorAnimations.add(
+        Tween<double>(begin: 0, end: 1).animate(
+          CurvedAnimation(parent: ctrl, curve: Curves.easeOut),
+        ),
+      );
     }
     _indicatorControllers[index].forward(from: 0);
   }
@@ -170,46 +95,35 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   void _reflipCard() {
     _cardKey.currentState?.addStatusListener((status) {
       if (status == AnimationStatus.dismissed) {
-        setState(() {
-          _backCardColor = Colors.grey;
-          _colorTracker[_currentCardIndex] = Colors.grey;
-          final frontText = _deck.cards[_currentCardIndex].frontText;
-          _analysisResults.removeWhere((res) => res.word == frontText);
-        });
+        ref.read(deckProvider.notifier).reflipCard();
         _cardKey.currentState?.removeStatusListener();
       }
     });
-
-    setState(() => _isFlipped = false);
   }
 
   void _nextCard() async {
-    if (_currentCardIndex < _deck.cards.length - 1) {
-      setState(() {
-        _currentCardIndex++;
-        _isFlipped = false;
-        _backCardColor = Colors.grey;
-        _isFavorite = false;
-        _drawCardController!.reset();
-        _drawCardController!.forward();
-      });
-      await _checkIfFavorite();
-    } else {
+    final notifier = ref.read(deckProvider.notifier);
+    if (notifier.state.isLastCard) {
       _showAnalysis();
+    } else {
+      await notifier.nextCard();
+      _drawCardController!.reset();
+      _drawCardController!.forward();
     }
   }
 
   void _showAnalysis() {
+    final state = ref.read(deckProvider);
     final local = AppLocalizations.of(context)!;
-    String deckLabel = local.deck(_deckIndex);
+    final deckLabel = local.deck(state.deckIndex);
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AnalysisPage(
-          analysisResults: _analysisResults,
+          analysisResults: state.analysisResults,
           previousDeckName: deckLabel,
-          deckIndex: _deckIndex,
+          deckIndex: state.deckIndex,
           onNewDeck: _startNewDeck,
         ),
       ),
@@ -217,15 +131,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   }
 
   void _startNewDeck() {
-    setState(() {
-      _deckIndex++;
-      _currentCardIndex = 0;
-      _analysisResults.clear();
-      _colorTracker = List.generate(10, (_) => Colors.grey);
-      _isFlipped = false;
-      _backCardColor = Colors.grey;
-      _isLoading = true;
-    });
+    ref.read(deckProvider.notifier).startNewDeck();
     _loadDeck();
   }
 
@@ -246,47 +152,10 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
     );
   }
 
-  void _openSettings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SettingsPage()),
-    );
-  }
-
-  void _toggleFavorite() async {
-    final currentCard = _deck.cards[_currentCardIndex];
-    try {
-      if (_isFavorite) {
-        await _dbHelper.removeFromFavorites(currentCard.frontText);
-        setState(() {
-          _isFavorite = false;
-        });
-      } else {
-        await _dbHelper.addToFavorites(
-          currentCard.frontText,
-          currentCard.frontSentence,
-          currentCard.level,
-          currentCard.backText,
-          currentCard.backSentence,
-        );
-        setState(() {
-          _isFavorite = true;
-        });
-      }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error toggling favorite: $e');
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error updating favorite status!')),
-      );
-    }
-  }
-
   @override
   void dispose() {
     _drawCardController?.dispose();
-    for (var ctrl in _indicatorControllers) {
+    for (final ctrl in _indicatorControllers) {
       ctrl.dispose();
     }
     super.dispose();
@@ -295,35 +164,65 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
   @override
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context)!;
+    final state = ref.watch(deckProvider);
 
-    if (_isLoading || _deck.cards.isEmpty) {
+    if (state.isLoading || state.isEmpty) {
       return Scaffold(
         appBar: AppBar(
-          title: halfColoredTitle(local.appTitle),
+          title: HalfColoredTitle(local.appTitle),
           centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
-    final currentCard = _deck.cards[_currentCardIndex];
-    final Color frontColor = Colors.blue.shade200;
+    if (state.errorMessage != null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: HalfColoredTitle(local.appTitle),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const SizedBox(height: 16),
+              Text(state.errorMessage!, textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: _loadDeck,
+                child: const Text('Retry'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final currentCard = state.currentCard;
+    final backColor = state.isFlipped
+        ? state.colorTracker[state.currentIndex]
+        : Colors.grey;
 
     return Scaffold(
       appBar: AppBar(
-        title: halfColoredTitle(local.appTitle),
+        title: HalfColoredTitle(local.appTitle),
         centerTitle: true,
         actions: [
           IconButton(
             icon: Icon(
-              _isFavorite ? Icons.star : Icons.star_border,
+              state.isFavorite ? Icons.star : Icons.star_border,
               color: Colors.yellow.shade700,
             ),
-            onPressed: _toggleFavorite,
+            onPressed: () => ref.read(deckProvider.notifier).toggleFavorite(),
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: _openSettings,
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            ),
           ),
         ],
       ),
@@ -341,21 +240,22 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
             child: Column(
               children: [
                 Text(
-                  local.deck(_deckIndex),
+                  local.deck(state.deckIndex),
                   style: const TextStyle(fontSize: 24),
                 ),
                 const SizedBox(height: 20),
 
+                // Color indicator dots
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    for (int i = 0; i < _colorTracker.length; i++)
+                    for (int i = 0; i < state.colorTracker.length; i++)
                       AnimatedBuilder(
-                        animation: (i < _indicatorAnimations.length)
+                        animation: i < _indicatorAnimations.length
                             ? _indicatorAnimations[i]
                             : const AlwaysStoppedAnimation(0),
                         builder: (_, __) {
-                          final val = (i < _indicatorAnimations.length)
+                          final val = i < _indicatorAnimations.length
                               ? _indicatorAnimations[i].value
                               : 0.0;
                           return Transform(
@@ -366,9 +266,10 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                             child: Container(
                               width: 24,
                               height: 35,
-                              margin: const EdgeInsets.symmetric(horizontal: 2),
+                              margin:
+                                  const EdgeInsets.symmetric(horizontal: 2),
                               decoration: BoxDecoration(
-                                color: _colorTracker[i],
+                                color: state.colorTracker[i],
                                 borderRadius: BorderRadius.circular(6),
                                 boxShadow: const [
                                   BoxShadow(
@@ -389,49 +290,50 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 Expanded(
                   child: Stack(
                     children: [
-                      SlideTransition(
-                        position: _drawCardAnimation!,
-                        child: Center(
-                          child: GestureDetector(
-                            onHorizontalDragEnd: !_isFlipped
-                                ? (details) {
-                              if (details.primaryVelocity! < 0) {
-                                _flipCard(Colors.red, FlipDirection.leftToRight);
-                                updateFeedback(_targetLang!, currentCard.id, 1);
-                              } else if (details.primaryVelocity! > 0) {
-                                _flipCard(Colors.green, FlipDirection.rightToLeft);
-                                updateFeedback(_targetLang!, currentCard.id, 2);
-                              }
-                            }
-                                : null,
-                            onVerticalDragEnd: !_isFlipped
-                                ? (details) {
-                              if (details.primaryVelocity! > 0) {
-                                _flipCard(
-                                  const Color.fromARGB(255, 179, 130, 8),
-                                  FlipDirection.topToBottom,
-                                );
-                                updateFeedback(_targetLang!, currentCard.id, 3);
-                              }
-                            }
-                                : null,
-                            child: CardFlipAnimation(
-                              key: _cardKey,
-                              isFlipped: _isFlipped,
-                              frontCardColor: frontColor,
-                              backCardColor: _backCardColor,
-                              frontText: currentCard.frontText,
-                              backText: currentCard.backText,
-                              frontSentence: currentCard.frontSentence,
-                              backSentence: currentCard.backSentence,
-                              onFlipComplete: _reflipCard,
-                              cardNumber: _currentCardIndex + 1,
-                              flipDirection: _flipDirection,
-                              level: currentCard.level,
+                      if (_drawCardAnimation != null)
+                        SlideTransition(
+                          position: _drawCardAnimation!,
+                          child: Center(
+                            child: GestureDetector(
+                              onHorizontalDragEnd: !state.isFlipped
+                                  ? (details) {
+                                      if (details.primaryVelocity! < 0) {
+                                        _flipCard(Colors.red,
+                                            FlipDirection.leftToRight);
+                                      } else if (details.primaryVelocity! > 0) {
+                                        _flipCard(Colors.green,
+                                            FlipDirection.rightToLeft);
+                                      }
+                                    }
+                                  : null,
+                              onVerticalDragEnd: !state.isFlipped
+                                  ? (details) {
+                                      if (details.primaryVelocity! > 0) {
+                                        _flipCard(
+                                          const Color.fromARGB(
+                                              255, 179, 130, 8),
+                                          FlipDirection.topToBottom,
+                                        );
+                                      }
+                                    }
+                                  : null,
+                              child: CardFlipAnimation(
+                                key: _cardKey,
+                                isFlipped: state.isFlipped,
+                                frontCardColor: Colors.blue.shade200,
+                                backCardColor: backColor,
+                                frontText: currentCard.frontText,
+                                backText: currentCard.backText,
+                                frontSentence: currentCard.frontSentence,
+                                backSentence: currentCard.backSentence,
+                                onFlipComplete: _reflipCard,
+                                cardNumber: state.currentIndex + 1,
+                                flipDirection: _flipDirection,
+                                level: currentCard.level,
+                              ),
                             ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -445,7 +347,7 @@ class _CardFlipPageState extends State<CardFlipPage> with TickerProviderStateMix
                 ),
                 const SizedBox(height: 10),
 
-                if (_isFlipped)
+                if (state.isFlipped)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

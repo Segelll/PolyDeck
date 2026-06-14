@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/pages/decks_page.dart';
-import 'package:poly2/services/database_helper.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
+import 'package:poly2/core/constants/language_codes.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../models/half_color.dart';
-class FirstTimeSelectionPage extends StatefulWidget {
+import 'package:poly2/presentation/widgets/half_colored_title.dart';
+
+class FirstTimeSelectionPage extends ConsumerStatefulWidget {
   const FirstTimeSelectionPage({super.key});
 
   @override
-  State<FirstTimeSelectionPage> createState() => _FirstTimeSelectionPageState();
+  ConsumerState<FirstTimeSelectionPage> createState() =>
+      _FirstTimeSelectionPageState();
 }
 
-class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
-  final List<String> _languages = ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp'];
+class _FirstTimeSelectionPageState
+    extends ConsumerState<FirstTimeSelectionPage> {
+  final List<String> _displayLanguages = LanguageCodes.displayCodes;
   String? _selectedMotherLanguage;
   String? _selectedTargetLanguage;
-
-  final DBHelper _dbHelper = DBHelper();
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,7 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: halfColoredTitle(local.firstTimePromptTitle),
+        title: HalfColoredTitle(local.firstTimePromptTitle),
         leading: const Icon(Icons.language),
         centerTitle: true,
       ),
@@ -48,16 +51,14 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
                 border: const OutlineInputBorder(),
               ),
               value: _selectedMotherLanguage,
-              items: _languages.map((lang) {
+              items: _displayLanguages.map((lang) {
                 return DropdownMenuItem<String>(
                   value: lang,
                   child: Text(lang.toUpperCase()),
                 );
               }).toList(),
               onChanged: (val) {
-                setState(() {
-                  _selectedMotherLanguage = val;
-                });
+                setState(() => _selectedMotherLanguage = val);
               },
             ),
             const SizedBox(height: 20),
@@ -70,16 +71,14 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
                 border: const OutlineInputBorder(),
               ),
               value: _selectedTargetLanguage,
-              items: _languages.map((lang) {
+              items: _displayLanguages.map((lang) {
                 return DropdownMenuItem<String>(
                   value: lang,
                   child: Text(lang.toUpperCase()),
                 );
               }).toList(),
               onChanged: (val) {
-                setState(() {
-                  _selectedTargetLanguage = val;
-                });
+                setState(() => _selectedTargetLanguage = val);
               },
             ),
             const Spacer(),
@@ -90,27 +89,27 @@ class _FirstTimeSelectionPageState extends State<FirstTimeSelectionPage> {
                 minimumSize: const Size(double.infinity, 50),
               ),
               onPressed: (_selectedMotherLanguage != null &&
-                  _selectedTargetLanguage != null)
+                      _selectedTargetLanguage != null)
                   ? () async {
-                try {
-                  await _dbHelper.saveUserChoices(
-                    'user',
-                    _selectedMotherLanguage!,
-                    _selectedTargetLanguage!,
-                  );
+                      try {
+                        await ref.read(settingsProvider.notifier).saveLanguages(
+                              _selectedMotherLanguage!,
+                              _selectedTargetLanguage!,
+                            );
 
-                  if (!mounted) return;
+                        if (!mounted) return;
 
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => const DecksPage()),
-                  );
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error saving choices: $e')),
-                  );
-                }
-              }
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const DecksPage()),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error saving choices: $e')),
+                        );
+                      }
+                    }
                   : null,
             ),
           ],

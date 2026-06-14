@@ -4,6 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:poly2/domain/models/word.dart';
+import 'package:poly2/core/constants/app_constants.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._privateConstructor();
@@ -179,7 +181,7 @@ Future<Map<String, String>?> getUserChoices(String tableName) async {
     }
   }
 
-  Future<WordModel?> fetchWordById(String tableName, int id) async {
+  Future<Word?> fetchWordById(String tableName, int id) async {
     try {
       final db = await database;
       final result = await db.query(
@@ -189,7 +191,7 @@ Future<Map<String, String>?> getUserChoices(String tableName) async {
       );
 
       if (result.isNotEmpty) {
-        return WordModel.fromMap(result.first);
+        return Word.fromMap(result.first);
       } else {
         return null;
       }
@@ -214,7 +216,11 @@ Future<Map<String, String>?> getUserChoices(String tableName) async {
 Future<List<Map<String, dynamic>>> fetchExamOptions(String tableName) async {
   try {
     final db = await database;
-    List<int> randomIds = _generateRandomIds(1, 4799, 3);
+    List<int> randomIds = _generateRandomIds(
+      AppConstants.minWordId,
+      AppConstants.maxWordId,
+      AppConstants.distractorsPerQuestion,
+    );
     List<Map<String, dynamic>> options = [];
     
     for (int id in randomIds) {
@@ -312,25 +318,4 @@ List<int> _generateRandomIds(int min, int max, int count) {
   return randomIds.toList();
 }
 
-class WordModel {
-  final int id;
-  final String backText;
-  final String backSentence;
-
-  WordModel({
-    required this.id,
-    required this.backText,
-    required this.backSentence,
-  });
-
-  factory WordModel.fromMap(Map<String, dynamic> map) {
-    return WordModel(
-      id: map['id'],
-      backText: map['word'] ?? '',
-      backSentence: map['sentence'] ?? '',
-    );
-  }
-
-
-
-}
+// Word model is now in lib/domain/models/word.dart (single source of truth)

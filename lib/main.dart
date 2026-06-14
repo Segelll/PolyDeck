@@ -1,64 +1,52 @@
-import 'package:firebase_core/firebase_core.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
-
-import 'package:poly2/pages/splash_screen.dart';
-import 'package:poly2/services/database_helper.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'dart:io';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:poly2/pages/splash_screen.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Firebase.initializeApp();
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final dbHelper=DBHelper();
-    return FutureBuilder<Map<String,String>?>(
-      future: dbHelper.getUserChoices('user'),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settingsAsync = ref.watch(settingsProvider);
 
-        return MaterialApp(
-          title: 'PolyDeck',
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: const [
-            Locale('en'),
-            Locale('es'),
-            Locale('pt'),
-            Locale('tr'),
-            Locale('it'),
-            Locale('de'),
-            Locale('fr')
-          ],
-          theme: ThemeData(
-            primarySwatch: Colors.blueGrey,
-            brightness: Brightness.light,
-          ),
-          darkTheme: ThemeData(
-            primarySwatch: Colors.blueGrey,
-            brightness: Brightness.dark,
-          ),
-          themeMode: ThemeMode.light,
-          locale: Locale(Platform.localeName),
-          home: const SplashScreen(),
-        );
-      },
+    return MaterialApp(
+      title: 'PolyDeck',
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('es'),
+        Locale('pt'),
+        Locale('tr'),
+        Locale('it'),
+        Locale('de'),
+        Locale('fr'),
+      ],
+      theme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+        brightness: Brightness.light,
+      ),
+      darkTheme: ThemeData(
+        primarySwatch: Colors.blueGrey,
+        brightness: Brightness.dark,
+      ),
+      themeMode: ThemeMode.light,
+      locale: Locale(Platform.localeName),
+      home: const SplashScreen(),
     );
   }
 }

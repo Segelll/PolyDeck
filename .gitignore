@@ -41,3 +41,16 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Backup files
+*.backup
+polydeck_backup.json
+
+# OS files
+Thumbs.db
+Desktop.ini
+
+# Firebase (removed from project)
+google-services.json
+.firebase/
+lib/firebase_options.dart

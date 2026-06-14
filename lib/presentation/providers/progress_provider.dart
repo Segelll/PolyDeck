@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/data/repositories/progress_repository.dart';
+import 'package:poly2/core/utils/date_utils.dart';
 
 /// Provides the [ProgressRepository] instance.
 final progressRepositoryProvider = Provider<ProgressRepository>((ref) {
@@ -30,15 +30,7 @@ final weeklyProgressProvider =
     return const WeeklyProgressState(isLoading: false);
   }
 
-  final startDate = DateTime.parse(earliestDate);
-  final List<String> weekDates = [];
-  for (int i = 0; i < 7; i++) {
-    final date = startDate.add(Duration(days: i));
-    weekDates.add(
-      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}',
-    );
-  }
-
+  final weekDates = generateWeekDates(DateTime.parse(earliestDate));
   final dateCounts = await repo.fetchDateCounts();
   final data = weekDates.map((d) => dateCounts[d] ?? 0).toList();
 
@@ -74,12 +66,7 @@ final monthlyProgressProvider =
 
   final earliestDate = DateTime.parse(earliestDateStr);
   final data = await repo.fetchMonthlyCounts(earliestDate);
-
-  final List<String> labels = [];
-  for (int i = 0; i < 4; i++) {
-    final d = DateTime(earliestDate.year, earliestDate.month + i);
-    labels.add('${d.year}-${d.month.toString().padLeft(2, "0")}');
-  }
+  final labels = generateMonthLabels(earliestDate);
 
   return MonthlyProgressState(
     data: data,

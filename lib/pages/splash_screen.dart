@@ -1,38 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/pages/decks_page.dart';
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SplashScreen> createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(const Duration(seconds: 1), () {
-      Navigator.pushReplacement(
-        context,
-        PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 700),
-          pageBuilder: (_, __, ___) => const DecksPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            return FadeTransition(
-              opacity: animation,
-              child: child,
-            );
-          },
-        ),
-      );
-    });
-  }
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    Future.delayed(const Duration(seconds: 1), () {
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            transitionDuration: const Duration(milliseconds: 700),
+            pageBuilder: (_, __, ___) => const DecksPage(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -59,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   TextSpan(
                     text: 'Deck',
-                    style: TextStyle(color: Color(0xFFADD8E6)), // Light blue
+                    style: TextStyle(color: Color(0xFFADD8E6)),
                   ),
                 ],
               ),

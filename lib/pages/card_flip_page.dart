@@ -1,8 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/domain/enums/flip_direction.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
+import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
@@ -59,13 +61,13 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   Color _colorForFeedback(int feedback) {
     switch (feedback) {
       case 1:
-        return Colors.red;
+        return AppTheme.cardRed;
       case 2:
-        return Colors.green;
+        return AppTheme.cardGreen;
       case 3:
-        return const Color.fromARGB(255, 179, 130, 8);
+        return AppTheme.cardYellow;
       default:
-        return Colors.grey;
+        return AppTheme.cardDefault;
     }
   }
 
@@ -298,10 +300,10 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                               onHorizontalDragEnd: !state.isFlipped
                                   ? (details) {
                                       if (details.primaryVelocity! < 0) {
-                                        _flipCard(Colors.red,
+                                        _flipCard(AppTheme.cardRed,
                                             FlipDirection.leftToRight);
                                       } else if (details.primaryVelocity! > 0) {
-                                        _flipCard(Colors.green,
+                                        _flipCard(AppTheme.cardGreen,
                                             FlipDirection.rightToLeft);
                                       }
                                     }
@@ -310,8 +312,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                                   ? (details) {
                                       if (details.primaryVelocity! > 0) {
                                         _flipCard(
-                                          const Color.fromARGB(
-                                              255, 179, 130, 8),
+                                          AppTheme.cardYellow,
                                           FlipDirection.topToBottom,
                                         );
                                       }

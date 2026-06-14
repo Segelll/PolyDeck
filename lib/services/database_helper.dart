@@ -1,11 +1,11 @@
 import 'dart:io';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:poly2/domain/models/word.dart';
 import 'package:poly2/core/constants/app_constants.dart';
+import 'package:poly2/core/utils/random_utils.dart';
 
 class DBHelper {
   static final DBHelper _instance = DBHelper._privateConstructor();
@@ -216,7 +216,7 @@ Future<Map<String, String>?> getUserChoices(String tableName) async {
 Future<List<Map<String, dynamic>>> fetchExamOptions(String tableName) async {
   try {
     final db = await database;
-    List<int> randomIds = _generateRandomIds(
+    List<int> randomIds = generateRandomIds(
       AppConstants.minWordId,
       AppConstants.maxWordId,
       AppConstants.distractorsPerQuestion,
@@ -307,15 +307,4 @@ Future<List<Map<String, dynamic>>> fetchAllFavWords() async {
 }
 
 
-List<int> _generateRandomIds(int min, int max, int count) {
-  Random random = Random();
-  Set<int> randomIds = {};
-
-  while (randomIds.length < count) {
-    randomIds.add(min + random.nextInt(max - min + 1));
-  }
-
-  return randomIds.toList();
-}
-
-// Word model is now in lib/domain/models/word.dart (single source of truth)
+// Word model → lib/domain/models/word.dart  ·  Random utils → lib/core/utils/random_utils.dart

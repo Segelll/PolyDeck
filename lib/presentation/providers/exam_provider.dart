@@ -3,65 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
-import 'package:poly2/models/exam_model.dart';
+import 'package:poly2/domain/models/exam_model.dart';
+import 'package:poly2/domain/state/exam_state.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
-
-/// The state of an exam session.
-class ExamState {
-  final List<Question> questions;
-  final int currentIndex;
-  final List<int?> userAnswers;
-  final bool isLoading;
-  final bool answered;
-  final int? selectedAnswerIndex;
-  final String? errorMessage;
-
-  const ExamState({
-    this.questions = const [],
-    this.currentIndex = 0,
-    this.userAnswers = const [],
-    this.isLoading = true,
-    this.answered = false,
-    this.selectedAnswerIndex,
-    this.errorMessage,
-  });
-
-  ExamState copyWith({
-    List<Question>? questions,
-    int? currentIndex,
-    List<int?>? userAnswers,
-    bool? isLoading,
-    bool? answered,
-    int? selectedAnswerIndex,
-    String? errorMessage,
-    bool clearError = false,
-  }) {
-    return ExamState(
-      questions: questions ?? this.questions,
-      currentIndex: currentIndex ?? this.currentIndex,
-      userAnswers: userAnswers ?? this.userAnswers,
-      isLoading: isLoading ?? this.isLoading,
-      answered: answered ?? this.answered,
-      selectedAnswerIndex: selectedAnswerIndex,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-    );
-  }
-
-  Question get currentQuestion => questions[currentIndex];
-  bool get isLastQuestion => currentIndex >= questions.length - 1;
-  bool get isEmpty => questions.isEmpty;
-
-  int calculateScore() {
-    int score = 0;
-    for (int i = 0; i < questions.length; i++) {
-      if (userAnswers[i] == questions[i].correctAnswerIndex) {
-        score++;
-      }
-    }
-    return score;
-  }
-}
+import 'package:poly2/core/utils/random_utils.dart';
 
 /// Manages the exam session.
 class ExamNotifier extends StateNotifier<ExamState> {
@@ -69,15 +15,6 @@ class ExamNotifier extends StateNotifier<ExamState> {
   final UserRepository _userRepo;
 
   ExamNotifier(this._wordRepo, this._userRepo) : super(const ExamState());
-
-  static List<int> generateRandomIds(int min, int max, int count) {
-    final random = Random();
-    final Set<int> ids = {};
-    while (ids.length < count) {
-      ids.add(min + random.nextInt(max - min + 1));
-    }
-    return ids.toList();
-  }
 
   Future<void> loadQuestions() async {
     state = state.copyWith(isLoading: true, clearError: true);
@@ -117,7 +54,7 @@ class ExamNotifier extends StateNotifier<ExamState> {
 
             allWords.remove(correctAnswer);
             allWords.shuffle(Random());
-            final distractors = allWords.take(3).toList();
+            final distractors = allWords.take(AppConstants.distractorsPerQuestion).toList();
 
             final options = [correctAnswer, ...distractors];
             options.shuffle(Random());

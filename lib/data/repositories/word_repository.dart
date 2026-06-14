@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:poly2/services/database_helper.dart';
 import 'package:poly2/domain/models/word.dart';
-import 'package:poly2/models/card_model.dart';
+import 'package:poly2/domain/models/card_model.dart';
 
 /// Repository for word-related data operations.
 ///

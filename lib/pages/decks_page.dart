@@ -1,45 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/domain/enums/proficiency_level.dart';
 import 'package:poly2/pages/exam_page.dart';
 import 'package:poly2/pages/settings_page.dart';
 import 'card_flip_page.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
-class DecksPage extends StatefulWidget {
 
+class DecksPage extends ConsumerStatefulWidget {
   const DecksPage({super.key});
 
   @override
-  State<DecksPage> createState() => _DecksPageState();
+  ConsumerState<DecksPage> createState() => _DecksPageState();
 }
 
-class _DecksPageState extends State<DecksPage> {
-
-  final List<Map<String, String>> allLevels = [
-    {"code": "A1", "label": "Beginner"},
-    {"code": "A2", "label": "Elementary"},
-    {"code": "B1", "label": "Intermediate"},
-    {"code": "B2", "label": "Upper-Interm."},
-    {"code": "C1", "label": "Advanced"},
-    {"code": "fav", "label": "Favourites"},
-  ];
-
-  String? _selectedLevels;
-  String? _selectedLanguage;
+class _DecksPageState extends ConsumerState<DecksPage> {
+  String? _selectedLevel;
 
   void _toggleLevel(String code) {
     setState(() {
-      if (_selectedLevels == code) {
-        _selectedLevels = null;
-      } else {
-        _selectedLevels = code;
-      }
+      _selectedLevel = (_selectedLevel == code) ? null : code;
     });
   }
 
   void _proceedToDeck(AppLocalizations local) {
-    if (_selectedLevels == null) {
+    if (_selectedLevel == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(local.selectLanguages)), // Use localized string
+        SnackBar(content: Text(local.selectLanguages)),
       );
       return;
     }
@@ -47,7 +34,7 @@ class _DecksPageState extends State<DecksPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CardFlipPage(levels: _selectedLevels!),
+        builder: (_) => CardFlipPage(levels: _selectedLevel!),
       ),
     );
   }
@@ -63,14 +50,12 @@ class _DecksPageState extends State<DecksPage> {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const SettingsPage()),
-    ).then((_) {
-      setState(() {});
-    });
+    ).then((_) => setState(() {}));
   }
 
   @override
   Widget build(BuildContext context) {
-    final local = AppLocalizations.of(context)!; // Access localization
+    final local = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
@@ -101,39 +86,27 @@ class _DecksPageState extends State<DecksPage> {
             ),
             const SizedBox(height: 20),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildDeck(allLevels[0]["code"]!, allLevels[0]["label"]!, local),
-                _buildDeck(allLevels[1]["code"]!, allLevels[1]["label"]!, local),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildDeck(allLevels[2]["code"]!, allLevels[2]["label"]!, local),
-                _buildDeck(allLevels[3]["code"]!, allLevels[3]["label"]!, local),
-              ],
-            ),
-            const SizedBox(height: 24),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildDeck(allLevels[4]["code"]!, allLevels[4]["label"]!, local),
-                _buildDeck(allLevels[5]["code"]!, allLevels[5]["label"]!, local),
-              ],
-            ),
+            // Build deck cards from ProficiencyLevel enum
+            for (var i = 0; i < ProficiencyLevel.values.length; i += 2)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildDeck(ProficiencyLevel.values[i]),
+                    if (i + 1 < ProficiencyLevel.values.length)
+                      _buildDeck(ProficiencyLevel.values[i + 1]),
+                  ],
+                ),
+              ),
 
             const Spacer(),
             ElevatedButton(
-              onPressed: () => _proceedToDeck(local), // Pass localization
+              onPressed: () => _proceedToDeck(local),
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(180, 50),
               ),
-              child: Text(local.proceed), // Use localized string
+              child: Text(local.proceed),
             ),
             const SizedBox(height: 40),
           ],
@@ -142,65 +115,62 @@ class _DecksPageState extends State<DecksPage> {
     );
   }
 
+  Widget _buildDeck(ProficiencyLevel level) {
+    final bool isSelected = _selectedLevel == level.code;
 
-  Widget _buildDeck(String code, String label, AppLocalizations local) {
-    final bool isSelected = _selectedLevels == code;
+    final Color primary = isSelected ? Colors.blue : Colors.grey;
+    final Color mid =
+        isSelected ? Colors.blue.shade300 : Colors.grey.shade400;
+    final Color back =
+        isSelected ? Colors.blue.shade100 : Colors.grey.shade200;
+    final Color textColor = isSelected ? Colors.white : Colors.black87;
 
-    final frontGradient = isSelected
-        ? const LinearGradient(
-      colors: [Color(0xFF2196F3), Color(0xFF64B5F6)], // Blueish
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    )
-        : const LinearGradient(
-      colors: [Color(0xFF9E9E9E), Color(0xFFBDBDBD)], // Grayish
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-
-    final middleGradient = isSelected
-        ? const LinearGradient(
-      colors: [Color(0xFF64B5F6), Color(0xFF90CAF9)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    )
-        : const LinearGradient(
-      colors: [Color(0xFFBDBDBD), Color(0xFFE0E0E0)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-
-    final backGradient = isSelected
-        ? const LinearGradient(
-      colors: [Color(0xFFBBDEFB), Color(0xFFE3F2FD)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    )
-        : const LinearGradient(
-      colors: [Color(0xFFEEEEEE), Color(0xFFFAFAFA)],
-      begin: Alignment.topLeft,
-      end: Alignment.bottomRight,
-    );
-
-    final textColor = isSelected ? Colors.white : Colors.black87;
+    Container buildLayer(Color color, {double left = 0, double top = 0}) {
+      return Positioned(
+        left: left,
+        top: top,
+        child: Container(
+          width: 70,
+          height: 100,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [color, color.withValues(alpha: 0.7)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(6),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 3,
+                offset: Offset(2, 2),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return GestureDetector(
-      onTap: () => _toggleLevel(code),
+      onTap: () => _toggleLevel(level.code),
       child: SizedBox(
         width: 100,
         height: 140,
         child: Stack(
           alignment: Alignment.center,
           children: [
-
-            Positioned(
-              left: 12,
-              top: 12,
+            buildLayer(back, left: 12, top: 12),
+            buildLayer(mid, left: 6, top: 6),
+            Positioned.fill(
               child: Container(
                 width: 70,
                 height: 100,
                 decoration: BoxDecoration(
-                  gradient: backGradient,
+                  gradient: LinearGradient(
+                    colors: [primary, mid],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
                   borderRadius: BorderRadius.circular(6),
                   boxShadow: const [
                     BoxShadow(
@@ -210,67 +180,26 @@ class _DecksPageState extends State<DecksPage> {
                     ),
                   ],
                 ),
-              ),
-            ),
-
-
-            Positioned(
-              left: 6,
-              top: 6,
-              child: Container(
-                width: 70,
-                height: 100,
-                decoration: BoxDecoration(
-                  gradient: middleGradient,
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 3,
-                      offset: Offset(2, 2),
+                alignment: Alignment.center,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      level.code,
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: textColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      level.label,
+                      style: TextStyle(fontSize: 12, color: textColor),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
-              ),
-            ),
-
-
-            Container(
-              width: 70,
-              height: 100,
-              decoration: BoxDecoration(
-                gradient: frontGradient,
-                borderRadius: BorderRadius.circular(6),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 3,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    code,
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: textColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: textColor,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
               ),
             ),
           ],

@@ -1,17 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-
-/// The axis direction for a card flip animation.
-enum FlipDirection {
-  /// Swipe left → card flips from left to right.
-  leftToRight,
-
-  /// Swipe right → card flips from right to left.
-  rightToLeft,
-
-  /// Swipe down → card flips from top to bottom.
-  topToBottom,
-}
+import 'package:poly2/domain/enums/flip_direction.dart';
 
 /// An animated card that flips on its horizontal or vertical axis
 /// to reveal the back side.

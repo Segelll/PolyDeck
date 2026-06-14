@@ -1,79 +1,21 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
-import 'package:poly2/models/card_model.dart';
-import 'package:poly2/models/analysis_result.dart';
-import 'package:poly2/domain/models/word.dart';
+import 'package:poly2/domain/models/card_model.dart';
+import 'package:poly2/domain/models/analysis_result.dart';
+import 'package:poly2/domain/enums/feedback_type.dart';
+import 'package:poly2/domain/state/deck_state.dart';
+import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
+import 'package:poly2/core/theme/app_theme.dart';
 
 /// Provides the [WordRepository] instance.
 final wordRepositoryProvider = Provider<WordRepository>((ref) {
   return WordRepository();
 });
-
-/// The state of a single card flip session.
-class DeckState {
-  final List<CardModel> cards;
-  final int currentIndex;
-  final bool isFlipped;
-  final bool isLoading;
-  final List<Color> colorTracker;
-  final List<AnalysisResult> analysisResults;
-  final int deckIndex;
-  final String? targetLang;
-  final String? motherLang;
-  final bool isFavorite;
-  final String? errorMessage;
-
-  const DeckState({
-    this.cards = const [],
-    this.currentIndex = 0,
-    this.isFlipped = false,
-    this.isLoading = true,
-    this.colorTracker = const [],
-    this.analysisResults = const [],
-    this.deckIndex = 1,
-    this.targetLang,
-    this.motherLang,
-    this.isFavorite = false,
-    this.errorMessage,
-  });
-
-  DeckState copyWith({
-    List<CardModel>? cards,
-    int? currentIndex,
-    bool? isFlipped,
-    bool? isLoading,
-    List<Color>? colorTracker,
-    List<AnalysisResult>? analysisResults,
-    int? deckIndex,
-    String? targetLang,
-    String? motherLang,
-    bool? isFavorite,
-    String? errorMessage,
-    bool clearError = false,
-  }) {
-    return DeckState(
-      cards: cards ?? this.cards,
-      currentIndex: currentIndex ?? this.currentIndex,
-      isFlipped: isFlipped ?? this.isFlipped,
-      isLoading: isLoading ?? this.isLoading,
-      colorTracker: colorTracker ?? this.colorTracker,
-      analysisResults: analysisResults ?? this.analysisResults,
-      deckIndex: deckIndex ?? this.deckIndex,
-      targetLang: targetLang ?? this.targetLang,
-      motherLang: motherLang ?? this.motherLang,
-      isFavorite: isFavorite ?? this.isFavorite,
-      errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-    );
-  }
-
-  CardModel get currentCard => cards[currentIndex];
-  bool get isLastCard => currentIndex >= cards.length - 1;
-  bool get isEmpty => cards.isEmpty;
-}
 
 /// Manages the deck-based flashcard session.
 class DeckNotifier extends StateNotifier<DeckState> {
@@ -99,22 +41,23 @@ class DeckNotifier extends StateNotifier<DeckState> {
         final favWords = await _wordRepo.fetchAllFavorites();
         final random = Random();
         final randomIndices = <int>{};
-        while (randomIndices.length < 10 && randomIndices.length < favWords.length) {
+        while (randomIndices.length < AppConstants.cardsPerDeck &&
+            randomIndices.length < favWords.length) {
           randomIndices.add(random.nextInt(favWords.length));
         }
         for (final index in randomIndices) {
           allWords.add(favWords[index]);
         }
       } else {
-        final feedback1Words = await _wordRepo.fetchWordsByFeedback(
-          targetLang, level, 1, 4,
+        final hardWords = await _wordRepo.fetchWordsByFeedback(
+          targetLang, level, FeedbackType.hard.value, 4,
         );
-        final feedback2Words = await _wordRepo.fetchWordsByFeedback(
-          targetLang, level, 2, 1,
+        final easyWords = await _wordRepo.fetchWordsByFeedback(
+          targetLang, level, FeedbackType.easy.value, 1,
         );
-        allWords = [...feedback1Words, ...feedback2Words];
+        allWords = [...hardWords, ...easyWords];
 
-        final missingCards = 10 - allWords.length;
+        final missingCards = AppConstants.cardsPerDeck - allWords.length;
         if (missingCards > 0) {
           final additionalWords = await _wordRepo.fetchWordsByIsSeen(
             targetLang, level, 0, missingCards,
@@ -146,7 +89,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
       }
 
       allCards.shuffle(Random());
-      final selected = allCards.take(10).toList();
+      final selected = allCards.take(AppConstants.cardsPerDeck).toList();
 
       // Mark all selected cards as seen
       for (final card in selected) {
@@ -158,7 +101,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
         currentIndex: 0,
         isFlipped: false,
         isLoading: false,
-        colorTracker: List.generate(selected.length, (_) => Colors.grey),
+        colorTracker: List.generate(selected.length, (_) => AppTheme.cardDefault),
         analysisResults: [],
         targetLang: targetLang,
         motherLang: motherLang,
@@ -178,14 +121,14 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
     final currentCard = state.currentCard;
 
-    // Map color to feedback value
-    int feedback;
-    if (color == Colors.red || color == Colors.red.shade200) {
-      feedback = 1;
-    } else if (color == Colors.green || color == Colors.green.shade200) {
-      feedback = 2;
+    // Map color to feedback value using the FeedbackType enum
+    final int feedback;
+    if (color == AppTheme.cardRed || color == Colors.red.shade200) {
+      feedback = FeedbackType.hard.value;
+    } else if (color == AppTheme.cardGreen || color == Colors.green.shade200) {
+      feedback = FeedbackType.easy.value;
     } else {
-      feedback = 3;
+      feedback = FeedbackType.medium.value;
     }
 
     // Persist feedback
@@ -214,7 +157,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
     if (!state.isFlipped) return;
 
     final newColorTracker = List<Color>.from(state.colorTracker);
-    newColorTracker[state.currentIndex] = Colors.grey;
+    newColorTracker[state.currentIndex] = AppTheme.cardDefault;
 
     state = state.copyWith(
       isFlipped: false,
@@ -244,7 +187,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
     state = DeckState(
       isLoading: true,
       deckIndex: state.deckIndex + 1,
-      colorTracker: List.generate(10, (_) => Colors.grey),
+      colorTracker: List.generate(AppConstants.cardsPerDeck, (_) => AppTheme.cardDefault),
     );
   }
 

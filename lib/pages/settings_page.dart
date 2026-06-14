@@ -77,11 +77,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           const JsonEncoder.withIndent('  ').convert(exportData));
 
       if (mounted) {
-        await SharePlus.instance.share(
-          ShareParams(
-            files: [XFile(file.path)],
-            subject: 'PolyDeck Backup',
-          ),
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          subject: 'PolyDeck Backup',
         );
       }
     } catch (e) {

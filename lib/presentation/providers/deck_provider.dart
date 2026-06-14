@@ -11,6 +11,7 @@ import 'package:poly2/domain/enums/rating.dart';
 import 'package:poly2/domain/enums/card_state.dart';
 import 'package:poly2/domain/state/deck_state.dart';
 import 'package:poly2/services/fsrs_service.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_theme.dart';
@@ -155,13 +156,11 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
       // Build FSRS card from DB state
       final fsrsCard = _fsrs.cardFromDb(
-        cardState: word.cardState,
+        cardId: word.id,
+        cardStateValue: word.cardState,
         stability: word.stability,
         difficulty: word.difficulty,
         elapsedDays: word.elapsedDays,
-        scheduledDays: word.scheduledDays,
-        reps: word.reps,
-        lapses: word.lapses,
         lastReview: word.lastReview,
         due: word.due,
       );
@@ -177,10 +176,10 @@ class DeckNotifier extends StateNotifier<DeckState> {
         stability: result.stability,
         difficulty: result.difficulty,
         due: result.due,
-        elapsedDays: result.elapsedDays,
+        elapsedDays: 0,
         scheduledDays: result.scheduledDays,
-        reps: result.reps,
-        lapses: result.lapses,
+        reps: word.reps + 1,
+        lapses: rating == Rating.again ? word.lapses + 1 : word.lapses,
         lastReview: result.lastReview,
       );
 
@@ -189,9 +188,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
           ? 1
           : rating == Rating.hard
               ? 3
-              : rating == Rating.good
-                  ? 2
-                  : 2; // Easy maps to 2 as well
+              : 2; // Good/Easy map to 2
       await _wordRepo.updateFeedback(tableName, card.id, legacyFeedback);
 
       // Insert revlog entry
@@ -203,7 +200,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
         due: word.due ?? '',
         stability: result.stability,
         difficulty: result.difficulty,
-        elapsedDays: result.elapsedDays,
+        elapsedDays: word.elapsedDays,
         lastElapsedDays: word.elapsedDays,
         scheduledDays: result.scheduledDays,
         reviewDate: result.lastReview,

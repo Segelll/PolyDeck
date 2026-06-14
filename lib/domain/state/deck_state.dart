@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/domain/models/card_model.dart';
 import 'package:poly2/domain/models/analysis_result.dart';
+import 'package:poly2/domain/enums/rating.dart';
 
 /// Immutable state for a single card flip (deck) session.
 class DeckState {
@@ -15,7 +16,7 @@ class DeckState {
   final String? motherLang;
   final bool isFavorite;
   final String? errorMessage;
-  final int? lastRating;
+  final Rating? lastRating;
 
   const DeckState({
     this.cards = const [],
@@ -45,7 +46,7 @@ class DeckState {
     bool? isFavorite,
     String? errorMessage,
     bool clearError = false,
-    int? lastRating,
+    Rating? lastRating,
   }) {
     return DeckState(
       cards: cards ?? this.cards,

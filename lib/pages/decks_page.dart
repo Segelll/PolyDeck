@@ -133,7 +133,7 @@ class _DecksPageState extends ConsumerState<DecksPage> {
         isSelected ? Colors.blue.shade100 : Colors.grey.shade200;
     final Color textColor = isSelected ? Colors.white : Colors.black87;
 
-    Container buildLayer(Color color, {double left = 0, double top = 0}) {
+    Positioned buildLayer(Color color, {double left = 0, double top = 0}) {
       return Positioned(
         left: left,
         top: top,

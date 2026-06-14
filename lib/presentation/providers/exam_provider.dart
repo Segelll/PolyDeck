@@ -5,6 +5,8 @@ import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/domain/models/exam_model.dart';
 import 'package:poly2/domain/state/exam_state.dart';
+import 'package:poly2/presentation/providers/deck_provider.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/utils/random_utils.dart';

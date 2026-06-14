@@ -62,7 +62,6 @@ dependencies:
 
   # FSRS Spaced Repetition
   fsrs: ^5.2.0
-    sdk: flutter
 
 dev_dependencies:
   flutter_test:

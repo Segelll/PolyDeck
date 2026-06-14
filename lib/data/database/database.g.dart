@@ -3,20 +3,16 @@
 part of 'database.dart';
 
 // ignore_for_file: type=lint
-class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
+class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $FavTable(this.attachedDatabase, [this._alias]);
+  $WordsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
       'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _wordMeta = const VerificationMeta('word');
   @override
   late final GeneratedColumn<String> word = GeneratedColumn<String>(
@@ -33,10 +29,16 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
   late final GeneratedColumn<String> level = GeneratedColumn<String>(
       'level', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _languageCodeMeta =
+      const VerificationMeta('languageCode');
+  @override
+  late final GeneratedColumn<String> languageCode = GeneratedColumn<String>(
+      'language_code', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _isSeenMeta = const VerificationMeta('isSeen');
   @override
   late final GeneratedColumn<int> isSeen = GeneratedColumn<int>(
-      'is_seen', aliasedName, false,
+      'isSeen', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
@@ -52,18 +54,6 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
   @override
   late final GeneratedColumn<String> date = GeneratedColumn<String>(
       'date', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _backwordMeta =
-      const VerificationMeta('backword');
-  @override
-  late final GeneratedColumn<String> backword = GeneratedColumn<String>(
-      'backword', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _backsentenceMeta =
-      const VerificationMeta('backsentence');
-  @override
-  late final GeneratedColumn<String> backsentence = GeneratedColumn<String>(
-      'backsentence', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _cardStateMeta =
       const VerificationMeta('cardState');
@@ -130,17 +120,28 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
   late final GeneratedColumn<String> lastReview = GeneratedColumn<String>(
       'last_review', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _backwordMeta =
+      const VerificationMeta('backword');
+  @override
+  late final GeneratedColumn<String> backword = GeneratedColumn<String>(
+      'backword', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _backsentenceMeta =
+      const VerificationMeta('backsentence');
+  @override
+  late final GeneratedColumn<String> backsentence = GeneratedColumn<String>(
+      'backsentence', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
         word,
         sentence,
         level,
+        languageCode,
         isSeen,
         feedback,
         date,
-        backword,
-        backsentence,
         cardState,
         stability,
         difficulty,
@@ -149,20 +150,24 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
         scheduledDays,
         reps,
         lapses,
-        lastReview
+        lastReview,
+        backword,
+        backsentence
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'fav';
+  static const String $name = 'words';
   @override
-  VerificationContext validateIntegrity(Insertable<FavData> instance,
+  VerificationContext validateIntegrity(Insertable<Word> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
     }
     if (data.containsKey('word')) {
       context.handle(
@@ -182,9 +187,17 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
     } else if (isInserting) {
       context.missing(_levelMeta);
     }
-    if (data.containsKey('is_seen')) {
+    if (data.containsKey('language_code')) {
+      context.handle(
+          _languageCodeMeta,
+          languageCode.isAcceptableOrUnknown(
+              data['language_code']!, _languageCodeMeta));
+    } else if (isInserting) {
+      context.missing(_languageCodeMeta);
+    }
+    if (data.containsKey('isSeen')) {
       context.handle(_isSeenMeta,
-          isSeen.isAcceptableOrUnknown(data['is_seen']!, _isSeenMeta));
+          isSeen.isAcceptableOrUnknown(data['isSeen']!, _isSeenMeta));
     }
     if (data.containsKey('feedback')) {
       context.handle(_feedbackMeta,
@@ -193,16 +206,6 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
     if (data.containsKey('date')) {
       context.handle(
           _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
-    }
-    if (data.containsKey('backword')) {
-      context.handle(_backwordMeta,
-          backword.isAcceptableOrUnknown(data['backword']!, _backwordMeta));
-    }
-    if (data.containsKey('backsentence')) {
-      context.handle(
-          _backsentenceMeta,
-          backsentence.isAcceptableOrUnknown(
-              data['backsentence']!, _backsentenceMeta));
     }
     if (data.containsKey('card_state')) {
       context.handle(_cardStateMeta,
@@ -248,15 +251,25 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
           lastReview.isAcceptableOrUnknown(
               data['last_review']!, _lastReviewMeta));
     }
+    if (data.containsKey('backword')) {
+      context.handle(_backwordMeta,
+          backword.isAcceptableOrUnknown(data['backword']!, _backwordMeta));
+    }
+    if (data.containsKey('backsentence')) {
+      context.handle(
+          _backsentenceMeta,
+          backsentence.isAcceptableOrUnknown(
+              data['backsentence']!, _backsentenceMeta));
+    }
     return context;
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {languageCode, id};
   @override
-  FavData map(Map<String, dynamic> data, {String? tablePrefix}) {
+  Word map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return FavData(
+    return Word(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       word: attachedDatabase.typeMapping
@@ -265,16 +278,14 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
           .read(DriftSqlType.string, data['${effectivePrefix}sentence'])!,
       level: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}level'])!,
+      languageCode: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}language_code'])!,
       isSeen: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}is_seen'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}isSeen'])!,
       feedback: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}feedback'])!,
       date: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}date']),
-      backword: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}backword']),
-      backsentence: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}backsentence']),
       cardState: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}card_state'])!,
       stability: attachedDatabase.typeMapping
@@ -293,25 +304,28 @@ class $FavTable extends Fav with TableInfo<$FavTable, FavData> {
           .read(DriftSqlType.int, data['${effectivePrefix}lapses'])!,
       lastReview: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}last_review']),
+      backword: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}backword']),
+      backsentence: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}backsentence']),
     );
   }
 
   @override
-  $FavTable createAlias(String alias) {
-    return $FavTable(attachedDatabase, alias);
+  $WordsTable createAlias(String alias) {
+    return $WordsTable(attachedDatabase, alias);
   }
 }
 
-class FavData extends DataClass implements Insertable<FavData> {
+class Word extends DataClass implements Insertable<Word> {
   final int id;
   final String word;
   final String sentence;
   final String level;
+  final String languageCode;
   final int isSeen;
   final int feedback;
   final String? date;
-  final String? backword;
-  final String? backsentence;
   final int cardState;
   final double stability;
   final double difficulty;
@@ -321,16 +335,17 @@ class FavData extends DataClass implements Insertable<FavData> {
   final int reps;
   final int lapses;
   final String? lastReview;
-  const FavData(
+  final String? backword;
+  final String? backsentence;
+  const Word(
       {required this.id,
       required this.word,
       required this.sentence,
       required this.level,
+      required this.languageCode,
       required this.isSeen,
       required this.feedback,
       this.date,
-      this.backword,
-      this.backsentence,
       required this.cardState,
       required this.stability,
       required this.difficulty,
@@ -339,7 +354,9 @@ class FavData extends DataClass implements Insertable<FavData> {
       required this.scheduledDays,
       required this.reps,
       required this.lapses,
-      this.lastReview});
+      this.lastReview,
+      this.backword,
+      this.backsentence});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -347,16 +364,11 @@ class FavData extends DataClass implements Insertable<FavData> {
     map['word'] = Variable<String>(word);
     map['sentence'] = Variable<String>(sentence);
     map['level'] = Variable<String>(level);
-    map['is_seen'] = Variable<int>(isSeen);
+    map['language_code'] = Variable<String>(languageCode);
+    map['isSeen'] = Variable<int>(isSeen);
     map['feedback'] = Variable<int>(feedback);
     if (!nullToAbsent || date != null) {
       map['date'] = Variable<String>(date);
-    }
-    if (!nullToAbsent || backword != null) {
-      map['backword'] = Variable<String>(backword);
-    }
-    if (!nullToAbsent || backsentence != null) {
-      map['backsentence'] = Variable<String>(backsentence);
     }
     map['card_state'] = Variable<int>(cardState);
     map['stability'] = Variable<double>(stability);
@@ -371,24 +383,25 @@ class FavData extends DataClass implements Insertable<FavData> {
     if (!nullToAbsent || lastReview != null) {
       map['last_review'] = Variable<String>(lastReview);
     }
+    if (!nullToAbsent || backword != null) {
+      map['backword'] = Variable<String>(backword);
+    }
+    if (!nullToAbsent || backsentence != null) {
+      map['backsentence'] = Variable<String>(backsentence);
+    }
     return map;
   }
 
-  FavCompanion toCompanion(bool nullToAbsent) {
-    return FavCompanion(
+  WordsCompanion toCompanion(bool nullToAbsent) {
+    return WordsCompanion(
       id: Value(id),
       word: Value(word),
       sentence: Value(sentence),
       level: Value(level),
+      languageCode: Value(languageCode),
       isSeen: Value(isSeen),
       feedback: Value(feedback),
       date: date == null && nullToAbsent ? const Value.absent() : Value(date),
-      backword: backword == null && nullToAbsent
-          ? const Value.absent()
-          : Value(backword),
-      backsentence: backsentence == null && nullToAbsent
-          ? const Value.absent()
-          : Value(backsentence),
       cardState: Value(cardState),
       stability: Value(stability),
       difficulty: Value(difficulty),
@@ -400,22 +413,27 @@ class FavData extends DataClass implements Insertable<FavData> {
       lastReview: lastReview == null && nullToAbsent
           ? const Value.absent()
           : Value(lastReview),
+      backword: backword == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backword),
+      backsentence: backsentence == null && nullToAbsent
+          ? const Value.absent()
+          : Value(backsentence),
     );
   }
 
-  factory FavData.fromJson(Map<String, dynamic> json,
+  factory Word.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return FavData(
+    return Word(
       id: serializer.fromJson<int>(json['id']),
       word: serializer.fromJson<String>(json['word']),
       sentence: serializer.fromJson<String>(json['sentence']),
       level: serializer.fromJson<String>(json['level']),
+      languageCode: serializer.fromJson<String>(json['languageCode']),
       isSeen: serializer.fromJson<int>(json['isSeen']),
       feedback: serializer.fromJson<int>(json['feedback']),
       date: serializer.fromJson<String?>(json['date']),
-      backword: serializer.fromJson<String?>(json['backword']),
-      backsentence: serializer.fromJson<String?>(json['backsentence']),
       cardState: serializer.fromJson<int>(json['cardState']),
       stability: serializer.fromJson<double>(json['stability']),
       difficulty: serializer.fromJson<double>(json['difficulty']),
@@ -425,6 +443,8 @@ class FavData extends DataClass implements Insertable<FavData> {
       reps: serializer.fromJson<int>(json['reps']),
       lapses: serializer.fromJson<int>(json['lapses']),
       lastReview: serializer.fromJson<String?>(json['lastReview']),
+      backword: serializer.fromJson<String?>(json['backword']),
+      backsentence: serializer.fromJson<String?>(json['backsentence']),
     );
   }
   @override
@@ -435,11 +455,10 @@ class FavData extends DataClass implements Insertable<FavData> {
       'word': serializer.toJson<String>(word),
       'sentence': serializer.toJson<String>(sentence),
       'level': serializer.toJson<String>(level),
+      'languageCode': serializer.toJson<String>(languageCode),
       'isSeen': serializer.toJson<int>(isSeen),
       'feedback': serializer.toJson<int>(feedback),
       'date': serializer.toJson<String?>(date),
-      'backword': serializer.toJson<String?>(backword),
-      'backsentence': serializer.toJson<String?>(backsentence),
       'cardState': serializer.toJson<int>(cardState),
       'stability': serializer.toJson<double>(stability),
       'difficulty': serializer.toJson<double>(difficulty),
@@ -449,19 +468,20 @@ class FavData extends DataClass implements Insertable<FavData> {
       'reps': serializer.toJson<int>(reps),
       'lapses': serializer.toJson<int>(lapses),
       'lastReview': serializer.toJson<String?>(lastReview),
+      'backword': serializer.toJson<String?>(backword),
+      'backsentence': serializer.toJson<String?>(backsentence),
     };
   }
 
-  FavData copyWith(
+  Word copyWith(
           {int? id,
           String? word,
           String? sentence,
           String? level,
+          String? languageCode,
           int? isSeen,
           int? feedback,
           Value<String?> date = const Value.absent(),
-          Value<String?> backword = const Value.absent(),
-          Value<String?> backsentence = const Value.absent(),
           int? cardState,
           double? stability,
           double? difficulty,
@@ -470,18 +490,18 @@ class FavData extends DataClass implements Insertable<FavData> {
           int? scheduledDays,
           int? reps,
           int? lapses,
-          Value<String?> lastReview = const Value.absent()}) =>
-      FavData(
+          Value<String?> lastReview = const Value.absent(),
+          Value<String?> backword = const Value.absent(),
+          Value<String?> backsentence = const Value.absent()}) =>
+      Word(
         id: id ?? this.id,
         word: word ?? this.word,
         sentence: sentence ?? this.sentence,
         level: level ?? this.level,
+        languageCode: languageCode ?? this.languageCode,
         isSeen: isSeen ?? this.isSeen,
         feedback: feedback ?? this.feedback,
         date: date.present ? date.value : this.date,
-        backword: backword.present ? backword.value : this.backword,
-        backsentence:
-            backsentence.present ? backsentence.value : this.backsentence,
         cardState: cardState ?? this.cardState,
         stability: stability ?? this.stability,
         difficulty: difficulty ?? this.difficulty,
@@ -491,20 +511,22 @@ class FavData extends DataClass implements Insertable<FavData> {
         reps: reps ?? this.reps,
         lapses: lapses ?? this.lapses,
         lastReview: lastReview.present ? lastReview.value : this.lastReview,
+        backword: backword.present ? backword.value : this.backword,
+        backsentence:
+            backsentence.present ? backsentence.value : this.backsentence,
       );
-  FavData copyWithCompanion(FavCompanion data) {
-    return FavData(
+  Word copyWithCompanion(WordsCompanion data) {
+    return Word(
       id: data.id.present ? data.id.value : this.id,
       word: data.word.present ? data.word.value : this.word,
       sentence: data.sentence.present ? data.sentence.value : this.sentence,
       level: data.level.present ? data.level.value : this.level,
+      languageCode: data.languageCode.present
+          ? data.languageCode.value
+          : this.languageCode,
       isSeen: data.isSeen.present ? data.isSeen.value : this.isSeen,
       feedback: data.feedback.present ? data.feedback.value : this.feedback,
       date: data.date.present ? data.date.value : this.date,
-      backword: data.backword.present ? data.backword.value : this.backword,
-      backsentence: data.backsentence.present
-          ? data.backsentence.value
-          : this.backsentence,
       cardState: data.cardState.present ? data.cardState.value : this.cardState,
       stability: data.stability.present ? data.stability.value : this.stability,
       difficulty:
@@ -519,21 +541,24 @@ class FavData extends DataClass implements Insertable<FavData> {
       lapses: data.lapses.present ? data.lapses.value : this.lapses,
       lastReview:
           data.lastReview.present ? data.lastReview.value : this.lastReview,
+      backword: data.backword.present ? data.backword.value : this.backword,
+      backsentence: data.backsentence.present
+          ? data.backsentence.value
+          : this.backsentence,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('FavData(')
+    return (StringBuffer('Word(')
           ..write('id: $id, ')
           ..write('word: $word, ')
           ..write('sentence: $sentence, ')
           ..write('level: $level, ')
+          ..write('languageCode: $languageCode, ')
           ..write('isSeen: $isSeen, ')
           ..write('feedback: $feedback, ')
           ..write('date: $date, ')
-          ..write('backword: $backword, ')
-          ..write('backsentence: $backsentence, ')
           ..write('cardState: $cardState, ')
           ..write('stability: $stability, ')
           ..write('difficulty: $difficulty, ')
@@ -542,7 +567,9 @@ class FavData extends DataClass implements Insertable<FavData> {
           ..write('scheduledDays: $scheduledDays, ')
           ..write('reps: $reps, ')
           ..write('lapses: $lapses, ')
-          ..write('lastReview: $lastReview')
+          ..write('lastReview: $lastReview, ')
+          ..write('backword: $backword, ')
+          ..write('backsentence: $backsentence')
           ..write(')'))
         .toString();
   }
@@ -553,11 +580,10 @@ class FavData extends DataClass implements Insertable<FavData> {
       word,
       sentence,
       level,
+      languageCode,
       isSeen,
       feedback,
       date,
-      backword,
-      backsentence,
       cardState,
       stability,
       difficulty,
@@ -566,20 +592,21 @@ class FavData extends DataClass implements Insertable<FavData> {
       scheduledDays,
       reps,
       lapses,
-      lastReview);
+      lastReview,
+      backword,
+      backsentence);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is FavData &&
+      (other is Word &&
           other.id == this.id &&
           other.word == this.word &&
           other.sentence == this.sentence &&
           other.level == this.level &&
+          other.languageCode == this.languageCode &&
           other.isSeen == this.isSeen &&
           other.feedback == this.feedback &&
           other.date == this.date &&
-          other.backword == this.backword &&
-          other.backsentence == this.backsentence &&
           other.cardState == this.cardState &&
           other.stability == this.stability &&
           other.difficulty == this.difficulty &&
@@ -588,19 +615,20 @@ class FavData extends DataClass implements Insertable<FavData> {
           other.scheduledDays == this.scheduledDays &&
           other.reps == this.reps &&
           other.lapses == this.lapses &&
-          other.lastReview == this.lastReview);
+          other.lastReview == this.lastReview &&
+          other.backword == this.backword &&
+          other.backsentence == this.backsentence);
 }
 
-class FavCompanion extends UpdateCompanion<FavData> {
+class WordsCompanion extends UpdateCompanion<Word> {
   final Value<int> id;
   final Value<String> word;
   final Value<String> sentence;
   final Value<String> level;
+  final Value<String> languageCode;
   final Value<int> isSeen;
   final Value<int> feedback;
   final Value<String?> date;
-  final Value<String?> backword;
-  final Value<String?> backsentence;
   final Value<int> cardState;
   final Value<double> stability;
   final Value<double> difficulty;
@@ -610,16 +638,18 @@ class FavCompanion extends UpdateCompanion<FavData> {
   final Value<int> reps;
   final Value<int> lapses;
   final Value<String?> lastReview;
-  const FavCompanion({
+  final Value<String?> backword;
+  final Value<String?> backsentence;
+  final Value<int> rowid;
+  const WordsCompanion({
     this.id = const Value.absent(),
     this.word = const Value.absent(),
     this.sentence = const Value.absent(),
     this.level = const Value.absent(),
+    this.languageCode = const Value.absent(),
     this.isSeen = const Value.absent(),
     this.feedback = const Value.absent(),
     this.date = const Value.absent(),
-    this.backword = const Value.absent(),
-    this.backsentence = const Value.absent(),
     this.cardState = const Value.absent(),
     this.stability = const Value.absent(),
     this.difficulty = const Value.absent(),
@@ -629,17 +659,19 @@ class FavCompanion extends UpdateCompanion<FavData> {
     this.reps = const Value.absent(),
     this.lapses = const Value.absent(),
     this.lastReview = const Value.absent(),
+    this.backword = const Value.absent(),
+    this.backsentence = const Value.absent(),
+    this.rowid = const Value.absent(),
   });
-  FavCompanion.insert({
-    this.id = const Value.absent(),
+  WordsCompanion.insert({
+    required int id,
     required String word,
     required String sentence,
     required String level,
+    required String languageCode,
     this.isSeen = const Value.absent(),
     this.feedback = const Value.absent(),
     this.date = const Value.absent(),
-    this.backword = const Value.absent(),
-    this.backsentence = const Value.absent(),
     this.cardState = const Value.absent(),
     this.stability = const Value.absent(),
     this.difficulty = const Value.absent(),
@@ -649,19 +681,23 @@ class FavCompanion extends UpdateCompanion<FavData> {
     this.reps = const Value.absent(),
     this.lapses = const Value.absent(),
     this.lastReview = const Value.absent(),
-  })  : word = Value(word),
+    this.backword = const Value.absent(),
+    this.backsentence = const Value.absent(),
+    this.rowid = const Value.absent(),
+  })  : id = Value(id),
+        word = Value(word),
         sentence = Value(sentence),
-        level = Value(level);
-  static Insertable<FavData> custom({
+        level = Value(level),
+        languageCode = Value(languageCode);
+  static Insertable<Word> custom({
     Expression<int>? id,
     Expression<String>? word,
     Expression<String>? sentence,
     Expression<String>? level,
+    Expression<String>? languageCode,
     Expression<int>? isSeen,
     Expression<int>? feedback,
     Expression<String>? date,
-    Expression<String>? backword,
-    Expression<String>? backsentence,
     Expression<int>? cardState,
     Expression<double>? stability,
     Expression<double>? difficulty,
@@ -671,17 +707,19 @@ class FavCompanion extends UpdateCompanion<FavData> {
     Expression<int>? reps,
     Expression<int>? lapses,
     Expression<String>? lastReview,
+    Expression<String>? backword,
+    Expression<String>? backsentence,
+    Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (word != null) 'word': word,
       if (sentence != null) 'sentence': sentence,
       if (level != null) 'level': level,
-      if (isSeen != null) 'is_seen': isSeen,
+      if (languageCode != null) 'language_code': languageCode,
+      if (isSeen != null) 'isSeen': isSeen,
       if (feedback != null) 'feedback': feedback,
       if (date != null) 'date': date,
-      if (backword != null) 'backword': backword,
-      if (backsentence != null) 'backsentence': backsentence,
       if (cardState != null) 'card_state': cardState,
       if (stability != null) 'stability': stability,
       if (difficulty != null) 'difficulty': difficulty,
@@ -691,19 +729,21 @@ class FavCompanion extends UpdateCompanion<FavData> {
       if (reps != null) 'reps': reps,
       if (lapses != null) 'lapses': lapses,
       if (lastReview != null) 'last_review': lastReview,
+      if (backword != null) 'backword': backword,
+      if (backsentence != null) 'backsentence': backsentence,
+      if (rowid != null) 'rowid': rowid,
     });
   }
 
-  FavCompanion copyWith(
+  WordsCompanion copyWith(
       {Value<int>? id,
       Value<String>? word,
       Value<String>? sentence,
       Value<String>? level,
+      Value<String>? languageCode,
       Value<int>? isSeen,
       Value<int>? feedback,
       Value<String?>? date,
-      Value<String?>? backword,
-      Value<String?>? backsentence,
       Value<int>? cardState,
       Value<double>? stability,
       Value<double>? difficulty,
@@ -712,17 +752,19 @@ class FavCompanion extends UpdateCompanion<FavData> {
       Value<int>? scheduledDays,
       Value<int>? reps,
       Value<int>? lapses,
-      Value<String?>? lastReview}) {
-    return FavCompanion(
+      Value<String?>? lastReview,
+      Value<String?>? backword,
+      Value<String?>? backsentence,
+      Value<int>? rowid}) {
+    return WordsCompanion(
       id: id ?? this.id,
       word: word ?? this.word,
       sentence: sentence ?? this.sentence,
       level: level ?? this.level,
+      languageCode: languageCode ?? this.languageCode,
       isSeen: isSeen ?? this.isSeen,
       feedback: feedback ?? this.feedback,
       date: date ?? this.date,
-      backword: backword ?? this.backword,
-      backsentence: backsentence ?? this.backsentence,
       cardState: cardState ?? this.cardState,
       stability: stability ?? this.stability,
       difficulty: difficulty ?? this.difficulty,
@@ -732,6 +774,9 @@ class FavCompanion extends UpdateCompanion<FavData> {
       reps: reps ?? this.reps,
       lapses: lapses ?? this.lapses,
       lastReview: lastReview ?? this.lastReview,
+      backword: backword ?? this.backword,
+      backsentence: backsentence ?? this.backsentence,
+      rowid: rowid ?? this.rowid,
     );
   }
 
@@ -750,20 +795,17 @@ class FavCompanion extends UpdateCompanion<FavData> {
     if (level.present) {
       map['level'] = Variable<String>(level.value);
     }
+    if (languageCode.present) {
+      map['language_code'] = Variable<String>(languageCode.value);
+    }
     if (isSeen.present) {
-      map['is_seen'] = Variable<int>(isSeen.value);
+      map['isSeen'] = Variable<int>(isSeen.value);
     }
     if (feedback.present) {
       map['feedback'] = Variable<int>(feedback.value);
     }
     if (date.present) {
       map['date'] = Variable<String>(date.value);
-    }
-    if (backword.present) {
-      map['backword'] = Variable<String>(backword.value);
-    }
-    if (backsentence.present) {
-      map['backsentence'] = Variable<String>(backsentence.value);
     }
     if (cardState.present) {
       map['card_state'] = Variable<int>(cardState.value);
@@ -792,21 +834,29 @@ class FavCompanion extends UpdateCompanion<FavData> {
     if (lastReview.present) {
       map['last_review'] = Variable<String>(lastReview.value);
     }
+    if (backword.present) {
+      map['backword'] = Variable<String>(backword.value);
+    }
+    if (backsentence.present) {
+      map['backsentence'] = Variable<String>(backsentence.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('FavCompanion(')
+    return (StringBuffer('WordsCompanion(')
           ..write('id: $id, ')
           ..write('word: $word, ')
           ..write('sentence: $sentence, ')
           ..write('level: $level, ')
+          ..write('languageCode: $languageCode, ')
           ..write('isSeen: $isSeen, ')
           ..write('feedback: $feedback, ')
           ..write('date: $date, ')
-          ..write('backword: $backword, ')
-          ..write('backsentence: $backsentence, ')
           ..write('cardState: $cardState, ')
           ..write('stability: $stability, ')
           ..write('difficulty: $difficulty, ')
@@ -815,7 +865,10 @@ class FavCompanion extends UpdateCompanion<FavData> {
           ..write('scheduledDays: $scheduledDays, ')
           ..write('reps: $reps, ')
           ..write('lapses: $lapses, ')
-          ..write('lastReview: $lastReview')
+          ..write('lastReview: $lastReview, ')
+          ..write('backword: $backword, ')
+          ..write('backsentence: $backsentence, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -2064,7 +2117,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
-  late final $FavTable fav = $FavTable(this);
+  late final $WordsTable words = $WordsTable(this);
   late final $RevlogEntriesTable revlogEntries = $RevlogEntriesTable(this);
   late final $DeckConfigsTable deckConfigs = $DeckConfigsTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
@@ -2073,19 +2126,18 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [fav, revlogEntries, deckConfigs, userSettings];
+      [words, revlogEntries, deckConfigs, userSettings];
 }
 
-typedef $$FavTableCreateCompanionBuilder = FavCompanion Function({
-  Value<int> id,
+typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
+  required int id,
   required String word,
   required String sentence,
   required String level,
+  required String languageCode,
   Value<int> isSeen,
   Value<int> feedback,
   Value<String?> date,
-  Value<String?> backword,
-  Value<String?> backsentence,
   Value<int> cardState,
   Value<double> stability,
   Value<double> difficulty,
@@ -2095,17 +2147,19 @@ typedef $$FavTableCreateCompanionBuilder = FavCompanion Function({
   Value<int> reps,
   Value<int> lapses,
   Value<String?> lastReview,
+  Value<String?> backword,
+  Value<String?> backsentence,
+  Value<int> rowid,
 });
-typedef $$FavTableUpdateCompanionBuilder = FavCompanion Function({
+typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<int> id,
   Value<String> word,
   Value<String> sentence,
   Value<String> level,
+  Value<String> languageCode,
   Value<int> isSeen,
   Value<int> feedback,
   Value<String?> date,
-  Value<String?> backword,
-  Value<String?> backsentence,
   Value<int> cardState,
   Value<double> stability,
   Value<double> difficulty,
@@ -2115,10 +2169,13 @@ typedef $$FavTableUpdateCompanionBuilder = FavCompanion Function({
   Value<int> reps,
   Value<int> lapses,
   Value<String?> lastReview,
+  Value<String?> backword,
+  Value<String?> backsentence,
+  Value<int> rowid,
 });
 
-class $$FavTableFilterComposer extends Composer<_$AppDatabase, $FavTable> {
-  $$FavTableFilterComposer({
+class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
+  $$WordsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2137,6 +2194,9 @@ class $$FavTableFilterComposer extends Composer<_$AppDatabase, $FavTable> {
   ColumnFilters<String> get level => $composableBuilder(
       column: $table.level, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<String> get languageCode => $composableBuilder(
+      column: $table.languageCode, builder: (column) => ColumnFilters(column));
+
   ColumnFilters<int> get isSeen => $composableBuilder(
       column: $table.isSeen, builder: (column) => ColumnFilters(column));
 
@@ -2145,12 +2205,6 @@ class $$FavTableFilterComposer extends Composer<_$AppDatabase, $FavTable> {
 
   ColumnFilters<String> get date => $composableBuilder(
       column: $table.date, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get backword => $composableBuilder(
-      column: $table.backword, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get backsentence => $composableBuilder(
-      column: $table.backsentence, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<int> get cardState => $composableBuilder(
       column: $table.cardState, builder: (column) => ColumnFilters(column));
@@ -2178,10 +2232,17 @@ class $$FavTableFilterComposer extends Composer<_$AppDatabase, $FavTable> {
 
   ColumnFilters<String> get lastReview => $composableBuilder(
       column: $table.lastReview, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get backword => $composableBuilder(
+      column: $table.backword, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get backsentence => $composableBuilder(
+      column: $table.backsentence, builder: (column) => ColumnFilters(column));
 }
 
-class $$FavTableOrderingComposer extends Composer<_$AppDatabase, $FavTable> {
-  $$FavTableOrderingComposer({
+class $$WordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WordsTable> {
+  $$WordsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2200,6 +2261,10 @@ class $$FavTableOrderingComposer extends Composer<_$AppDatabase, $FavTable> {
   ColumnOrderings<String> get level => $composableBuilder(
       column: $table.level, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get languageCode => $composableBuilder(
+      column: $table.languageCode,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<int> get isSeen => $composableBuilder(
       column: $table.isSeen, builder: (column) => ColumnOrderings(column));
 
@@ -2208,13 +2273,6 @@ class $$FavTableOrderingComposer extends Composer<_$AppDatabase, $FavTable> {
 
   ColumnOrderings<String> get date => $composableBuilder(
       column: $table.date, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get backword => $composableBuilder(
-      column: $table.backword, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get backsentence => $composableBuilder(
-      column: $table.backsentence,
-      builder: (column) => ColumnOrderings(column));
 
   ColumnOrderings<int> get cardState => $composableBuilder(
       column: $table.cardState, builder: (column) => ColumnOrderings(column));
@@ -2243,10 +2301,18 @@ class $$FavTableOrderingComposer extends Composer<_$AppDatabase, $FavTable> {
 
   ColumnOrderings<String> get lastReview => $composableBuilder(
       column: $table.lastReview, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get backword => $composableBuilder(
+      column: $table.backword, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get backsentence => $composableBuilder(
+      column: $table.backsentence,
+      builder: (column) => ColumnOrderings(column));
 }
 
-class $$FavTableAnnotationComposer extends Composer<_$AppDatabase, $FavTable> {
-  $$FavTableAnnotationComposer({
+class $$WordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WordsTable> {
+  $$WordsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2265,6 +2331,9 @@ class $$FavTableAnnotationComposer extends Composer<_$AppDatabase, $FavTable> {
   GeneratedColumn<String> get level =>
       $composableBuilder(column: $table.level, builder: (column) => column);
 
+  GeneratedColumn<String> get languageCode => $composableBuilder(
+      column: $table.languageCode, builder: (column) => column);
+
   GeneratedColumn<int> get isSeen =>
       $composableBuilder(column: $table.isSeen, builder: (column) => column);
 
@@ -2273,12 +2342,6 @@ class $$FavTableAnnotationComposer extends Composer<_$AppDatabase, $FavTable> {
 
   GeneratedColumn<String> get date =>
       $composableBuilder(column: $table.date, builder: (column) => column);
-
-  GeneratedColumn<String> get backword =>
-      $composableBuilder(column: $table.backword, builder: (column) => column);
-
-  GeneratedColumn<String> get backsentence => $composableBuilder(
-      column: $table.backsentence, builder: (column) => column);
 
   GeneratedColumn<int> get cardState =>
       $composableBuilder(column: $table.cardState, builder: (column) => column);
@@ -2306,40 +2369,45 @@ class $$FavTableAnnotationComposer extends Composer<_$AppDatabase, $FavTable> {
 
   GeneratedColumn<String> get lastReview => $composableBuilder(
       column: $table.lastReview, builder: (column) => column);
+
+  GeneratedColumn<String> get backword =>
+      $composableBuilder(column: $table.backword, builder: (column) => column);
+
+  GeneratedColumn<String> get backsentence => $composableBuilder(
+      column: $table.backsentence, builder: (column) => column);
 }
 
-class $$FavTableTableManager extends RootTableManager<
+class $$WordsTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $FavTable,
-    FavData,
-    $$FavTableFilterComposer,
-    $$FavTableOrderingComposer,
-    $$FavTableAnnotationComposer,
-    $$FavTableCreateCompanionBuilder,
-    $$FavTableUpdateCompanionBuilder,
-    (FavData, BaseReferences<_$AppDatabase, $FavTable, FavData>),
-    FavData,
+    $WordsTable,
+    Word,
+    $$WordsTableFilterComposer,
+    $$WordsTableOrderingComposer,
+    $$WordsTableAnnotationComposer,
+    $$WordsTableCreateCompanionBuilder,
+    $$WordsTableUpdateCompanionBuilder,
+    (Word, BaseReferences<_$AppDatabase, $WordsTable, Word>),
+    Word,
     PrefetchHooks Function()> {
-  $$FavTableTableManager(_$AppDatabase db, $FavTable table)
+  $$WordsTableTableManager(_$AppDatabase db, $WordsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$FavTableFilterComposer($db: db, $table: table),
+              $$WordsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$FavTableOrderingComposer($db: db, $table: table),
+              $$WordsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$FavTableAnnotationComposer($db: db, $table: table),
+              $$WordsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> word = const Value.absent(),
             Value<String> sentence = const Value.absent(),
             Value<String> level = const Value.absent(),
+            Value<String> languageCode = const Value.absent(),
             Value<int> isSeen = const Value.absent(),
             Value<int> feedback = const Value.absent(),
             Value<String?> date = const Value.absent(),
-            Value<String?> backword = const Value.absent(),
-            Value<String?> backsentence = const Value.absent(),
             Value<int> cardState = const Value.absent(),
             Value<double> stability = const Value.absent(),
             Value<double> difficulty = const Value.absent(),
@@ -2349,17 +2417,19 @@ class $$FavTableTableManager extends RootTableManager<
             Value<int> reps = const Value.absent(),
             Value<int> lapses = const Value.absent(),
             Value<String?> lastReview = const Value.absent(),
+            Value<String?> backword = const Value.absent(),
+            Value<String?> backsentence = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
-              FavCompanion(
+              WordsCompanion(
             id: id,
             word: word,
             sentence: sentence,
             level: level,
+            languageCode: languageCode,
             isSeen: isSeen,
             feedback: feedback,
             date: date,
-            backword: backword,
-            backsentence: backsentence,
             cardState: cardState,
             stability: stability,
             difficulty: difficulty,
@@ -2369,17 +2439,19 @@ class $$FavTableTableManager extends RootTableManager<
             reps: reps,
             lapses: lapses,
             lastReview: lastReview,
+            backword: backword,
+            backsentence: backsentence,
+            rowid: rowid,
           ),
           createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
+            required int id,
             required String word,
             required String sentence,
             required String level,
+            required String languageCode,
             Value<int> isSeen = const Value.absent(),
             Value<int> feedback = const Value.absent(),
             Value<String?> date = const Value.absent(),
-            Value<String?> backword = const Value.absent(),
-            Value<String?> backsentence = const Value.absent(),
             Value<int> cardState = const Value.absent(),
             Value<double> stability = const Value.absent(),
             Value<double> difficulty = const Value.absent(),
@@ -2389,17 +2461,19 @@ class $$FavTableTableManager extends RootTableManager<
             Value<int> reps = const Value.absent(),
             Value<int> lapses = const Value.absent(),
             Value<String?> lastReview = const Value.absent(),
+            Value<String?> backword = const Value.absent(),
+            Value<String?> backsentence = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
           }) =>
-              FavCompanion.insert(
+              WordsCompanion.insert(
             id: id,
             word: word,
             sentence: sentence,
             level: level,
+            languageCode: languageCode,
             isSeen: isSeen,
             feedback: feedback,
             date: date,
-            backword: backword,
-            backsentence: backsentence,
             cardState: cardState,
             stability: stability,
             difficulty: difficulty,
@@ -2409,6 +2483,9 @@ class $$FavTableTableManager extends RootTableManager<
             reps: reps,
             lapses: lapses,
             lastReview: lastReview,
+            backword: backword,
+            backsentence: backsentence,
+            rowid: rowid,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -2417,17 +2494,17 @@ class $$FavTableTableManager extends RootTableManager<
         ));
 }
 
-typedef $$FavTableProcessedTableManager = ProcessedTableManager<
+typedef $$WordsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $FavTable,
-    FavData,
-    $$FavTableFilterComposer,
-    $$FavTableOrderingComposer,
-    $$FavTableAnnotationComposer,
-    $$FavTableCreateCompanionBuilder,
-    $$FavTableUpdateCompanionBuilder,
-    (FavData, BaseReferences<_$AppDatabase, $FavTable, FavData>),
-    FavData,
+    $WordsTable,
+    Word,
+    $$WordsTableFilterComposer,
+    $$WordsTableOrderingComposer,
+    $$WordsTableAnnotationComposer,
+    $$WordsTableCreateCompanionBuilder,
+    $$WordsTableUpdateCompanionBuilder,
+    (Word, BaseReferences<_$AppDatabase, $WordsTable, Word>),
+    Word,
     PrefetchHooks Function()>;
 typedef $$RevlogEntriesTableCreateCompanionBuilder = RevlogEntriesCompanion
     Function({
@@ -3057,7 +3134,8 @@ typedef $$UserSettingsTableProcessedTableManager = ProcessedTableManager<
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
-  $$FavTableTableManager get fav => $$FavTableTableManager(_db, _db.fav);
+  $$WordsTableTableManager get words =>
+      $$WordsTableTableManager(_db, _db.words);
   $$RevlogEntriesTableTableManager get revlogEntries =>
       $$RevlogEntriesTableTableManager(_db, _db.revlogEntries);
   $$DeckConfigsTableTableManager get deckConfigs =>

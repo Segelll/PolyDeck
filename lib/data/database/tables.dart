@@ -1,16 +1,18 @@
 import 'package:drift/drift.dart';
 
-/// Favorites table — has extra backword/backsentence columns.
-class Fav extends Table {
-  IntColumn get id => integer().autoIncrement()();
+/// Unified vocabulary table — all languages in one table.
+/// Replaces the old per-language tables (en, tr, de, fr, it, pr, esp).
+@DataClassName('Word')
+class Words extends Table {
+  IntColumn get id => integer()();
   TextColumn get word => text()();
   TextColumn get sentence => text()();
   TextColumn get level => text()();
-  IntColumn get isSeen => integer().withDefault(const Constant(0))();
-  IntColumn get feedback => integer().withDefault(const Constant(0))();
+  TextColumn get languageCode => text().named('language_code')();
+  IntColumn get isSeen => integer().named('isSeen').withDefault(const Constant(0))();
+  IntColumn get feedback => integer().named('feedback').withDefault(const Constant(0))();
   TextColumn get date => text().nullable()();
-  TextColumn get backword => text().nullable()();
-  TextColumn get backsentence => text().nullable()();
+  // FSRS
   IntColumn get cardState => integer().named('card_state').withDefault(const Constant(0))();
   RealColumn get stability => real().withDefault(const Constant(0.0))();
   RealColumn get difficulty => real().withDefault(const Constant(0.0))();
@@ -20,9 +22,15 @@ class Fav extends Table {
   IntColumn get reps => integer().withDefault(const Constant(0))();
   IntColumn get lapses => integer().withDefault(const Constant(0))();
   TextColumn get lastReview => text().named('last_review').nullable()();
+  // Fav-specific
+  TextColumn get backword => text().nullable()();
+  TextColumn get backsentence => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {languageCode, id};
 }
 
-/// Review log table for FSRS parameter optimization.
+/// Review log table.
 class RevlogEntries extends Table {
   IntColumn get id => integer().autoIncrement()();
   IntColumn get cardId => integer().named('card_id')();
@@ -41,7 +49,7 @@ class RevlogEntries extends Table {
   String get tableName => 'revlog';
 }
 
-/// Per-level SRS configuration.
+/// Per-level SRS config.
 class DeckConfigs extends Table {
   TextColumn get level => text()();
   IntColumn get maxNewPerDay => integer().named('max_new_per_day').withDefault(const Constant(10))();
@@ -58,7 +66,7 @@ class DeckConfigs extends Table {
   String get tableName => 'deck_config';
 }
 
-/// User language preferences.
+/// User preferences.
 class UserSettings extends Table {
   TextColumn get mainLanguage => text().named('mainLanguage')();
   TextColumn get targetLanguage => text().named('targetLanguage')();

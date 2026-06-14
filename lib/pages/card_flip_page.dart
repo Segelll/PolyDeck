@@ -145,17 +145,17 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   }
 
   void _showAnalysis() {
-    final state = ref.read(deckProvider);
+    final st = ref.read(deckProvider);
     final local = AppLocalizations.of(context)!;
-    final deckLabel = local.deck(state.deckIndex);
+    final deckLabel = local.deck(st.deckIndex);
 
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => AnalysisPage(
-          analysisResults: state.analysisResults,
+          analysisResults: st.analysisResults,
           previousDeckName: deckLabel,
-          deckIndex: state.deckIndex,
+          deckIndex: st.deckIndex,
           onNewDeck: _startNewDeck,
         ),
       ),
@@ -196,19 +196,23 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   @override
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context)!;
-    final state = ref.watch(deckProvider);
+    // Use .select() to only rebuild on critical state changes
+    final isLoading = ref.watch(deckProvider.select((s) => s.isLoading));
+    final isEmpty = ref.watch(deckProvider.select((s) => s.isEmpty));
+    final errorMessage = ref.watch(deckProvider.select((s) => s.errorMessage));
+    final isFlipped = ref.watch(deckProvider.select((s) => s.isFlipped));
+    final currentCard = ref.watch(deckProvider.select((s) =>
+        s.isEmpty ? null : s.currentCard));
+    final currentIndex = ref.watch(deckProvider.select((s) => s.currentIndex));
+    final isFavorite = ref.watch(deckProvider.select((s) => s.isFavorite));
+    final isLast = ref.watch(deckProvider.select((s) => s.isLastCard));
+    final colorTracker = ref.watch(deckProvider.select((s) => s.colorTracker));
+    final deckIndex = ref.watch(deckProvider.select((s) => s.deckIndex));
+    final backColor = isFlipped && currentIndex < colorTracker.length
+        ? colorTracker[currentIndex]
+        : Colors.grey;
 
-    if (state.isLoading || state.isEmpty) {
-      return Scaffold(
-        appBar: AppBar(
-          title: HalfColoredTitle(local.appTitle),
-          centerTitle: true,
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (state.errorMessage != null) {
+    if (errorMessage != null) {
       return Scaffold(
         appBar: AppBar(
           title: HalfColoredTitle(local.appTitle),
@@ -220,7 +224,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
             children: [
               const Icon(Icons.error_outline, size: 48, color: Colors.red),
               const SizedBox(height: 16),
-              Text(state.errorMessage!, textAlign: TextAlign.center),
+              Text(errorMessage, textAlign: TextAlign.center),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _loadDeck,
@@ -232,10 +236,45 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
       );
     }
 
-    final currentCard = state.currentCard;
-    final backColor = state.isFlipped
-        ? state.colorTracker[state.currentIndex]
-        : Colors.grey;
+    if (isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: HalfColoredTitle(local.appTitle),
+          centerTitle: true,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (isEmpty) {
+      return Scaffold(
+        appBar: AppBar(
+          title: HalfColoredTitle(local.appTitle),
+          centerTitle: true,
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+              const SizedBox(height: 16),
+              const Text(
+                'Tebrikler! Bu destede çalışılacak kelime kalmadı.',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Geri Dön'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (currentCard == null) return const SizedBox.shrink();
 
     return Scaffold(
       appBar: AppBar(
@@ -244,7 +283,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
         actions: [
           IconButton(
             icon: Icon(
-              state.isFavorite ? Icons.star : Icons.star_border,
+              isFavorite ? Icons.star : Icons.star_border,
               color: Colors.yellow.shade700,
             ),
             onPressed: () => ref.read(deckProvider.notifier).toggleFavorite(),
@@ -272,7 +311,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
             child: Column(
               children: [
                 Text(
-                  local.deck(state.deckIndex),
+                  local.deck(deckIndex),
                   style: const TextStyle(fontSize: 24),
                 ),
                 const SizedBox(height: 20),
@@ -281,7 +320,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    for (int i = 0; i < state.colorTracker.length; i++)
+                    for (int i = 0; i < colorTracker.length; i++)
                       AnimatedBuilder(
                         animation: i < _indicatorAnimations.length
                             ? _indicatorAnimations[i]
@@ -301,7 +340,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                               margin:
                                   const EdgeInsets.symmetric(horizontal: 2),
                               decoration: BoxDecoration(
-                                color: state.colorTracker[i],
+                                color: colorTracker[i],
                                 borderRadius: BorderRadius.circular(6),
                                 boxShadow: const [
                                   BoxShadow(
@@ -328,11 +367,11 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           child: Center(
                             child: GestureDetector(
                               // Tap to flip (no rating yet)
-                              onTap: !state.isFlipped
+                              onTap: !isFlipped
                                   ? () => setState(() => _isFlippedLocally = true)
                                   : null,
                               // Swipe shortcuts for rating
-                              onHorizontalDragEnd: !state.isFlipped
+                              onHorizontalDragEnd: !isFlipped
                                   ? (details) {
                                       if (details.primaryVelocity! < 0) {
                                         ref
@@ -347,7 +386,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                                       }
                                     }
                                   : null,
-                              onVerticalDragEnd: !state.isFlipped
+                              onVerticalDragEnd: !isFlipped
                                   ? (details) {
                                       if (details.primaryVelocity! < 0) {
                                         ref
@@ -364,7 +403,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                                   : null,
                               child: CardFlipAnimation(
                                 key: _cardKey,
-                                isFlipped: state.isFlipped || _isFlippedLocally,
+                                isFlipped: isFlipped || _isFlippedLocally,
                                 frontCardColor: Colors.blue.shade200,
                                 backCardColor: backColor,
                                 frontText: currentCard.frontText,
@@ -372,7 +411,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                                 frontSentence: currentCard.frontSentence,
                                 backSentence: currentCard.backSentence,
                                 onFlipComplete: _reflipCard,
-                                cardNumber: state.currentIndex + 1,
+                                cardNumber: currentIndex + 1,
                                 flipDirection: _flipDirection,
                                 level: currentCard.level,
                               ),
@@ -385,7 +424,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 const SizedBox(height: 10),
 
                 // 4-button FSRS rating (visible after flip)
-                if (state.isFlipped || _isFlippedLocally)
+                if (isFlipped || _isFlippedLocally)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
@@ -449,7 +488,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 ),
                 const SizedBox(height: 10),
 
-                if (state.isFlipped || _isFlippedLocally)
+                if (isFlipped || _isFlippedLocally)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

@@ -219,15 +219,36 @@ class _DecksPageState extends ConsumerState<DecksPage> {
 }
 
 /// Widget showing today's new/review counts for a level.
-class _DailyProgressBar extends ConsumerWidget {
+class _DailyProgressBar extends ConsumerStatefulWidget {
   final String level;
 
   const _DailyProgressBar({required this.level});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_DailyProgressBar> createState() => _DailyProgressBarState();
+}
+
+class _DailyProgressBarState extends ConsumerState<_DailyProgressBar> {
+  Future<({int newCount, int reviewCount})>? _countsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _countsFuture = _fetchCounts(ref, widget.level);
+  }
+
+  @override
+  void didUpdateWidget(covariant _DailyProgressBar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.level != widget.level) {
+      _countsFuture = _fetchCounts(ref, widget.level);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final local = AppLocalizations.of(context)!;
-    final configAsync = ref.watch(deckConfigProvider(level));
+    final configAsync = ref.watch(deckConfigProvider(widget.level));
 
     return configAsync.when(
       loading: () => const SizedBox.shrink(),
@@ -235,7 +256,7 @@ class _DailyProgressBar extends ConsumerWidget {
       data: (config) {
         // Fetch counts in a FutureBuilder since we need async
         return FutureBuilder<({int newCount, int reviewCount})>(
-          future: _fetchCounts(ref, level),
+          future: _countsFuture,
           builder: (context, snapshot) {
             final newCount = snapshot.data?.newCount ?? 0;
             final reviewCount = snapshot.data?.reviewCount ?? 0;

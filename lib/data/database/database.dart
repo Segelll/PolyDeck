@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
@@ -10,7 +11,7 @@ import 'tables.dart';
 
 part 'database.g.dart';
 
-@DriftDatabase(tables: [Fav, RevlogEntries, DeckConfigs, UserSettings])
+@DriftDatabase(tables: [Words, RevlogEntries, DeckConfigs, UserSettings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(DatabaseConnection.delayed(_connect()));
 
@@ -49,254 +50,231 @@ class AppDatabase extends _$AppDatabase {
           await m.createAll();
           await _ensureIndices();
         },
-        onUpgrade: (Migrator m, int from, int to) async {
-          // Handle future schema upgrades here
-        },
+        onUpgrade: (Migrator m, int from, int to) async {},
         beforeOpen: (details) async {
+          // If the DB was copied from assets, it already has the tables.
+          // This just ensures indices are present in case they were missed.
           await _ensureIndices();
         },
       );
 
   Future<void> _ensureIndices() async {
-    const langs = ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp', 'fav'];
-    for (final lang in langs) {
+    const idxs = [
+      'CREATE INDEX IF NOT EXISTS idx_words_lang_level_state_due ON words (language_code, level, card_state, due)',
+      'CREATE INDEX IF NOT EXISTS idx_words_lang_level_state_seen ON words (language_code, level, card_state, isSeen)',
+      'CREATE INDEX IF NOT EXISTS idx_words_lang_level_isSeen ON words (language_code, level, isSeen)',
+      'CREATE INDEX IF NOT EXISTS idx_words_feedback ON words (isSeen, feedback)',
+      'CREATE INDEX IF NOT EXISTS idx_revlog_card ON revlog (deck_table, card_id)',
+      'CREATE INDEX IF NOT EXISTS idx_revlog_date ON revlog (review_date)',
+      'CREATE INDEX IF NOT EXISTS idx_revlog_deck_date_state ON revlog (deck_table, review_date, state)',
+    ];
+    for (final sql in idxs) {
       try {
-        await customStatement(
-            'CREATE INDEX IF NOT EXISTS "idx_${lang}_fsrs_due" ON "$lang" ("level", "card_state", "due")');
-      } catch (_) {}
-      try {
-        await customStatement(
-            'CREATE INDEX IF NOT EXISTS "idx_${lang}_fsrs_new" ON "$lang" ("level", "card_state", "isSeen")');
-      } catch (_) {}
-      try {
-        await customStatement(
-            'CREATE INDEX IF NOT EXISTS "idx_${lang}_level_isSeen" ON "$lang" ("level", "isSeen")');
-      } catch (_) {}
-      try {
-        await customStatement(
-            'CREATE INDEX IF NOT EXISTS "idx_${lang}_feedback" ON "$lang" ("isSeen", "feedback")');
+        await customStatement(sql);
       } catch (_) {}
     }
-    try {
-      await customStatement(
-          'CREATE INDEX IF NOT EXISTS "idx_revlog_card" ON "revlog" ("deck_table", "card_id")');
-    } catch (_) {}
-    try {
-      await customStatement(
-          'CREATE INDEX IF NOT EXISTS "idx_revlog_date" ON "revlog" ("review_date")');
-    } catch (_) {}
-    try {
-      await customStatement(
-          'CREATE INDEX IF NOT EXISTS "idx_revlog_deck_date_state" ON "revlog" ("deck_table", "review_date", "state")');
-    } catch (_) {}
   }
 
   // ═══════════════════════════════════════════════════════════════
-  //  Language table queries (dynamic table names → raw SQL)
+  //  Type-safe word queries (unified words table)
   // ═══════════════════════════════════════════════════════════════
 
-  Future<Map<String, dynamic>?> fetchWordById(String tn, int id) async {
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE id = ?',
-      variables: [Variable.withInt(id)],
-    ).get();
-    if (rows.isEmpty) return null;
-    return _rowToMap(rows.first);
+  Future<Word?> fetchWordById(int id) =>
+      (select(words)..where((w) => w.id.equals(id))).getSingleOrNull();
+
+  Future<List<Word>> fetchWordsByIds(String language, List<int> ids) {
+    if (ids.isEmpty) return Future.value([]);
+    return (select(words)..where((w) => w.languageCode.equals(language) & w.id.isIn(ids))).get();
   }
 
-  Future<List<Map<String, dynamic>>> fetchWordsByIds(
-      String tn, List<int> ids) async {
-    if (ids.isEmpty) return [];
-    final ph = ids.map((_) => '?').join(',');
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE id IN ($ph)',
-      variables: ids.map((i) => Variable.withInt(i)).toList(),
-    ).get();
-    return rows.map(_rowToMap).toList();
+  Future<List<Word>> fetchDueCards(
+      String language, String? level, String date, int limit) {
+    var q = select(words)
+      ..where((w) =>
+          w.languageCode.equals(language) &
+          w.due.isNotNull() &
+          w.due.isSmallerOrEqualValue(date) &
+          w.cardState.isIn([1, 2, 3]))
+      ..orderBy([(u) => OrderingTerm.asc(u.due)])
+      ..limit(limit);
+    if (level != null && level != 'fav') {
+      q = select(words)..where((w) => w.level.equals(level));
+      q
+        ..where((w) =>
+            w.languageCode.equals(language) &
+            w.due.isNotNull() &
+            w.due.isSmallerOrEqualValue(date) &
+            w.cardState.isIn([1, 2, 3]))
+        ..orderBy([(u) => OrderingTerm.asc(u.due)])
+        ..limit(limit);
+    }
+    return q.get();
   }
 
-  Future<List<Map<String, dynamic>>> fetchDueCards(
-      String tn, String? level, String date, int limit) async {
-    final where = level != null
-        ? 'level = ? AND due IS NOT NULL AND due <= ? AND card_state IN (1,2,3)'
-        : 'due IS NOT NULL AND due <= ? AND card_state IN (1,2,3)';
-    final vars = level != null
-        ? [Variable.withString(level), Variable.withString(date)]
-        : [Variable.withString(date)];
-
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE $where ORDER BY due ASC LIMIT $limit',
-      variables: vars,
-    ).get();
-    return rows.map(_rowToMap).toList();
+  Future<List<Word>> fetchNewCards(
+      String language, String? level, int limit) {
+    var q = select(words)
+      ..where((w) =>
+          w.languageCode.equals(language) &
+          w.cardState.equals(0) &
+          w.isSeen.equals(0))
+      ..orderBy([(u) => OrderingTerm.random()])
+      ..limit(limit);
+    if (level != null && level != 'fav') {
+      q = select(words)
+        ..where((w) =>
+            w.languageCode.equals(language) &
+            w.level.equals(level) &
+            w.cardState.equals(0) &
+            w.isSeen.equals(0))
+        ..orderBy([(u) => OrderingTerm.random()])
+        ..limit(limit);
+    }
+    return q.get();
   }
 
-  Future<List<Map<String, dynamic>>> fetchNewCards(
-      String tn, String? level, int limit) async {
-    final where = level != null
-        ? 'level = ? AND card_state = 0 AND isSeen = 0'
-        : 'card_state = 0 AND isSeen = 0';
-    final vars = level != null
-        ? [Variable.withString(level)]
-        : <Variable<Object>>[];
-
-    // Get a candidate pool
-    final candidates = await customSelect(
-      'SELECT id FROM "$tn" WHERE $where LIMIT 100',
-      variables: vars,
-    ).get();
-    final ids = candidates.map((r) => r.read<int>('id')).toList();
-
-    if (ids.isEmpty) return [];
-    ids.shuffle();
-    final pick = ids.take(limit).toList();
-    final ph = pick.map((_) => '?').join(',');
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE id IN ($ph)',
-      variables: pick.map((i) => Variable.withInt(i)).toList(),
-    ).get();
-    final result = rows.map(_rowToMap).toList();
-    result.shuffle();
-    return result;
+  Future<List<Word>> fetchWordsByIsSeen(
+      String language, String? level, int isSeen, int limit) {
+    var q = select(words)
+      ..where((w) =>
+          w.languageCode.equals(language) & w.isSeen.equals(isSeen))
+      ..limit(limit);
+    if (level != null && level != 'fav') {
+      q = select(words)
+        ..where((w) =>
+            w.languageCode.equals(language) &
+            w.level.equals(level) &
+            w.isSeen.equals(isSeen))
+        ..limit(limit);
+    }
+    return q.get();
   }
 
-  Future<List<Map<String, dynamic>>> fetchWordsByIsSeen(
-      String tn, String? level, int isSeen, int limit) async {
-    final where =
-        level != null ? 'level = ? AND isSeen = ?' : 'isSeen = ?';
-    final vars = level != null
-        ? [Variable.withString(level), Variable.withInt(isSeen)]
-        : [Variable.withInt(isSeen)];
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE $where LIMIT $limit',
-      variables: vars,
-    ).get();
-    return rows.map(_rowToMap).toList();
+  Future<List<Word>> fetchWordsByFeedback(
+      String language, String? level, int feedback, int limit) {
+    var q = select(words)
+      ..where((w) => w.languageCode.equals(language) & w.feedback.equals(feedback))
+      ..limit(limit);
+    if (level != null && level != 'fav') {
+      q = select(words)
+        ..where((w) =>
+            w.languageCode.equals(language) &
+            w.level.equals(level) &
+            w.feedback.equals(feedback))
+        ..limit(limit);
+    }
+    return q.get();
   }
 
-  Future<List<Map<String, dynamic>>> fetchWordsByFeedback(
-      String tn, String? level, int feedback, int limit) async {
-    final where =
-        level != null ? 'level = ? AND feedback = ?' : 'feedback = ?';
-    final vars = level != null
-        ? [Variable.withString(level), Variable.withInt(feedback)]
-        : [Variable.withInt(feedback)];
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE $where LIMIT $limit',
-      variables: vars,
-    ).get();
-    return rows.map(_rowToMap).toList();
+  Future<List<int>> fetchAllIsSeenId(String language) async {
+    final rows = await (selectOnly(words)
+          ..addColumns([words.id])
+          ..where(words.languageCode.equals(language) & words.isSeen.equals(1)))
+        .get();
+    return rows.map((r) => r.read(words.id)!).toList();
   }
 
-  Future<void> updateSrsState(
-    String tn, int id, {
-    required int cardState,
-    required double stability,
-    required double difficulty,
-    String? due,
-    required int elapsedDays,
-    required int scheduledDays,
-    required int reps,
-    required int lapses,
-    String? lastReview,
-    int? legacyFeedback,
-  }) async {
-    final parts = [
-      'card_state = $cardState',
-      'stability = $stability',
-      'difficulty = $difficulty',
-      if (due != null) "due = '$due'" else 'due = NULL',
-      'elapsed_days = $elapsedDays',
-      'scheduled_days = $scheduledDays',
-      'reps = $reps',
-      'lapses = $lapses',
-      if (lastReview != null) "last_review = '$lastReview'" else 'last_review = NULL',
-      if (legacyFeedback != null) 'feedback = $legacyFeedback',
-    ];
-    await customStatement(
-        'UPDATE "$tn" SET ${parts.join(', ')} WHERE id = $id');
+  Future<String?> getEarliestDate(String language) async {
+    final row = await (selectOnly(words)
+          ..addColumns([words.date])
+          ..where(words.languageCode.equals(language) & words.date.isNotNull())
+          ..orderBy([OrderingTerm.asc(words.date)])
+          ..limit(1))
+        .getSingleOrNull();
+    return row?.read(words.date);
   }
 
-  Future<void> markAsSeen(String tn, int id, String date) async {
-    await customStatement(
-        'UPDATE "$tn" SET isSeen = 1, date = ? WHERE id = ?', [date, id]);
+  Future<List<Word>> fetchExamWords(String language, int id) =>
+      (select(words)
+            ..where((w) => w.languageCode.equals(language) & w.id.equals(id)))
+          .get();
+
+  Future<List<Word>> fetchExamOptions(String language, List<int> ids) {
+    if (ids.isEmpty) return Future.value([]);
+    return (select(words)
+          ..where((w) => w.languageCode.equals(language) & w.id.isIn(ids)))
+        .get();
   }
 
-  Future<void> markMultipleAsSeen(
-      String tn, List<int> ids, String date) async {
+  Future<void> updateSrsState(int id,
+      {required int cardState,
+      required double stability,
+      required double difficulty,
+      String? due,
+      required int elapsedDays,
+      required int scheduledDays,
+      required int reps,
+      required int lapses,
+      String? lastReview,
+      int? legacyFeedback}) async {
+    final values = WordsCompanion(
+      cardState: Value(cardState),
+      stability: Value(stability),
+      difficulty: Value(difficulty),
+      due: Value(due),
+      elapsedDays: Value(elapsedDays),
+      scheduledDays: Value(scheduledDays),
+      reps: Value(reps),
+      lapses: Value(lapses),
+      lastReview: Value(lastReview),
+      feedback: legacyFeedback != null ? Value(legacyFeedback) : const Value.absent(),
+    );
+    await (update(words)..where((w) => w.id.equals(id))).write(values);
+  }
+
+  Future<void> markAsSeen(int id, String date) =>
+      (update(words)..where((w) => w.id.equals(id)))
+          .write(WordsCompanion(isSeen: const Value(1), date: Value(date)));
+
+  Future<void> markMultipleAsSeen(List<int> ids, String date) async {
+    // Use customStatement for batch update (more efficient)
     if (ids.isEmpty) return;
-    final ph = ids.join(',');
     await customStatement(
-        'UPDATE "$tn" SET isSeen = 1, date = ? WHERE id IN ($ph)', [date]);
-  }
-
-  Future<List<int>> fetchAllIsSeenId(String tn) async {
-    final rows = await customSelect(
-      'SELECT id FROM "$tn" WHERE isSeen = 1',
-    ).get();
-    return rows.map((r) => r.read<int>('id')).toList();
-  }
-
-  Future<String?> getEarliestDate(String tn) async {
-    final rows = await customSelect(
-      'SELECT MIN(date) as earliestDate FROM "$tn" WHERE date != 0',
-    ).get();
-    return rows.firstOrNull?.readNullable<String>('earliestDate');
-  }
-
-  Future<List<Map<String, dynamic>>> fetchExamWords(String tn, int id) async {
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE id = ?',
-      variables: [Variable.withInt(id)],
-    ).get();
-    return rows.map(_rowToMap).toList();
-  }
-
-  Future<List<Map<String, dynamic>>> fetchExamOptions(
-      String tn, List<int> randomIds) async {
-    if (randomIds.isEmpty) return [];
-    final ph = randomIds.map((_) => '?').join(',');
-    final rows = await customSelect(
-      'SELECT * FROM "$tn" WHERE id IN ($ph)',
-      variables: randomIds.map((i) => Variable.withInt(i)).toList(),
-    ).get();
-    return rows.map(_rowToMap).toList();
+        'UPDATE words SET isSeen = 1, date = ? WHERE id IN (${ids.join(',')})',
+        [date]);
   }
 
   // ═══════════════════════════════════════════════════════════════
-  //  Favorites (managed by Drift)
+  //  Favorites (subset of words where language_code = 'fav')
   // ═══════════════════════════════════════════════════════════════
 
-  Future<void> addToFav({
-    required String word,
-    required String sentence,
-    required String level,
-    String? backWord,
-    String? backSentence,
-  }) async {
-    await into(fav).insert(FavCompanion.insert(
-          word: word,
-          sentence: sentence,
-          level: level,
-          backword: Value(backWord ?? ''),
-          backsentence: Value(backSentence ?? ''),
-        ));
-  }
-
-  Future<void> removeFromFav(String word) async {
-    await (delete(fav)..where((t) => t.word.equals(word))).go();
-  }
+  Future<List<Word>> fetchAllFavorites() =>
+      (select(words)..where((w) => w.languageCode.equals('fav'))).get();
 
   Future<bool> isFavorite(String word) async {
-    final cnt = await (selectOnly(fav)
-          ..addColumns([fav.id])
-          ..where(fav.word.equals(word)))
-        .map((r) => r.read(fav.id))
+    final cnt = await (selectOnly(words)
+          ..addColumns([words.id])
+          ..where(words.word.equals(word) & words.languageCode.equals('fav')))
+        .map((r) => r.read(words.id))
         .get();
     return cnt.isNotEmpty;
   }
 
-  Future<List<FavData>> fetchAllFavorites() => select(fav).get();
+  Future<void> removeFromFav(String word) async {
+    await (delete(words)
+          ..where((w) => w.word.equals(word) & w.languageCode.equals('fav')))
+        .go();
+  }
+
+  Future<void> addToFav(
+      {required String word,
+      required String sentence,
+      required String level,
+      String? backWord,
+      String? backSentence}) async {
+    final maxIdRow = await customSelect(
+        'SELECT MAX(id) as max_id FROM words WHERE language_code = "fav"').getSingle();
+    final nextId = (maxIdRow.readNullable<int>('max_id') ?? 0) + 1;
+    await into(words).insert(WordsCompanion.insert(
+          id: nextId,
+          word: word,
+          sentence: sentence,
+          level: level,
+          languageCode: 'fav',
+          backword: Value(backWord ?? ''),
+          backsentence: Value(backSentence ?? ''),
+        ));
+  }
 
   // ═══════════════════════════════════════════════════════════════
   //  User settings
@@ -314,73 +292,62 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> saveUserChoices(
-      String mainLanguage, String targetLanguage) async {
-    await customStatement('DELETE FROM "user"');
-    await into(userSettings).insert(UserSettingsCompanion.insert(
-          mainLanguage: mainLanguage,
-          targetLanguage: targetLanguage,
-          firstTime: 'true',
-        ));
-  }
+          String mainLanguage, String targetLanguage) async =>
+      into(userSettings).insertOnConflictUpdate(
+          UserSettingsCompanion.insert(
+              mainLanguage: mainLanguage,
+              targetLanguage: targetLanguage,
+              firstTime: 'true'));
 
   // ═══════════════════════════════════════════════════════════════
   //  Revlog
   // ═══════════════════════════════════════════════════════════════
 
-  Future<void> insertRevlogEntry({
-    required int cardId,
-    required String deckTable,
-    required int rating,
-    required int state,
-    required String due,
-    required double stability,
-    required double difficulty,
-    required int elapsedDays,
-    required int lastElapsedDays,
-    required int scheduledDays,
-    required String reviewDate,
-  }) async {
-    await into(revlogEntries).insert(RevlogEntriesCompanion.insert(
-          cardId: cardId,
-          deckTable: deckTable,
-          rating: rating,
-          state: state,
-          due: due,
-          stability: stability,
-          difficulty: difficulty,
-          elapsedDays: elapsedDays,
-          lastElapsedDays: Value(lastElapsedDays),
-          scheduledDays: scheduledDays,
-          reviewDate: reviewDate,
-        ));
-  }
+  Future<void> insertRevlogEntry(
+          {required int cardId,
+          required String deckTable,
+          required int rating,
+          required int state,
+          required String due,
+          required double stability,
+          required double difficulty,
+          required int elapsedDays,
+          required int lastElapsedDays,
+          required int scheduledDays,
+          required String reviewDate}) async =>
+      into(revlogEntries).insert(RevlogEntriesCompanion.insert(
+            cardId: cardId,
+            deckTable: deckTable,
+            rating: rating,
+            state: state,
+            due: due,
+            stability: stability,
+            difficulty: difficulty,
+            elapsedDays: elapsedDays,
+            lastElapsedDays: Value(lastElapsedDays),
+            scheduledDays: scheduledDays,
+            reviewDate: reviewDate,
+          ));
 
-  Future<({int newCount, int reviewCount})> getTodayCounts(
-      String tableName, String? level) async {
+  Future<({int newCount, int reviewCount})> getTodayCounts(String language,
+      [String? level]) async {
     final today = DateTime.now();
     String ds(DateTime d) =>
         '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
-    final todayStr = ds(today);
-    final tomorrowStr = ds(today.add(const Duration(days: 1)));
-
-    final where = level != null
-        ? 'deck_table = ? AND review_date >= ? AND review_date < ?'
-        : 'review_date >= ? AND review_date < ?';
-    final vars = level != null
-        ? [Variable.withString(tableName), Variable.withString(todayStr), Variable.withString(tomorrowStr)]
-        : [Variable.withString(todayStr), Variable.withString(tomorrowStr)];
-
     final rows = await customSelect(
       '''SELECT
         SUM(CASE WHEN state = 0 THEN 1 ELSE 0 END) as new_cnt,
         SUM(CASE WHEN state IN (2,3) THEN 1 ELSE 0 END) as review_cnt
-      FROM revlog WHERE $where''',
-      variables: vars,
+      FROM revlog WHERE deck_table = ? AND review_date >= ? AND review_date < ?''',
+      variables: [
+        Variable.withString(language),
+        Variable.withString(ds(today)),
+        Variable.withString(ds(today.add(const Duration(days: 1)))),
+      ],
     ).get();
-
     return (
-      newCount: rows.firstOrNull?.read<int>('new_cnt') ?? 0,
-      reviewCount: rows.firstOrNull?.read<int>('review_cnt') ?? 0,
+      newCount: rows.firstOrNull?.readNullable<int>('new_cnt') ?? 0,
+      reviewCount: rows.firstOrNull?.readNullable<int>('review_cnt') ?? 0,
     );
   }
 
@@ -392,120 +359,61 @@ class AppDatabase extends _$AppDatabase {
     final rows =
         await (select(deckConfigs)..where((t) => t.level.equals(level))).get();
     if (rows.isNotEmpty) return rows.first;
-    final defaults = await (select(deckConfigs)
-          ..where((t) => t.level.equals('default')))
-        .get();
-    return defaults.firstOrNull;
+    return (select(deckConfigs)..where((t) => t.level.equals('default')))
+        .getSingleOrNull();
   }
 
-  Future<void> saveDeckConfigEntry({
-    required String level,
-    required int maxNewPerDay,
-    required int maxReviewsPerDay,
-    required String learningSteps,
-    required bool enableFuzz,
-    required double requestRetention,
-    String? w,
-  }) async {
-    await into(deckConfigs).insert(
-      DeckConfigsCompanion.insert(
-        level: level,
-        maxNewPerDay: Value(maxNewPerDay),
-        maxReviewsPerDay: Value(maxReviewsPerDay),
-        learningSteps: Value(learningSteps),
-        enableFuzz: Value(enableFuzz ? 1 : 0),
-        requestRetention: Value(requestRetention),
-        w: Value(w),
-      ),
-      mode: InsertMode.insertOrReplace,
-    );
+  Future<void> saveDeckConfigEntry(
+          {required String level,
+          required int maxNewPerDay,
+          required int maxReviewsPerDay,
+          required String learningSteps,
+          required bool enableFuzz,
+          required double requestRetention,
+          String? w}) async =>
+      into(deckConfigs).insertOnConflictUpdate(DeckConfigsCompanion.insert(
+            level: level,
+            maxNewPerDay: Value(maxNewPerDay),
+            maxReviewsPerDay: Value(maxReviewsPerDay),
+            learningSteps: Value(learningSteps),
+            enableFuzz: Value(enableFuzz ? 1 : 0),
+            requestRetention: Value(requestRetention),
+            w: Value(w),
+          ));
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Reset
+  // ═══════════════════════════════════════════════════════════════
+
+  Future<void> resetSrsState(String language) async {
+    await (update(words)
+          ..where((w) => w.languageCode.equals(language)))
+        .write(const WordsCompanion(
+          cardState: Value(0),
+          stability: Value(0.0),
+          difficulty: Value(0.0),
+          due: Value.absent(),
+          elapsedDays: Value(0),
+          scheduledDays: Value(0),
+          reps: Value(0),
+          lapses: Value(0),
+          lastReview: Value.absent(),
+        ));
   }
 
-  // ── Progress queries ──
-
-  Future<Map<String, int>> fetchDateCounts(List<String> languageTables) async {
-    final combined = <String, int>{};
-    for (final table in languageTables) {
-      final rows = await customSelect(
-        'SELECT date, COUNT(*) as count FROM "$table" '
-        'WHERE date IS NOT NULL AND date != "0" '
-        'GROUP BY date ORDER BY date ASC',
-      ).get();
-      for (final row in rows) {
-        final date = row.read<String>('date');
-        final count = row.read<int>('count');
-        combined[date] = (combined[date] ?? 0) + count;
-      }
-    }
-    return combined;
+  Future<void> resetAllProgress() async {
+    await (update(words)).write(const WordsCompanion(
+      isSeen: Value(0),
+      date: Value(''),
+      feedback: Value(0),
+      cardState: Value(0),
+      stability: Value(0.0),
+      difficulty: Value(0.0),
+      elapsedDays: Value(0),
+      scheduledDays: Value(0),
+      reps: Value(0),
+      lapses: Value(0),
+    ));
+    await customStatement('DELETE FROM revlog');
   }
-
-  Future<List<int>> fetchMonthlyCounts(
-      List<String> languageTables, DateTime startDate) async {
-    final counts = <int>[];
-    for (int i = 0; i < 4; i++) {
-      final cur = DateTime(startDate.year, startDate.month + i);
-      final next = DateTime(cur.year, cur.month + 1);
-      final startStr =
-          '${cur.year}-${cur.month.toString().padLeft(2, '0')}-01';
-      final endStr =
-          '${next.year}-${next.month.toString().padLeft(2, '0')}-01';
-      int total = 0;
-      for (final table in languageTables) {
-        final rows = await customSelect(
-          'SELECT COUNT(*) as count FROM "$table" WHERE date BETWEEN ? AND ?',
-          variables: [
-            Variable.withString(startStr),
-            Variable.withString(endStr),
-          ],
-        ).get();
-        total += rows.firstOrNull?.read<int>('count') ?? 0;
-      }
-      counts.add(total);
-    }
-    return counts;
-  }
-
-  Future<void> resetAllProgress(List<String> languageTables) async {
-    for (final lang in languageTables) {
-      await customStatement(
-          'UPDATE "$lang" SET isSeen = 0, date = "", feedback = 0');
-      await customStatement('''UPDATE "$lang" SET
-        card_state = 0, stability = 0.0, difficulty = 0.0,
-        due = NULL, elapsed_days = 0, scheduled_days = 0,
-        reps = 0, lapses = 0, last_review = NULL''');
-    }
-    await customStatement('DELETE FROM "fav"');
-    await customStatement('DELETE FROM "revlog"');
-  }
-
-  Future<void> resetSrsState(String tn) async {
-    await customStatement('''UPDATE "$tn" SET
-      card_state = 0, stability = 0.0, difficulty = 0.0,
-      due = NULL, elapsed_days = 0, scheduled_days = 0,
-      reps = 0, lapses = 0, last_review = NULL''');
-  }
-
-  // ── Helpers ──
-
-  Map<String, dynamic> _rowToMap(QueryRow row) => {
-        'id': row.read<int>('id'),
-        'word': row.read<String>('word'),
-        'sentence': row.read<String>('sentence'),
-        'level': row.read<String>('level'),
-        'isSeen': row.read<int>('isSeen'),
-        'feedback': row.read<int>('feedback'),
-        'date': row.readNullable<String>('date'),
-        'backword': row.readNullable<String>('backword'),
-        'backsentence': row.readNullable<String>('backsentence'),
-        'card_state': row.read<int>('card_state'),
-        'stability': row.read<double>('stability'),
-        'difficulty': row.read<double>('difficulty'),
-        'due': row.readNullable<String>('due'),
-        'elapsed_days': row.read<int>('elapsed_days'),
-        'scheduled_days': row.read<int>('scheduled_days'),
-        'reps': row.read<int>('reps'),
-        'lapses': row.read<int>('lapses'),
-        'last_review': row.readNullable<String>('last_review'),
-      };
 }

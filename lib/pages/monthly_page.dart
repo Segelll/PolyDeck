@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:poly2/l10n/generated/app_localizations.dart';
 
 class MonthlyPage extends ConsumerWidget {
   const MonthlyPage({super.key});

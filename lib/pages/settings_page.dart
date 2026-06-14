@@ -19,7 +19,7 @@ import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/constants/app_constants.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {

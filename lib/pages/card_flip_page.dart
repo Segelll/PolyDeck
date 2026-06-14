@@ -8,7 +8,7 @@ import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/pages/settings_page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 
 class CardFlipPage extends ConsumerStatefulWidget {

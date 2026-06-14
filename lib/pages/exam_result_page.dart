@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:poly2/domain/models/exam_model.dart';
 import 'package:poly2/pages/decks_page.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 class ResultPage extends StatelessWidget {
   final int score;

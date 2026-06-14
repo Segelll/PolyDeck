@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/presentation/providers/exam_provider.dart';
 import 'exam_result_page.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:poly2/l10n/generated/app_localizations.dart';
 
 class ExamPage extends ConsumerStatefulWidget {
   const ExamPage({super.key});

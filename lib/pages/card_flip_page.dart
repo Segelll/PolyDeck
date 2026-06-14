@@ -391,7 +391,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         _buildRatingButton(
-                          label: local.red, // "Again" / "Zor"
+                          label: local.again,
                           color: AppTheme.ratingAgain,
                           icon: Icons.replay,
                           onPressed: () {
@@ -402,7 +402,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           },
                         ),
                         _buildRatingButton(
-                          label: local.yellow, // "Hard" / "Orta"
+                          label: local.hard,
                           color: AppTheme.ratingHard,
                           icon: Icons.trending_down,
                           onPressed: () {
@@ -413,7 +413,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           },
                         ),
                         _buildRatingButton(
-                          label: local.green, // "Good" / "İyi"
+                          label: local.good,
                           color: AppTheme.ratingGood,
                           icon: Icons.check,
                           onPressed: () {
@@ -424,7 +424,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           },
                         ),
                         _buildRatingButton(
-                          label: 'Easy',
+                          label: local.easy,
                           color: AppTheme.ratingEasy,
                           icon: Icons.thumb_up,
                           onPressed: () {

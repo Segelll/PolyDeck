@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
@@ -36,6 +35,17 @@ class MyApp extends ConsumerWidget {
         Locale('de'),
         Locale('fr'),
       ],
+      localeResolutionCallback: (locale, supportedLocales) {
+        // Match on language code only, with 'en' as fallback
+        if (locale != null) {
+          for (final supported in supportedLocales) {
+            if (supported.languageCode == locale.languageCode) {
+              return supported;
+            }
+          }
+        }
+        return const Locale('en');
+      },
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
         brightness: Brightness.light,
@@ -45,7 +55,6 @@ class MyApp extends ConsumerWidget {
         brightness: Brightness.dark,
       ),
       themeMode: ThemeMode.light,
-      locale: Locale(Platform.localeName),
       home: const SplashScreen(),
     );
   }

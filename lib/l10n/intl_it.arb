@@ -155,5 +155,55 @@
   "saveFailed": "Impostazioni non salvate",
   "selectLanguages": "Seleziona le lingue.",
 
-  "decksPage": "Pagina del Deck"
+  "decksPage": "Pagina del Deck",
+
+  "again": "Ancora",
+  "hard": "Difficile",
+  "good": "Bene",
+  "easy": "Facile",
+
+  "srsSettings": "Impostazioni SRS",
+  "dailyLimits": "Limiti giornalieri",
+  "globalSettings": "Impostazioni globali",
+  "dangerZone": "Zona pericolosa",
+  "loading": "Caricamento...",
+  "maxNewPerDay": "Max nuove al giorno",
+  "maxReviewsPerDay": "Max ripassi al giorno",
+  "enableFuzz": "Attiva variazione casuale",
+  "fuzzDescription": "Aggiunge variazione casuale agli intervalli",
+  "requestRetention": "Ritenzione desiderata",
+  "resetAllSrsProgress": "Azzera tutto il progresso SRS",
+  "resetSrsDescription": "Reimposta tutte le carte allo stato Nuovo. La cronologia dei ripassi è conservata nel registro.",
+  "resetSrsStateTitle": "Azzera stato SRS?",
+  "resetSrsConfirmation": "Questo segnerà tutte le carte come Nuove. La cronologia dei ripassi sarà conservata. Continuare?",
+  "reset": "Azzera",
+  "cancel": "Annulla",
+  "srsStateReset": "Lo stato SRS è stato azzerato.",
+  "level": "Livello {level}",
+  "@level": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "newReviewsPerDay": "{newCount} nuove / {reviewCount} ripassi al giorno",
+  "@newReviewsPerDay": {
+    "placeholders": {
+      "newCount": {},
+      "reviewCount": {}
+    }
+  },
+  "newCount": "{newCount} / {maxNew} nuove",
+  "@newCount": {
+    "placeholders": {
+      "newCount": {},
+      "maxNew": {}
+    }
+  },
+  "reviewCount": "{reviewCount} / {maxReviews} ripassi",
+  "@reviewCount": {
+    "placeholders": {
+      "reviewCount": {},
+      "maxReviews": {}
+    }
+  }
 }

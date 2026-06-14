@@ -155,5 +155,55 @@
   "saveFailed": "Einstellungen konnten nicht gespeichert werden",
   "selectLanguages": "Bitte wählen Sie Sprachen aus.",
 
-  "decksPage": "Deck-Seite"
+  "decksPage": "Deck-Seite",
+
+  "again": "Wiederholen",
+  "hard": "Schwer",
+  "good": "Gut",
+  "easy": "Einfach",
+
+  "srsSettings": "SRS-Einstellungen",
+  "dailyLimits": "Tägliche Limits",
+  "globalSettings": "Globale Einstellungen",
+  "dangerZone": "Gefahrenzone",
+  "loading": "Laden...",
+  "maxNewPerDay": "Max neue pro Tag",
+  "maxReviewsPerDay": "Max Wiederholungen pro Tag",
+  "enableFuzz": "Zufallsvarianz aktivieren",
+  "fuzzDescription": "Fügt zufällige Abweichungen zu Intervallen hinzu",
+  "requestRetention": "Ziel-Behaltequote",
+  "resetAllSrsProgress": "Gesamten SRS-Fortschritt zurücksetzen",
+  "resetSrsDescription": "Setzt alle Karten auf Neu. Der Wiederholungsverlauf bleibt im Protokoll erhalten.",
+  "resetSrsStateTitle": "SRS-Status zurücksetzen?",
+  "resetSrsConfirmation": "Dadurch werden alle Karten als Neu markiert. Ihr Wiederholungsverlauf bleibt erhalten. Fortfahren?",
+  "reset": "Zurücksetzen",
+  "cancel": "Abbrechen",
+  "srsStateReset": "SRS-Status wurde zurückgesetzt.",
+  "level": "Stufe {level}",
+  "@level": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "newReviewsPerDay": "{newCount} neu / {reviewCount} Wiederholungen pro Tag",
+  "@newReviewsPerDay": {
+    "placeholders": {
+      "newCount": {},
+      "reviewCount": {}
+    }
+  },
+  "newCount": "{newCount} / {maxNew} neu",
+  "@newCount": {
+    "placeholders": {
+      "newCount": {},
+      "maxNew": {}
+    }
+  },
+  "reviewCount": "{reviewCount} / {maxReviews} Wiederholungen",
+  "@reviewCount": {
+    "placeholders": {
+      "reviewCount": {},
+      "maxReviews": {}
+    }
+  }
 }

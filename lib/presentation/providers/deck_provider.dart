@@ -15,6 +15,7 @@ import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_theme.dart';
+import 'package:poly2/core/utils/date_utils.dart';
 
 /// Provides the [WordRepository] instance.
 final wordRepositoryProvider = Provider<WordRepository>((ref) {
@@ -59,14 +60,14 @@ class DeckNotifier extends StateNotifier<DeckState> {
       } else {
         // FSRS-driven selection
         final config = await _wordRepo.getDeckConfig(level);
-        final todayNewCount =
-            await _wordRepo.getTodayNewCardCount(targetLang, level);
-        final todayReviewCount =
-            await _wordRepo.getTodayReviewCount(targetLang, level);
+        // Single combined query instead of two separate COUNT queries
+        final todayCounts =
+            await _wordRepo.getTodayCounts(targetLang, level);
 
-        final remainingNew = (config.maxNewPerDay - todayNewCount).clamp(0, 999);
+        final remainingNew =
+            (config.maxNewPerDay - todayCounts.newCount).clamp(0, 999);
         final remainingReviews =
-            (config.maxReviewsPerDay - todayReviewCount).clamp(0, 999);
+            (config.maxReviewsPerDay - todayCounts.reviewCount).clamp(0, 999);
 
         // Fetch due cards first (reviews)
         final dueWords =
@@ -87,23 +88,32 @@ class DeckNotifier extends StateNotifier<DeckState> {
         }
       }
 
-      // Build CardModel list with translations
+      // Build CardModel list with translations (batch query)
       final List<CardModel> allCards = [];
-      for (final word in allWords) {
-        final wordId = word['id'] as int;
-        final translation = await _wordRepo.fetchWordById(motherLang, wordId);
+      if (allWords.isNotEmpty) {
+        // Batch-fetch all translations in a single query
+        final wordIds = allWords.map((w) => w['id'] as int).toList();
+        final translations =
+            await _wordRepo.fetchWordsByIds(motherLang, wordIds);
+        final translationMap = <int, Map<String, dynamic>>{};
+        for (final t in translations) {
+          translationMap[t['id'] as int] = t;
+        }
 
-        if (translation != null) {
+        for (final word in allWords) {
+          final wordId = word['id'] as int;
+          final translation = translationMap[wordId];
+
           allCards.add(CardModel(
             word['id'] as int,
             word['word'] as String,
             word['sentence'] as String,
             word['level'] == 'fav'
                 ? (word['backword'] as String? ?? '')
-                : translation.word,
+                : (translation?['word'] as String? ?? ''),
             word['level'] == 'fav'
                 ? (word['backsentence'] as String? ?? '')
-                : translation.sentence,
+                : (translation?['sentence'] as String? ?? ''),
             word['level'] as String,
           ));
         }
@@ -112,9 +122,10 @@ class DeckNotifier extends StateNotifier<DeckState> {
       allCards.shuffle(Random());
       final selected = allCards.take(AppConstants.cardsPerDeck).toList();
 
-      // Mark all selected cards as seen (for progress tracking)
-      for (final card in selected) {
-        await _wordRepo.markAsSeen(targetLang, card.id);
+      // Mark all selected cards as seen in a single batch query
+      if (selected.isNotEmpty) {
+        await _wordRepo.markMultipleAsSeen(
+            targetLang, selected.map((c) => c.id).toList(), formatDate(DateTime.now()));
       }
 
       state = state.copyWith(
@@ -168,7 +179,13 @@ class DeckNotifier extends StateNotifier<DeckState> {
       // Run FSRS review
       final result = _fsrs.review(card: fsrsCard, rating: rating);
 
-      // Persist new FSRS state
+      // Persist new FSRS state (including legacy feedback in same query)
+      final legacyFeedback = rating == Rating.again
+          ? 1
+          : rating == Rating.hard
+              ? 3
+              : 2; // Good/Easy map to 2
+
       await _wordRepo.updateSrsState(
         tableName,
         card.id,
@@ -181,15 +198,8 @@ class DeckNotifier extends StateNotifier<DeckState> {
         reps: word.reps + 1,
         lapses: rating == Rating.again ? word.lapses + 1 : word.lapses,
         lastReview: result.lastReview,
+        legacyFeedback: legacyFeedback,
       );
-
-      // Also update legacy feedback for backward compat
-      final legacyFeedback = rating == Rating.again
-          ? 1
-          : rating == Rating.hard
-              ? 3
-              : 2; // Good/Easy map to 2
-      await _wordRepo.updateFeedback(tableName, card.id, legacyFeedback);
 
       // Insert revlog entry
       final revlogEntry = RevlogEntry(

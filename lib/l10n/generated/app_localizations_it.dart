@@ -279,4 +279,89 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get decksPage => 'Pagina del Deck';
+
+  @override
+  String get again => 'Ancora';
+
+  @override
+  String get hard => 'Difficile';
+
+  @override
+  String get good => 'Bene';
+
+  @override
+  String get easy => 'Facile';
+
+  @override
+  String get srsSettings => 'Impostazioni SRS';
+
+  @override
+  String get dailyLimits => 'Limiti giornalieri';
+
+  @override
+  String get globalSettings => 'Impostazioni globali';
+
+  @override
+  String get dangerZone => 'Zona pericolosa';
+
+  @override
+  String get loading => 'Caricamento...';
+
+  @override
+  String get maxNewPerDay => 'Max nuove al giorno';
+
+  @override
+  String get maxReviewsPerDay => 'Max ripassi al giorno';
+
+  @override
+  String get enableFuzz => 'Attiva variazione casuale';
+
+  @override
+  String get fuzzDescription => 'Aggiunge variazione casuale agli intervalli';
+
+  @override
+  String get requestRetention => 'Ritenzione desiderata';
+
+  @override
+  String get resetAllSrsProgress => 'Azzera tutto il progresso SRS';
+
+  @override
+  String get resetSrsDescription =>
+      'Reimposta tutte le carte allo stato Nuovo. La cronologia dei ripassi è conservata nel registro.';
+
+  @override
+  String get resetSrsStateTitle => 'Azzera stato SRS?';
+
+  @override
+  String get resetSrsConfirmation =>
+      'Questo segnerà tutte le carte come Nuove. La cronologia dei ripassi sarà conservata. Continuare?';
+
+  @override
+  String get reset => 'Azzera';
+
+  @override
+  String get cancel => 'Annulla';
+
+  @override
+  String get srsStateReset => 'Lo stato SRS è stato azzerato.';
+
+  @override
+  String level(Object level) {
+    return 'Livello $level';
+  }
+
+  @override
+  String newReviewsPerDay(Object newCount, Object reviewCount) {
+    return '$newCount nuove / $reviewCount ripassi al giorno';
+  }
+
+  @override
+  String newCount(Object newCount, Object maxNew) {
+    return '$newCount / $maxNew nuove';
+  }
+
+  @override
+  String reviewCount(Object reviewCount, Object maxReviews) {
+    return '$reviewCount / $maxReviews ripassi';
+  }
 }

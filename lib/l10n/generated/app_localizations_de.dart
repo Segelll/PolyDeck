@@ -281,4 +281,90 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get decksPage => 'Deck-Seite';
+
+  @override
+  String get again => 'Wiederholen';
+
+  @override
+  String get hard => 'Schwer';
+
+  @override
+  String get good => 'Gut';
+
+  @override
+  String get easy => 'Einfach';
+
+  @override
+  String get srsSettings => 'SRS-Einstellungen';
+
+  @override
+  String get dailyLimits => 'Tägliche Limits';
+
+  @override
+  String get globalSettings => 'Globale Einstellungen';
+
+  @override
+  String get dangerZone => 'Gefahrenzone';
+
+  @override
+  String get loading => 'Laden...';
+
+  @override
+  String get maxNewPerDay => 'Max neue pro Tag';
+
+  @override
+  String get maxReviewsPerDay => 'Max Wiederholungen pro Tag';
+
+  @override
+  String get enableFuzz => 'Zufallsvarianz aktivieren';
+
+  @override
+  String get fuzzDescription =>
+      'Fügt zufällige Abweichungen zu Intervallen hinzu';
+
+  @override
+  String get requestRetention => 'Ziel-Behaltequote';
+
+  @override
+  String get resetAllSrsProgress => 'Gesamten SRS-Fortschritt zurücksetzen';
+
+  @override
+  String get resetSrsDescription =>
+      'Setzt alle Karten auf Neu. Der Wiederholungsverlauf bleibt im Protokoll erhalten.';
+
+  @override
+  String get resetSrsStateTitle => 'SRS-Status zurücksetzen?';
+
+  @override
+  String get resetSrsConfirmation =>
+      'Dadurch werden alle Karten als Neu markiert. Ihr Wiederholungsverlauf bleibt erhalten. Fortfahren?';
+
+  @override
+  String get reset => 'Zurücksetzen';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get srsStateReset => 'SRS-Status wurde zurückgesetzt.';
+
+  @override
+  String level(Object level) {
+    return 'Stufe $level';
+  }
+
+  @override
+  String newReviewsPerDay(Object newCount, Object reviewCount) {
+    return '$newCount neu / $reviewCount Wiederholungen pro Tag';
+  }
+
+  @override
+  String newCount(Object newCount, Object maxNew) {
+    return '$newCount / $maxNew neu';
+  }
+
+  @override
+  String reviewCount(Object reviewCount, Object maxReviews) {
+    return '$reviewCount / $maxReviews Wiederholungen';
+  }
 }

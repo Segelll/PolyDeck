@@ -155,5 +155,55 @@
   "saveFailed": "Falha ao salvar as configurações",
   "selectLanguages": "Por favor, selecione as línguas.",
 
-  "decksPage": "Página do Deck"
+  "decksPage": "Página do Deck",
+
+  "again": "De novo",
+  "hard": "Difícil",
+  "good": "Bom",
+  "easy": "Fácil",
+
+  "srsSettings": "Configurações SRS",
+  "dailyLimits": "Limites diários",
+  "globalSettings": "Configurações globais",
+  "dangerZone": "Zona de perigo",
+  "loading": "Carregando...",
+  "maxNewPerDay": "Máx. novas por dia",
+  "maxReviewsPerDay": "Máx. revisões por dia",
+  "enableFuzz": "Ativar variação aleatória",
+  "fuzzDescription": "Adiciona variação aleatória aos intervalos",
+  "requestRetention": "Retenção desejada",
+  "resetAllSrsProgress": "Redefinir todo o progresso SRS",
+  "resetSrsDescription": "Redefine todas as cartas para o estado Novo. O histórico de revisões é preservado no registro.",
+  "resetSrsStateTitle": "Redefinir estado SRS?",
+  "resetSrsConfirmation": "Isso marcará todas as cartas como Novas. Seu histórico de revisões será mantido. Continuar?",
+  "reset": "Redefinir",
+  "cancel": "Cancelar",
+  "srsStateReset": "O estado SRS foi redefinido.",
+  "level": "Nível {level}",
+  "@level": {
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "newReviewsPerDay": "{newCount} novas / {reviewCount} revisões por dia",
+  "@newReviewsPerDay": {
+    "placeholders": {
+      "newCount": {},
+      "reviewCount": {}
+    }
+  },
+  "newCount": "{newCount} / {maxNew} novas",
+  "@newCount": {
+    "placeholders": {
+      "newCount": {},
+      "maxNew": {}
+    }
+  },
+  "reviewCount": "{reviewCount} / {maxReviews} revisões",
+  "@reviewCount": {
+    "placeholders": {
+      "reviewCount": {},
+      "maxReviews": {}
+    }
+  }
 }

@@ -225,6 +225,7 @@ class _DailyProgressBar extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final local = AppLocalizations.of(context)!;
     final configAsync = ref.watch(deckConfigProvider(level));
 
     return configAsync.when(
@@ -254,13 +255,13 @@ class _DailyProgressBar extends ConsumerWidget {
                   _StatChip(
                     icon: Icons.fiber_new,
                     color: Colors.blue,
-                    label: '$newCount / ${config.maxNewPerDay} new',
+                    label: local.newCount(newCount, config.maxNewPerDay),
                   ),
                   const SizedBox(width: 16),
                   _StatChip(
                     icon: Icons.replay,
                     color: Colors.orange,
-                    label: '$reviewCount / ${config.maxReviewsPerDay} reviews',
+                    label: local.reviewCount(reviewCount, config.maxReviewsPerDay),
                   ),
                 ],
               ),
@@ -278,9 +279,8 @@ class _DailyProgressBar extends ConsumerWidget {
         await ref.read(userRepositoryProvider).getUserChoices();
     final tableName = LanguageCodes.tableNameFor(
         userSettings?['targetLanguage'] ?? 'tr');
-    final newCount = await repo.getTodayNewCardCount(tableName, level);
-    final reviewCount = await repo.getTodayReviewCount(tableName, level);
-    return (newCount: newCount, reviewCount: reviewCount);
+    // Single combined query instead of two
+    return repo.getTodayCounts(tableName, level);
   }
 }
 

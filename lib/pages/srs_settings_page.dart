@@ -5,6 +5,7 @@ import 'package:poly2/domain/models/deck_config.dart';
 import 'package:poly2/presentation/providers/deck_config_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
+import 'package:poly2/l10n/generated/app_localizations.dart';
 
 /// Settings page for FSRS / spaced repetition configuration.
 class SrsSettingsPage extends ConsumerWidget {
@@ -12,27 +13,29 @@ class SrsSettingsPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final local = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        title: const HalfColoredTitle('SRS Settings'),
+        title: HalfColoredTitle(local.srsSettings),
         centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const _SectionHeader('Daily Limits'),
+          _SectionHeader(local.dailyLimits),
           const SizedBox(height: 8),
           for (final level
               in ProficiencyLevel.values.where((l) => l != ProficiencyLevel.favourites))
             _LevelConfigTile(level: level.code),
           const Divider(height: 32),
-          const _SectionHeader('Global Settings'),
+          _SectionHeader(local.globalSettings),
           const SizedBox(height: 8),
-          _GlobalConfigTile(),
+          const _GlobalConfigTile(),
           const Divider(height: 32),
-          const _SectionHeader('Danger Zone'),
+          _SectionHeader(local.dangerZone),
           const SizedBox(height: 8),
-          _ResetSrsButton(),
+          const _ResetSrsButton(),
         ],
       ),
     );
@@ -47,21 +50,23 @@ class _LevelConfigTile extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final local = AppLocalizations.of(context)!;
     final configAsync = ref.watch(deckConfigProvider(level));
 
     return configAsync.when(
-      loading: () => ListTile(title: Text('$level'), subtitle: const Text('Loading...')),
+      loading: () => ListTile(
+          title: Text(local.level(level)), subtitle: Text(local.loading)),
       error: (_, __) => const SizedBox.shrink(),
       data: (config) {
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
           child: ExpansionTile(
-            title: Text('Level $level'),
-            subtitle: Text(
-                '${config.maxNewPerDay} new / ${config.maxReviewsPerDay} reviews per day'),
+            title: Text(local.level(level)),
+            subtitle: Text(local.newReviewsPerDay(
+                config.maxNewPerDay, config.maxReviewsPerDay)),
             children: [
               _SliderSetting(
-                label: 'Max new per day',
+                label: local.maxNewPerDay,
                 value: config.maxNewPerDay.toDouble(),
                 min: 1,
                 max: 50,
@@ -69,7 +74,7 @@ class _LevelConfigTile extends ConsumerWidget {
                 onChanged: (v) => _save(ref, config.copyWith(maxNewPerDay: v.toInt())),
               ),
               _SliderSetting(
-                label: 'Max reviews per day',
+                label: local.maxReviewsPerDay,
                 value: config.maxReviewsPerDay.toDouble(),
                 min: 1,
                 max: 200,
@@ -93,19 +98,23 @@ class _LevelConfigTile extends ConsumerWidget {
 
 /// Global retention + fuzz settings.
 class _GlobalConfigTile extends ConsumerWidget {
+  const _GlobalConfigTile();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final local = AppLocalizations.of(context)!;
     final configAsync = ref.watch(deckConfigProvider('default'));
 
     return configAsync.when(
-      loading: () => const ListTile(title: Text('Loading...')),
+      loading: () => ListTile(title: Text(local.loading)),
       error: (_, __) => const SizedBox.shrink(),
       data: (config) {
         return Card(
           child: Column(
             children: [
               _SliderSetting(
-                label: 'Request retention: ${config.requestRetention.toStringAsFixed(2)}',
+                label:
+                    '${local.requestRetention}: ${config.requestRetention.toStringAsFixed(2)}',
                 value: config.requestRetention,
                 min: 0.70,
                 max: 0.97,
@@ -118,8 +127,8 @@ class _GlobalConfigTile extends ConsumerWidget {
                 },
               ),
               SwitchListTile(
-                title: const Text('Enable fuzz'),
-                subtitle: const Text('Adds random variance to intervals'),
+                title: Text(local.enableFuzz),
+                subtitle: Text(local.fuzzDescription),
                 value: config.enableFuzz,
                 onChanged: (v) {
                   final newConfig = config.copyWith(enableFuzz: v);
@@ -138,33 +147,34 @@ class _GlobalConfigTile extends ConsumerWidget {
 
 /// Resets all SRS state to New.
 class _ResetSrsButton extends ConsumerWidget {
+  const _ResetSrsButton();
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final local = AppLocalizations.of(context)!;
+
     return Card(
       color: Colors.red.shade50,
       child: ListTile(
         leading: const Icon(Icons.warning, color: Colors.red),
-        title: const Text('Reset All SRS Progress'),
-        subtitle: const Text(
-            'Resets every card to New state. Review history is preserved in the log.'),
+        title: Text(local.resetAllSrsProgress),
+        subtitle: Text(local.resetSrsDescription),
         trailing: ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
           onPressed: () async {
             final confirmed = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
-                title: const Text('Reset SRS State?'),
-                content: const Text(
-                    'This will mark all cards as New. '
-                    'Your review history will be kept. Continue?'),
+                title: Text(local.resetSrsStateTitle),
+                content: Text(local.resetSrsConfirmation),
                 actions: [
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, false),
-                      child: const Text('Cancel')),
+                      child: Text(local.cancel)),
                   TextButton(
                       onPressed: () => Navigator.pop(ctx, true),
-                      child: const Text('Reset',
-                          style: TextStyle(color: Colors.red))),
+                      child: Text(local.reset,
+                          style: const TextStyle(color: Colors.red))),
                 ],
               ),
             );
@@ -176,12 +186,13 @@ class _ResetSrsButton extends ConsumerWidget {
               }
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('SRS state has been reset.')),
+                  SnackBar(content: Text(local.srsStateReset)),
                 );
               }
             }
           },
-          child: const Text('Reset', style: TextStyle(color: Colors.white)),
+          child: Text(local.reset,
+              style: const TextStyle(color: Colors.white)),
         ),
       ),
     );

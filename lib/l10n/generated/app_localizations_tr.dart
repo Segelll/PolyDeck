@@ -108,7 +108,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get instructionsContent =>
-      'Sola Kaydır: Kırmızı Olarak İşaretle (Zor)\nAşağı Kaydır: Sarı Olarak İşaretle (Orta)\nSağa Kaydır: Yeşil Olarak İşaretle (Kolay)\n\nKartı tekrar denemek için \'Tekrar Çevir\'e dokunun.';
+      'Karta dokunup çevirin, sonra bir derecelendirme seçin:\n◉ Tekrar — sıfırla ve yeniden öğren\n◉ Zor — daha kısa aralık\n◉ İyi — standart aralık\n◉ Kolay — daha uzun aralık\n\nKaydırma kısayolları: Sol=Tekrar, Aşağı=Zor, Sağ=İyi, Yukarı=Kolay';
 
   @override
   String get result => 'Sonuç';
@@ -280,4 +280,89 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get decksPage => 'Desteler Sayfası';
+
+  @override
+  String get again => 'Tekrar';
+
+  @override
+  String get hard => 'Zor';
+
+  @override
+  String get good => 'İyi';
+
+  @override
+  String get easy => 'Kolay';
+
+  @override
+  String get srsSettings => 'SRS Ayarları';
+
+  @override
+  String get dailyLimits => 'Günlük Limitler';
+
+  @override
+  String get globalSettings => 'Genel Ayarlar';
+
+  @override
+  String get dangerZone => 'Tehlikeli Bölge';
+
+  @override
+  String get loading => 'Yükleniyor...';
+
+  @override
+  String get maxNewPerDay => 'Günlük maks. yeni';
+
+  @override
+  String get maxReviewsPerDay => 'Günlük maks. tekrar';
+
+  @override
+  String get enableFuzz => 'Rastgelelik ekle';
+
+  @override
+  String get fuzzDescription => 'Aralıklara rastgele sapma ekler';
+
+  @override
+  String get requestRetention => 'Hedef hatırlama';
+
+  @override
+  String get resetAllSrsProgress => 'Tüm SRS İlerlemesini Sıfırla';
+
+  @override
+  String get resetSrsDescription =>
+      'Tüm kartları Yeni durumuna döndürür. Gözden geçirme geçmişi logda korunur.';
+
+  @override
+  String get resetSrsStateTitle => 'SRS Durumu Sıfırlansın mı?';
+
+  @override
+  String get resetSrsConfirmation =>
+      'Bu işlem tüm kartları Yeni olarak işaretler. Gözden geçirme geçmişiniz korunur. Devam edilsin mi?';
+
+  @override
+  String get reset => 'Sıfırla';
+
+  @override
+  String get cancel => 'İptal';
+
+  @override
+  String get srsStateReset => 'SRS durumu sıfırlandı.';
+
+  @override
+  String level(Object level) {
+    return 'Seviye $level';
+  }
+
+  @override
+  String newReviewsPerDay(Object newCount, Object reviewCount) {
+    return '$newCount yeni / $reviewCount tekrar/gün';
+  }
+
+  @override
+  String newCount(Object newCount, Object maxNew) {
+    return '$newCount / $maxNew yeni';
+  }
+
+  @override
+  String reviewCount(Object reviewCount, Object maxReviews) {
+    return '$reviewCount / $maxReviews tekrar';
+  }
 }

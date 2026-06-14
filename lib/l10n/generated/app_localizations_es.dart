@@ -280,4 +280,89 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get decksPage => 'Decks Page';
+
+  @override
+  String get again => 'Otra vez';
+
+  @override
+  String get hard => 'Difícil';
+
+  @override
+  String get good => 'Bien';
+
+  @override
+  String get easy => 'Fácil';
+
+  @override
+  String get srsSettings => 'Ajustes SRS';
+
+  @override
+  String get dailyLimits => 'Límites diarios';
+
+  @override
+  String get globalSettings => 'Ajustes globales';
+
+  @override
+  String get dangerZone => 'Zona de peligro';
+
+  @override
+  String get loading => 'Cargando...';
+
+  @override
+  String get maxNewPerDay => 'Máx. nuevas por día';
+
+  @override
+  String get maxReviewsPerDay => 'Máx. repasos por día';
+
+  @override
+  String get enableFuzz => 'Activar variación aleatoria';
+
+  @override
+  String get fuzzDescription => 'Añade variación aleatoria a los intervalos';
+
+  @override
+  String get requestRetention => 'Retención deseada';
+
+  @override
+  String get resetAllSrsProgress => 'Restablecer todo el progreso SRS';
+
+  @override
+  String get resetSrsDescription =>
+      'Restablece todas las tarjetas al estado Nuevo. El historial de repasos se conserva en el registro.';
+
+  @override
+  String get resetSrsStateTitle => '¿Restablecer estado SRS?';
+
+  @override
+  String get resetSrsConfirmation =>
+      'Esto marcará todas las tarjetas como Nuevas. El historial de repasos se conservará. ¿Continuar?';
+
+  @override
+  String get reset => 'Restablecer';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get srsStateReset => 'El estado SRS ha sido restablecido.';
+
+  @override
+  String level(Object level) {
+    return 'Nivel $level';
+  }
+
+  @override
+  String newReviewsPerDay(Object newCount, Object reviewCount) {
+    return '$newCount nuevas / $reviewCount repasos por día';
+  }
+
+  @override
+  String newCount(Object newCount, Object maxNew) {
+    return '$newCount / $maxNew nuevas';
+  }
+
+  @override
+  String reviewCount(Object reviewCount, Object maxReviews) {
+    return '$reviewCount / $maxReviews repasos';
+  }
 }

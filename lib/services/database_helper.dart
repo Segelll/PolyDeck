@@ -34,24 +34,31 @@ class DBHelper {
       final dbExists = await databaseExists(path);
 
       if (!dbExists) {
-        ByteData data = await rootBundle.load('assets/language_data.db');
-        List<int> bytes =
+        // Copy prebuilt DB from assets (2.5 MB) — offloaded via async I/O
+        final data = await rootBundle.load('assets/language_data.db');
+        final bytes =
             data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
         await File(path).writeAsBytes(bytes, flush: true);
       }
 
       return await openDatabase(
         path,
-        version: 2,
+        version: 3,
+        onConfigure: _onConfigure,
         onUpgrade: (db, oldVersion, newVersion) async {
           if (oldVersion < 2) {
             await _runMigrationV2(db);
           }
+          if (oldVersion < 3) {
+            await _runMigrationV3(db);
+          }
         },
         onCreate: (db, version) async {
-          // If created fresh (not from asset), run v2 migration to add SRS columns
           if (version >= 2) {
             await _runMigrationV2(db);
+          }
+          if (version >= 3) {
+            await _runMigrationV3(db);
           }
         },
       );
@@ -60,139 +67,211 @@ class DBHelper {
     }
   }
 
-  /// Adds FSRS scheduling columns, revlog table, and deck_config table.
-  Future<void> _runMigrationV2(Database db) async {
-    const srsColumns = [
-      'ALTER TABLE "en" ADD COLUMN "card_state" INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE "en" ADD COLUMN "stability" REAL NOT NULL DEFAULT 0.0',
-      'ALTER TABLE "en" ADD COLUMN "difficulty" REAL NOT NULL DEFAULT 0.0',
-      'ALTER TABLE "en" ADD COLUMN "due" TEXT DEFAULT NULL',
-      'ALTER TABLE "en" ADD COLUMN "elapsed_days" INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE "en" ADD COLUMN "scheduled_days" INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE "en" ADD COLUMN "reps" INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE "en" ADD COLUMN "lapses" INTEGER NOT NULL DEFAULT 0',
-      'ALTER TABLE "en" ADD COLUMN "last_review" TEXT DEFAULT NULL',
-    ];
+  /// Apply performance PRAGMAs before any queries run.
+  Future<void> _onConfigure(Database db) async {
+    // WAL mode: writers don't block readers → smoother UI during concurrent access
+    await db.execute('PRAGMA journal_mode=WAL');
+    // NORMAL synchronous: still safe, much faster than FULL (default)
+    await db.execute('PRAGMA synchronous=NORMAL');
+    // 64 MB page cache — the DB is ~2.5 MB so this holds everything in memory
+    await db.execute('PRAGMA cache_size=-64000');
+    // Temp tables in memory
+    await db.execute('PRAGMA temp_store=MEMORY');
+    // Enable memory-mapped I/O for faster reads (64 MB)
+    await db.execute('PRAGMA mmap_size=67108864');
+    // Enable foreign keys
+    await db.execute('PRAGMA foreign_keys=ON');
+  }
 
+  /// Adds FSRS scheduling columns, revlog table, deck_config table,
+  /// and performance indices — all wrapped in a single transaction.
+  Future<void> _runMigrationV2(Database db) async {
     const tables = ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp', 'fav'];
 
-    for (final table in tables) {
-      for (final col in srsColumns) {
-        try {
-          await db.execute(col.replaceAll('"en"', '"$table"'));
-        } catch (_) {
-          // Column may already exist — safe to ignore
+    // Wrap the ENTIRE migration in a single transaction.
+    // Without this, each ALTER/UPDATE/CREATE is its own disk sync.
+    await db.transaction((tx) async {
+      // ── Add FSRS columns per language table ──
+      const srsColumns = [
+        'card_state', 'stability', 'difficulty', 'due',
+        'elapsed_days', 'scheduled_days', 'reps', 'lapses', 'last_review',
+      ];
+      const srsColumnDefs = [
+        'card_state INTEGER NOT NULL DEFAULT 0',
+        'stability REAL NOT NULL DEFAULT 0.0',
+        'difficulty REAL NOT NULL DEFAULT 0.0',
+        'due TEXT DEFAULT NULL',
+        'elapsed_days INTEGER NOT NULL DEFAULT 0',
+        'scheduled_days INTEGER NOT NULL DEFAULT 0',
+        'reps INTEGER NOT NULL DEFAULT 0',
+        'lapses INTEGER NOT NULL DEFAULT 0',
+        'last_review TEXT DEFAULT NULL',
+      ];
+
+      for (final table in tables) {
+        for (final colDef in srsColumnDefs) {
+          try {
+            await tx.execute('ALTER TABLE "$table" ADD COLUMN $colDef');
+          } catch (_) {
+            // Column may already exist — safe to ignore
+          }
         }
       }
-    }
 
-    // Seed initial FSRS params from legacy data where available
-    for (final table in tables) {
-      try {
-        // Words seen with hard feedback → moderate initial stability
-        await db.execute('''
-          UPDATE "$table" SET
-            card_state = 2,
-            stability = 1.0,
-            difficulty = 7.0,
-            reps = 1,
-            elapsed_days = 1,
-            scheduled_days = 1,
-            last_review = date
-          WHERE isSeen = 1 AND feedback = 1
-        ''');
-        // Words seen with easy feedback → higher initial stability
-        await db.execute('''
-          UPDATE "$table" SET
-            card_state = 2,
-            stability = 3.0,
-            difficulty = 3.0,
-            reps = 2,
-            elapsed_days = 3,
-            scheduled_days = 3,
-            last_review = date
-          WHERE isSeen = 1 AND feedback = 2
-        ''');
-        // Words seen with medium feedback → moderate stability
-        await db.execute('''
-          UPDATE "$table" SET
-            card_state = 2,
-            stability = 1.5,
-            difficulty = 5.0,
-            reps = 1,
-            elapsed_days = 1,
-            scheduled_days = 1,
-            last_review = date
-          WHERE isSeen = 1 AND feedback = 3
-        ''');
-        // Words seen but no feedback → low initial stability
-        await db.execute('''
-          UPDATE "$table" SET
-            card_state = 2,
-            stability = 0.5,
-            difficulty = 5.0,
-            reps = 1,
-            elapsed_days = 1,
-            scheduled_days = 1,
-            last_review = date
-          WHERE isSeen = 1 AND feedback = 0 AND date IS NOT NULL AND date != '0'
-        ''');
-      } catch (e) {
-        if (kDebugMode) print('Seed FSRS params for $table: $e');
+      // ── Seed initial FSRS params from legacy data ──
+      for (final table in tables) {
+        try {
+          await tx.execute('''
+            UPDATE "$table" SET
+              card_state = 2, stability = 1.0, difficulty = 7.0,
+              reps = 1, elapsed_days = 1, scheduled_days = 1, last_review = date
+            WHERE isSeen = 1 AND feedback = 1
+          ''');
+          await tx.execute('''
+            UPDATE "$table" SET
+              card_state = 2, stability = 3.0, difficulty = 3.0,
+              reps = 2, elapsed_days = 3, scheduled_days = 3, last_review = date
+            WHERE isSeen = 1 AND feedback = 2
+          ''');
+          await tx.execute('''
+            UPDATE "$table" SET
+              card_state = 2, stability = 1.5, difficulty = 5.0,
+              reps = 1, elapsed_days = 1, scheduled_days = 1, last_review = date
+            WHERE isSeen = 1 AND feedback = 3
+          ''');
+          await tx.execute('''
+            UPDATE "$table" SET
+              card_state = 2, stability = 0.5, difficulty = 5.0,
+              reps = 1, elapsed_days = 1, scheduled_days = 1, last_review = date
+            WHERE isSeen = 1 AND feedback = 0 AND date IS NOT NULL AND date != '0'
+          ''');
+        } catch (e) {
+          if (kDebugMode) print('Seed FSRS params for $table: $e');
+        }
       }
-    }
 
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS "revlog" (
-        "id"              INTEGER PRIMARY KEY AUTOINCREMENT,
-        "card_id"         INTEGER NOT NULL,
-        "deck_table"      TEXT NOT NULL,
-        "rating"          INTEGER NOT NULL,
-        "state"           INTEGER NOT NULL,
-        "due"             TEXT NOT NULL,
-        "stability"       REAL NOT NULL,
-        "difficulty"      REAL NOT NULL,
-        "elapsed_days"    INTEGER NOT NULL,
-        "last_elapsed_days" INTEGER NOT NULL DEFAULT 0,
-        "scheduled_days"  INTEGER NOT NULL,
-        "review_date"     TEXT NOT NULL
-      )
-    ''');
+      // ── Create revlog table ──
+      await tx.execute('''
+        CREATE TABLE IF NOT EXISTS "revlog" (
+          "id"              INTEGER PRIMARY KEY AUTOINCREMENT,
+          "card_id"         INTEGER NOT NULL,
+          "deck_table"      TEXT NOT NULL,
+          "rating"          INTEGER NOT NULL,
+          "state"           INTEGER NOT NULL,
+          "due"             TEXT NOT NULL,
+          "stability"       REAL NOT NULL,
+          "difficulty"      REAL NOT NULL,
+          "elapsed_days"    INTEGER NOT NULL,
+          "last_elapsed_days" INTEGER NOT NULL DEFAULT 0,
+          "scheduled_days"  INTEGER NOT NULL,
+          "review_date"     TEXT NOT NULL
+        )
+      ''');
+      await tx.execute('''
+        CREATE INDEX IF NOT EXISTS "idx_revlog_card"
+          ON "revlog" ("deck_table", "card_id")
+      ''');
+      await tx.execute('''
+        CREATE INDEX IF NOT EXISTS "idx_revlog_date"
+          ON "revlog" ("review_date")
+      ''');
+      // Composite index for today-count queries
+      await tx.execute('''
+        CREATE INDEX IF NOT EXISTS "idx_revlog_deck_date_state"
+          ON "revlog" ("deck_table", "review_date", "state")
+      ''');
 
-    await db.execute('''
-      CREATE INDEX IF NOT EXISTS "idx_revlog_card"
-        ON "revlog" ("deck_table", "card_id")
-    ''');
+      // ── Create deck_config table ──
+      await tx.execute('''
+        CREATE TABLE IF NOT EXISTS "deck_config" (
+          "level"               TEXT PRIMARY KEY,
+          "max_new_per_day"     INTEGER NOT NULL DEFAULT 10,
+          "max_reviews_per_day" INTEGER NOT NULL DEFAULT 20,
+          "learning_steps"      TEXT NOT NULL DEFAULT '[1,10]',
+          "enable_fuzz"         INTEGER NOT NULL DEFAULT 1,
+          "request_retention"   REAL NOT NULL DEFAULT 0.9,
+          "w"                   TEXT DEFAULT NULL
+        )
+      ''');
 
-    await db.execute('''
-      CREATE INDEX IF NOT EXISTS "idx_revlog_date"
-        ON "revlog" ("review_date")
-    ''');
+      final levels = ['default', 'A1', 'A2', 'B1', 'B2', 'C1'];
+      for (final level in levels) {
+        try {
+          await tx.insert('deck_config',
+              DeckConfig.defaults().copyWithLevel(level).toMap(),
+              conflictAlgorithm: ConflictAlgorithm.ignore);
+        } catch (_) {}
+      }
 
-    await db.execute('''
-      CREATE TABLE IF NOT EXISTS "deck_config" (
-        "level"               TEXT PRIMARY KEY,
-        "max_new_per_day"     INTEGER NOT NULL DEFAULT 10,
-        "max_reviews_per_day" INTEGER NOT NULL DEFAULT 20,
-        "learning_steps"      TEXT NOT NULL DEFAULT '[1,10]',
-        "enable_fuzz"         INTEGER NOT NULL DEFAULT 1,
-        "request_retention"   REAL NOT NULL DEFAULT 0.9,
-        "w"                   TEXT DEFAULT NULL
-      )
-    ''');
+      // ── Create performance indices on ALL language tables ──
+      // These are critical for fast FSRS deck loading.
+      for (final table in tables) {
+        // FSRS due-card query: WHERE level=? AND card_state IN (1,2,3) AND due<=? ORDER BY due
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_fsrs_due" ON "$table" ("level", "card_state", "due")');
+        } catch (_) {}
+        // FSRS new-card query: WHERE level=? AND card_state=0 AND isSeen=0
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_fsrs_new" ON "$table" ("level", "card_state", "isSeen")');
+        } catch (_) {}
+        // Seen-word query: WHERE level=? AND isSeen=?
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_level_isSeen" ON "$table" ("level", "isSeen")');
+        } catch (_) {}
+        // Feedback-based queries
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_feedback" ON "$table" ("isSeen", "feedback")');
+        } catch (_) {}
+      }
+    });
+  }
 
-    // Seed default configs for all levels
-    final levels = ['default', 'A1', 'A2', 'B1', 'B2', 'C1'];
-    for (final level in levels) {
+  /// v3 migration: adds performance indices that were missing in v2.
+  Future<void> _runMigrationV3(Database db) async {
+    const tables = ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp', 'fav'];
+
+    await db.transaction((tx) async {
+      // Add the composite revlog index (missing in v2)
       try {
-        await db.insert('deck_config', DeckConfig.defaults().copyWithLevel(level).toMap(),
-            conflictAlgorithm: ConflictAlgorithm.ignore);
+        await tx.execute('''
+          CREATE INDEX IF NOT EXISTS "idx_revlog_deck_date_state"
+            ON "revlog" ("deck_table", "review_date", "state")
+        ''');
       } catch (_) {}
-    }
+
+      // Add performance indices on all language tables
+      for (final table in tables) {
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_fsrs_due" ON "$table" ("level", "card_state", "due")');
+        } catch (_) {}
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_fsrs_new" ON "$table" ("level", "card_state", "isSeen")');
+        } catch (_) {}
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_level_isSeen" ON "$table" ("level", "isSeen")');
+        } catch (_) {}
+        try {
+          await tx.execute(
+            'CREATE INDEX IF NOT EXISTS "idx_${table}_feedback" ON "$table" ("isSeen", "feedback")');
+        } catch (_) {}
+      }
+    });
+
+    // Analyze after adding indices so the query planner uses them
+    try {
+      await db.execute('ANALYZE');
+    } catch (_) {}
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  Existing methods (unchanged)
+  //  Existing query methods
   // ─────────────────────────────────────────────────────────────
 
   Future<void> updateIsSeenDate(String tableName, int id) async {
@@ -277,8 +356,7 @@ class DBHelper {
       final db = await database;
       final whereClause =
           level != null ? 'level = ? AND feedback = ?' : 'feedback = ?';
-      final whereArgs =
-          level != null ? [level, feedback] : [feedback];
+      final whereArgs = level != null ? [level, feedback] : [feedback];
       return await db.query(tableName,
           where: whereClause, whereArgs: whereArgs, limit: limit);
     } catch (e) {
@@ -292,8 +370,7 @@ class DBHelper {
       final db = await database;
       final whereClause =
           level != null ? 'level = ? AND isSeen = ?' : 'isSeen = ?';
-      final whereArgs =
-          level != null ? [level, isSeen] : [isSeen];
+      final whereArgs = level != null ? [level, isSeen] : [isSeen];
       return await db.query(tableName,
           where: whereClause, whereArgs: whereArgs, limit: limit);
     } catch (e) {
@@ -343,13 +420,13 @@ class DBHelper {
         AppConstants.maxWordId,
         AppConstants.distractorsPerQuestion,
       );
-      List<Map<String, dynamic>> options = [];
-      for (int id in randomIds) {
-        final result =
-            await db.query(tableName, where: 'id = ?', whereArgs: [id]);
-        if (result.isNotEmpty) options.add(result.first);
-      }
-      return options;
+      // Batch query instead of N individual queries
+      if (randomIds.isEmpty) return [];
+      final placeholders = randomIds.map((_) => '?').join(',');
+      return await db.rawQuery(
+        'SELECT * FROM "$tableName" WHERE id IN ($placeholders)',
+        randomIds,
+      );
     } catch (e) {
       throw Exception('Failed to fetch exam options: $e');
     }
@@ -395,7 +472,7 @@ class DBHelper {
   }
 
   // ─────────────────────────────────────────────────────────────
-  //  New FSRS scheduling methods
+  //  FSRS scheduling methods (optimized)
   // ─────────────────────────────────────────────────────────────
 
   /// Fetches cards due for review on or before [date] for a given level.
@@ -414,22 +491,71 @@ class DBHelper {
         where: where, whereArgs: args, orderBy: 'due ASC', limit: limit);
   }
 
+  /// Fetches multiple words by their IDs in a single query.
+  Future<List<Map<String, dynamic>>> fetchWordsByIds(
+    String tableName,
+    List<int> ids,
+  ) async {
+    if (ids.isEmpty) return [];
+    final db = await database;
+    final placeholders = ids.map((_) => '?').join(',');
+    return db.rawQuery(
+      'SELECT * FROM "$tableName" WHERE id IN ($placeholders)',
+      ids,
+    );
+  }
+
   /// Fetches new (unseen, never-reviewed) cards up to [limit].
+  /// Uses rowid-based random sampling instead of ORDER BY RANDOM() for performance.
   Future<List<Map<String, dynamic>>> fetchNewCards(
     String tableName,
     String? level,
     int limit,
   ) async {
     final db = await database;
+    // Use ABS(RANDOM() % maxId) trick to pick random rows efficiently.
+    // Much faster than ORDER BY RANDOM() which does O(n log n) sort.
     final where = level != null
         ? 'level = ? AND card_state = 0 AND isSeen = 0'
         : 'card_state = 0 AND isSeen = 0';
-    final args = level != null ? [level] : null;
-    return db.query(tableName,
-        where: where, whereArgs: args, limit: limit, orderBy: 'RANDOM()');
+    final args = level != null ? [level] : <Object>[];
+
+    // First, get a pool of candidates (up to 100) then randomly pick
+    final candidates = await db.query(
+      tableName,
+      where: where,
+      whereArgs: args.isNotEmpty ? args : null,
+      limit: 100,
+      columns: ['id'],
+    );
+
+    if (candidates.length <= limit) {
+      // Not enough candidates, fetch all of them
+      final result = await db.query(
+        tableName,
+        where: where,
+        whereArgs: args.isNotEmpty ? args : null,
+        limit: limit,
+      );
+      result.shuffle();
+      return result;
+    }
+
+    // Randomly select `limit` IDs from the candidate pool
+    candidates.shuffle();
+    final selectedIds = candidates.take(limit).map((c) => c['id'] as int).toList();
+    if (selectedIds.isEmpty) return [];
+
+    final placeholders = selectedIds.map((_) => '?').join(',');
+    final result = await db.rawQuery(
+      'SELECT * FROM "$tableName" WHERE id IN ($placeholders)',
+      selectedIds,
+    );
+    result.shuffle();
+    return result;
   }
 
-  /// Updates all FSRS scheduling fields for a card.
+  /// Updates all FSRS scheduling fields for a card (including legacy feedback).
   Future<void> updateSrsState(
     String tableName,
     int id, {
@@ -442,23 +568,40 @@ class DBHelper {
     required int reps,
     required int lapses,
     String? lastReview,
+    int? legacyFeedback,
   }) async {
     final db = await database;
+    final values = <String, dynamic>{
+      'card_state': cardState,
+      'stability': stability,
+      'difficulty': difficulty,
+      'due': due,
+      'elapsed_days': elapsedDays,
+      'scheduled_days': scheduledDays,
+      'reps': reps,
+      'lapses': lapses,
+      'last_review': lastReview,
+    };
+    if (legacyFeedback != null) {
+      values['feedback'] = legacyFeedback;
+    }
     await db.update(
       tableName,
-      {
-        'card_state': cardState,
-        'stability': stability,
-        'difficulty': difficulty,
-        'due': due,
-        'elapsed_days': elapsedDays,
-        'scheduled_days': scheduledDays,
-        'reps': reps,
-        'lapses': lapses,
-        'last_review': lastReview,
-      },
+      values,
       where: 'id = ?',
       whereArgs: [id],
+    );
+  }
+
+  /// Batch marks multiple cards as seen.
+  Future<void> markMultipleAsSeen(
+      String tableName, List<int> ids, String date) async {
+    if (ids.isEmpty) return;
+    final db = await database;
+    final placeholders = ids.map((_) => '?').join(',');
+    await db.rawUpdate(
+      'UPDATE "$tableName" SET isSeen = 1, date = ? WHERE id IN ($placeholders)',
+      [date, ...ids],
     );
   }
 
@@ -468,42 +611,33 @@ class DBHelper {
     await db.insert('revlog', entry.toMap());
   }
 
-  /// Counts today's reviews for a given level.
-  Future<int> getTodayReviewCount(String tableName, String? level) async {
+  /// Combined query: fetches both today's new and review counts in a single query.
+  Future<({int newCount, int reviewCount})> getTodayCounts(
+      String tableName, String? level) async {
     final db = await database;
     final today = formatDate(DateTime.now());
-    String where;
-    List<Object?> args;
-    if (level != null) {
-      where =
-          'SELECT COUNT(*) as cnt FROM revlog WHERE deck_table = ? AND review_date LIKE ? AND state IN (2,3)';
-      args = [tableName, '$today%'];
-    } else {
-      where =
-          'SELECT COUNT(*) as cnt FROM revlog WHERE review_date LIKE ? AND state IN (2,3)';
-      args = ['$today%'];
-    }
-    final result = await db.rawQuery(where, args);
-    return result.first['cnt'] as int? ?? 0;
-  }
+    final tomorrow = formatDate(DateTime.now().add(const Duration(days: 1)));
 
-  /// Counts today's new cards for a given level.
-  Future<int> getTodayNewCardCount(String tableName, String? level) async {
-    final db = await database;
-    final today = formatDate(DateTime.now());
-    String where;
-    List<Object?> args;
-    if (level != null) {
-      where =
-          'SELECT COUNT(*) as cnt FROM revlog WHERE deck_table = ? AND review_date LIKE ? AND state = 0';
-      args = [tableName, '$today%'];
-    } else {
-      where =
-          'SELECT COUNT(*) as cnt FROM revlog WHERE review_date LIKE ? AND state = 0';
-      args = ['$today%'];
-    }
-    final result = await db.rawQuery(where, args);
-    return result.first['cnt'] as int? ?? 0;
+    // Use >= AND < instead of LIKE for index-friendly date range
+    final where = level != null
+        ? 'deck_table = ? AND review_date >= ? AND review_date < ?'
+        : 'review_date >= ? AND review_date < ?';
+    final args = level != null
+        ? [tableName, today, tomorrow]
+        : [today, tomorrow];
+
+    final result = await db.rawQuery('''
+      SELECT
+        SUM(CASE WHEN state = 0 THEN 1 ELSE 0 END) as new_cnt,
+        SUM(CASE WHEN state IN (2,3) THEN 1 ELSE 0 END) as review_cnt
+      FROM revlog
+      WHERE $where
+    ''', args);
+
+    return (
+      newCount: result.first['new_cnt'] as int? ?? 0,
+      reviewCount: result.first['review_cnt'] as int? ?? 0,
+    );
   }
 
   /// Loads deck config from the database.

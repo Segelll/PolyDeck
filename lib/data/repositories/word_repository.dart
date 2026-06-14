@@ -52,6 +52,20 @@ class WordRepository {
     }
   }
 
+  /// Batch marks multiple cards as seen in a single query.
+  Future<void> markMultipleAsSeen(
+      String tableName, List<int> ids, String date) async {
+    await _dbHelper.markMultipleAsSeen(tableName, ids, date);
+  }
+
+  /// Fetches multiple words by their IDs in a single query.
+  Future<List<Map<String, dynamic>>> fetchWordsByIds(
+    String tableName,
+    List<int> ids,
+  ) async {
+    return _dbHelper.fetchWordsByIds(tableName, ids);
+  }
+
   // ── Exam queries ──
 
   Future<List<Map<String, dynamic>>> fetchExamWords(
@@ -125,6 +139,7 @@ class WordRepository {
     required int reps,
     required int lapses,
     String? lastReview,
+    int? legacyFeedback,
   }) async {
     await _dbHelper.updateSrsState(
       tableName,
@@ -138,6 +153,7 @@ class WordRepository {
       reps: reps,
       lapses: lapses,
       lastReview: lastReview,
+      legacyFeedback: legacyFeedback,
     );
   }
 
@@ -146,14 +162,22 @@ class WordRepository {
     await _dbHelper.insertRevlog(entry);
   }
 
+  /// Returns both today's new and review counts in a single query.
+  Future<({int newCount, int reviewCount})> getTodayCounts(
+      String tableName, String? level) async {
+    return _dbHelper.getTodayCounts(tableName, level);
+  }
+
   /// Returns today's review count for a level.
   Future<int> getTodayReviewCount(String tableName, String? level) async {
-    return _dbHelper.getTodayReviewCount(tableName, level);
+    final counts = await _dbHelper.getTodayCounts(tableName, level);
+    return counts.reviewCount;
   }
 
   /// Returns today's new card count for a level.
   Future<int> getTodayNewCardCount(String tableName, String? level) async {
-    return _dbHelper.getTodayNewCardCount(tableName, level);
+    final counts = await _dbHelper.getTodayCounts(tableName, level);
+    return counts.newCount;
   }
 
   /// Loads deck configuration from the database.

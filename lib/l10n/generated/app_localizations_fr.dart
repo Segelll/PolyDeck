@@ -281,4 +281,90 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get decksPage => 'Decks Page';
+
+  @override
+  String get again => 'Encore';
+
+  @override
+  String get hard => 'Difficile';
+
+  @override
+  String get good => 'Bien';
+
+  @override
+  String get easy => 'Facile';
+
+  @override
+  String get srsSettings => 'Paramètres SRS';
+
+  @override
+  String get dailyLimits => 'Limites quotidiennes';
+
+  @override
+  String get globalSettings => 'Paramètres globaux';
+
+  @override
+  String get dangerZone => 'Zone dangereuse';
+
+  @override
+  String get loading => 'Chargement...';
+
+  @override
+  String get maxNewPerDay => 'Max nouvelles par jour';
+
+  @override
+  String get maxReviewsPerDay => 'Max révisions par jour';
+
+  @override
+  String get enableFuzz => 'Activer la variation aléatoire';
+
+  @override
+  String get fuzzDescription =>
+      'Ajoute une variation aléatoire aux intervalles';
+
+  @override
+  String get requestRetention => 'Rétention souhaitée';
+
+  @override
+  String get resetAllSrsProgress => 'Réinitialiser tout le progrès SRS';
+
+  @override
+  String get resetSrsDescription =>
+      'Réinitialise toutes les cartes à l\'état Nouveau. L\'historique des révisions est conservé dans le journal.';
+
+  @override
+  String get resetSrsStateTitle => 'Réinitialiser l\'état SRS ?';
+
+  @override
+  String get resetSrsConfirmation =>
+      'Cela marquera toutes les cartes comme Nouvelles. Votre historique de révisions sera conservé. Continuer ?';
+
+  @override
+  String get reset => 'Réinitialiser';
+
+  @override
+  String get cancel => 'Annuler';
+
+  @override
+  String get srsStateReset => 'L\'état SRS a été réinitialisé.';
+
+  @override
+  String level(Object level) {
+    return 'Niveau $level';
+  }
+
+  @override
+  String newReviewsPerDay(Object newCount, Object reviewCount) {
+    return '$newCount nouvelles / $reviewCount révisions par jour';
+  }
+
+  @override
+  String newCount(Object newCount, Object maxNew) {
+    return '$newCount / $maxNew nouvelles';
+  }
+
+  @override
+  String reviewCount(Object reviewCount, Object maxReviews) {
+    return '$reviewCount / $maxReviews révisions';
+  }
 }

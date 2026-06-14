@@ -65,7 +65,7 @@
   "grey": "Grey",
 
   "instructionsTitle": "Instructions",
-  "instructionsContent": "Swipe Left: Mark as Red (Hard)\nSwipe Down: Mark as Yellow (Medium)\nSwipe Right: Mark as Green (Easy)\n\nTap 'Reflip' to reattempt the card.",
+  "instructionsContent": "Tap card to flip, then choose a rating:\n◉ Again — reset & relearn\n◉ Hard — shorter interval\n◉ Good — standard interval\n◉ Easy — longer interval\n\nSwipe shortcuts: Left=Again, Down=Hard, Right=Good, Up=Easy",
 
   "result": "Result",
   "reviewAnswers": "Review Answers",
@@ -155,5 +155,59 @@
   "saveFailed": "Failed to save settings",
   "selectLanguages": "Please select languages.",
 
-  "decksPage": "Decks Page"
+  "decksPage": "Decks Page",
+
+  "again": "Again",
+  "hard": "Hard",
+  "good": "Good",
+  "easy": "Easy",
+
+  "srsSettings": "SRS Settings",
+  "dailyLimits": "Daily Limits",
+  "globalSettings": "Global Settings",
+  "dangerZone": "Danger Zone",
+  "loading": "Loading...",
+  "maxNewPerDay": "Max new per day",
+  "maxReviewsPerDay": "Max reviews per day",
+  "enableFuzz": "Enable fuzz",
+  "fuzzDescription": "Adds random variance to intervals",
+  "requestRetention": "Request retention",
+  "resetAllSrsProgress": "Reset All SRS Progress",
+  "resetSrsDescription": "Resets every card to New state. Review history is preserved in the log.",
+  "resetSrsStateTitle": "Reset SRS State?",
+  "resetSrsConfirmation": "This will mark all cards as New. Your review history will be kept. Continue?",
+  "reset": "Reset",
+  "cancel": "Cancel",
+  "srsStateReset": "SRS state has been reset.",
+  "level": "Level {level}",
+  "@level": {
+    "description": "Level label with code",
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "newReviewsPerDay": "{newCount} new / {reviewCount} reviews per day",
+  "@newReviewsPerDay": {
+    "description": "Daily new/review counts",
+    "placeholders": {
+      "newCount": {},
+      "reviewCount": {}
+    }
+  },
+  "newCount": "{newCount} / {maxNew} new",
+  "@newCount": {
+    "description": "New cards count for the day",
+    "placeholders": {
+      "newCount": {},
+      "maxNew": {}
+    }
+  },
+  "reviewCount": "{reviewCount} / {maxReviews} reviews",
+  "@reviewCount": {
+    "description": "Review cards count for the day",
+    "placeholders": {
+      "reviewCount": {},
+      "maxReviews": {}
+    }
+  }
 }

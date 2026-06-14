@@ -291,7 +291,7 @@ abstract class AppLocalizations {
   /// No description provided for @instructionsContent.
   ///
   /// In en, this message translates to:
-  /// **'Swipe Left: Mark as Red (Hard)\nSwipe Down: Mark as Yellow (Medium)\nSwipe Right: Mark as Green (Easy)\n\nTap \'Reflip\' to reattempt the card.'**
+  /// **'Tap card to flip, then choose a rating:\n◉ Again — reset & relearn\n◉ Hard — shorter interval\n◉ Good — standard interval\n◉ Easy — longer interval\n\nSwipe shortcuts: Left=Again, Down=Hard, Right=Good, Up=Easy'**
   String get instructionsContent;
 
   /// No description provided for @result.
@@ -617,6 +617,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Decks Page'**
   String get decksPage;
+
+  /// No description provided for @again.
+  ///
+  /// In en, this message translates to:
+  /// **'Again'**
+  String get again;
+
+  /// No description provided for @hard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get hard;
+
+  /// No description provided for @good.
+  ///
+  /// In en, this message translates to:
+  /// **'Good'**
+  String get good;
+
+  /// No description provided for @easy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get easy;
+
+  /// No description provided for @srsSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'SRS Settings'**
+  String get srsSettings;
+
+  /// No description provided for @dailyLimits.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily Limits'**
+  String get dailyLimits;
+
+  /// No description provided for @globalSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Global Settings'**
+  String get globalSettings;
+
+  /// No description provided for @dangerZone.
+  ///
+  /// In en, this message translates to:
+  /// **'Danger Zone'**
+  String get dangerZone;
+
+  /// No description provided for @loading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get loading;
+
+  /// No description provided for @maxNewPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Max new per day'**
+  String get maxNewPerDay;
+
+  /// No description provided for @maxReviewsPerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Max reviews per day'**
+  String get maxReviewsPerDay;
+
+  /// No description provided for @enableFuzz.
+  ///
+  /// In en, this message translates to:
+  /// **'Enable fuzz'**
+  String get enableFuzz;
+
+  /// No description provided for @fuzzDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Adds random variance to intervals'**
+  String get fuzzDescription;
+
+  /// No description provided for @requestRetention.
+  ///
+  /// In en, this message translates to:
+  /// **'Request retention'**
+  String get requestRetention;
+
+  /// No description provided for @resetAllSrsProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset All SRS Progress'**
+  String get resetAllSrsProgress;
+
+  /// No description provided for @resetSrsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Resets every card to New state. Review history is preserved in the log.'**
+  String get resetSrsDescription;
+
+  /// No description provided for @resetSrsStateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset SRS State?'**
+  String get resetSrsStateTitle;
+
+  /// No description provided for @resetSrsConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'This will mark all cards as New. Your review history will be kept. Continue?'**
+  String get resetSrsConfirmation;
+
+  /// No description provided for @reset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get reset;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @srsStateReset.
+  ///
+  /// In en, this message translates to:
+  /// **'SRS state has been reset.'**
+  String get srsStateReset;
+
+  /// Level label with code
+  ///
+  /// In en, this message translates to:
+  /// **'Level {level}'**
+  String level(Object level);
+
+  /// Daily new/review counts
+  ///
+  /// In en, this message translates to:
+  /// **'{newCount} new / {reviewCount} reviews per day'**
+  String newReviewsPerDay(Object newCount, Object reviewCount);
+
+  /// New cards count for the day
+  ///
+  /// In en, this message translates to:
+  /// **'{newCount} / {maxNew} new'**
+  String newCount(Object newCount, Object maxNew);
+
+  /// Review cards count for the day
+  ///
+  /// In en, this message translates to:
+  /// **'{reviewCount} / {maxReviews} reviews'**
+  String reviewCount(Object reviewCount, Object maxReviews);
 }
 
 class _AppLocalizationsDelegate

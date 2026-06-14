@@ -65,7 +65,7 @@
   "grey": "Gri",
 
   "instructionsTitle": "Talimatlar",
-  "instructionsContent": "Sola Kaydır: Kırmızı Olarak İşaretle (Zor)\nAşağı Kaydır: Sarı Olarak İşaretle (Orta)\nSağa Kaydır: Yeşil Olarak İşaretle (Kolay)\n\nKartı tekrar denemek için 'Tekrar Çevir'e dokunun.",
+  "instructionsContent": "Karta dokunup çevirin, sonra bir derecelendirme seçin:\n◉ Tekrar — sıfırla ve yeniden öğren\n◉ Zor — daha kısa aralık\n◉ İyi — standart aralık\n◉ Kolay — daha uzun aralık\n\nKaydırma kısayolları: Sol=Tekrar, Aşağı=Zor, Sağ=İyi, Yukarı=Kolay",
 
   "result": "Sonuç",
   "reviewAnswers": "Cevapları Gözden Geçir",
@@ -155,5 +155,59 @@
   "saveFailed": "Ayarlar kaydedilemedi",
   "selectLanguages": "Lütfen dilleri seçiniz.",
 
-  "decksPage": "Desteler Sayfası"
+  "decksPage": "Desteler Sayfası",
+
+  "again": "Tekrar",
+  "hard": "Zor",
+  "good": "İyi",
+  "easy": "Kolay",
+
+  "srsSettings": "SRS Ayarları",
+  "dailyLimits": "Günlük Limitler",
+  "globalSettings": "Genel Ayarlar",
+  "dangerZone": "Tehlikeli Bölge",
+  "loading": "Yükleniyor...",
+  "maxNewPerDay": "Günlük maks. yeni",
+  "maxReviewsPerDay": "Günlük maks. tekrar",
+  "enableFuzz": "Rastgelelik ekle",
+  "fuzzDescription": "Aralıklara rastgele sapma ekler",
+  "requestRetention": "Hedef hatırlama",
+  "resetAllSrsProgress": "Tüm SRS İlerlemesini Sıfırla",
+  "resetSrsDescription": "Tüm kartları Yeni durumuna döndürür. Gözden geçirme geçmişi logda korunur.",
+  "resetSrsStateTitle": "SRS Durumu Sıfırlansın mı?",
+  "resetSrsConfirmation": "Bu işlem tüm kartları Yeni olarak işaretler. Gözden geçirme geçmişiniz korunur. Devam edilsin mi?",
+  "reset": "Sıfırla",
+  "cancel": "İptal",
+  "srsStateReset": "SRS durumu sıfırlandı.",
+  "level": "Seviye {level}",
+  "@level": {
+    "description": "Level label with code",
+    "placeholders": {
+      "level": {}
+    }
+  },
+  "newReviewsPerDay": "{newCount} yeni / {reviewCount} tekrar/gün",
+  "@newReviewsPerDay": {
+    "description": "Daily new/review counts",
+    "placeholders": {
+      "newCount": {},
+      "reviewCount": {}
+    }
+  },
+  "newCount": "{newCount} / {maxNew} yeni",
+  "@newCount": {
+    "description": "New cards count for the day",
+    "placeholders": {
+      "newCount": {},
+      "maxNew": {}
+    }
+  },
+  "reviewCount": "{reviewCount} / {maxReviews} tekrar",
+  "@reviewCount": {
+    "description": "Review cards count for the day",
+    "placeholders": {
+      "reviewCount": {},
+      "maxReviews": {}
+    }
+  }
 }

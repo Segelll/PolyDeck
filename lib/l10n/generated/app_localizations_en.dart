@@ -108,7 +108,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get instructionsContent =>
-      'Swipe Left: Mark as Red (Hard)\nSwipe Down: Mark as Yellow (Medium)\nSwipe Right: Mark as Green (Easy)\n\nTap \'Reflip\' to reattempt the card.';
+      'Tap card to flip, then choose a rating:\n◉ Again — reset & relearn\n◉ Hard — shorter interval\n◉ Good — standard interval\n◉ Easy — longer interval\n\nSwipe shortcuts: Left=Again, Down=Hard, Right=Good, Up=Easy';
 
   @override
   String get result => 'Result';
@@ -279,4 +279,89 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get decksPage => 'Decks Page';
+
+  @override
+  String get again => 'Again';
+
+  @override
+  String get hard => 'Hard';
+
+  @override
+  String get good => 'Good';
+
+  @override
+  String get easy => 'Easy';
+
+  @override
+  String get srsSettings => 'SRS Settings';
+
+  @override
+  String get dailyLimits => 'Daily Limits';
+
+  @override
+  String get globalSettings => 'Global Settings';
+
+  @override
+  String get dangerZone => 'Danger Zone';
+
+  @override
+  String get loading => 'Loading...';
+
+  @override
+  String get maxNewPerDay => 'Max new per day';
+
+  @override
+  String get maxReviewsPerDay => 'Max reviews per day';
+
+  @override
+  String get enableFuzz => 'Enable fuzz';
+
+  @override
+  String get fuzzDescription => 'Adds random variance to intervals';
+
+  @override
+  String get requestRetention => 'Request retention';
+
+  @override
+  String get resetAllSrsProgress => 'Reset All SRS Progress';
+
+  @override
+  String get resetSrsDescription =>
+      'Resets every card to New state. Review history is preserved in the log.';
+
+  @override
+  String get resetSrsStateTitle => 'Reset SRS State?';
+
+  @override
+  String get resetSrsConfirmation =>
+      'This will mark all cards as New. Your review history will be kept. Continue?';
+
+  @override
+  String get reset => 'Reset';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get srsStateReset => 'SRS state has been reset.';
+
+  @override
+  String level(Object level) {
+    return 'Level $level';
+  }
+
+  @override
+  String newReviewsPerDay(Object newCount, Object reviewCount) {
+    return '$newCount new / $reviewCount reviews per day';
+  }
+
+  @override
+  String newCount(Object newCount, Object maxNew) {
+    return '$newCount / $maxNew new';
+  }
+
+  @override
+  String reviewCount(Object reviewCount, Object maxReviews) {
+    return '$reviewCount / $maxReviews reviews';
+  }
 }

@@ -69,6 +69,45 @@ class WordRepository {
   Future<List<Word>> fetchNewCards(String language, String? level, int limit) =>
       _db.fetchNewCards(language, level, limit);
 
+  // ── Transactional review ──
+
+  /// Persists a complete card review atomically.
+  /// Returns `true` on success, `false` if the optimistic guard rejected
+  /// a duplicate write.
+  Future<bool> reviewWord({
+    required int wordId,
+    required String deckTable,
+    required int rating,
+    required int cardState,
+    required double stability,
+    required double difficulty,
+    String? due,
+    required int elapsedDays,
+    required int scheduledDays,
+    required int reps,
+    required int lapses,
+    String? lastReview,
+    int? legacyFeedback,
+    required String reviewDate,
+    String? guardLastReview,
+  }) => _db.reviewWord(
+        wordId: wordId,
+        deckTable: deckTable,
+        rating: rating,
+        cardState: cardState,
+        stability: stability,
+        difficulty: difficulty,
+        due: due,
+        elapsedDays: elapsedDays,
+        scheduledDays: scheduledDays,
+        reps: reps,
+        lapses: lapses,
+        lastReview: lastReview,
+        legacyFeedback: legacyFeedback,
+        reviewDate: reviewDate,
+        guardLastReview: guardLastReview,
+      );
+
   Future<void> updateSrsState(int id,
           {required int cardState,
           required double stability,

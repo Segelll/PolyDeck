@@ -147,8 +147,14 @@ class DeckNotifier extends StateNotifier<DeckState> {
       final legacyFeedback =
           rating == Rating.again ? 1 : rating == Rating.hard ? 3 : 2;
 
+      // Use transactional review with optimistic guard against double-writes.
+      // The guard checks that last_review still matches the value we read
+      // before computing FSRS — if it changed, another review already landed.
       await PerfTrace.timeAsync('deck.review', () async {
-      await _wordRepo.updateSrsState(card.id,
+        await _wordRepo.reviewWord(
+          wordId: card.id,
+          deckTable: language,
+          rating: rating.value,
           cardState: result.cardState.value,
           stability: result.stability,
           difficulty: result.difficulty,
@@ -158,21 +164,10 @@ class DeckNotifier extends StateNotifier<DeckState> {
           reps: word.reps + 1,
           lapses: rating == Rating.again ? word.lapses + 1 : word.lapses,
           lastReview: result.lastReview,
-          legacyFeedback: legacyFeedback);
-
-      await _wordRepo.insertRevlog(
-        cardId: card.id,
-        deckTable: language,
-        rating: rating.value,
-        state: word.cardState,
-        due: word.due ?? '',
-        stability: result.stability,
-        difficulty: result.difficulty,
-        elapsedDays: word.elapsedDays,
-        lastElapsedDays: word.elapsedDays,
-        scheduledDays: result.scheduledDays,
-        reviewDate: result.lastReview,
-      );
+          legacyFeedback: legacyFeedback,
+          reviewDate: result.lastReview,
+          guardLastReview: word.lastReview,
+        );
       }); // end deck.review trace
 
       final color = _colorForRating(rating);

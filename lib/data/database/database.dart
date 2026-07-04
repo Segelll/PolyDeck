@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 
 import 'package:drift/drift.dart';
@@ -211,26 +213,58 @@ class AppDatabase extends _$AppDatabase {
     return q.get();
   }
 
+  /// Fetches a random-ish selection of unseen new cards.
+  ///
+  /// Replaces `ORDER BY RANDOM()` (which forces a full-scan + temp B-tree sort)
+  /// with a count → random-start-id → id-range strategy.  The result set is
+  /// a deterministic slice ordered by id; the deck provider shuffles the
+  /// combined deck in Dart so the user still sees variety.
   Future<List<Word>> fetchNewCards(
-      String language, String? level, int limit) {
-    var q = select(words)
-      ..where((w) =>
-          w.languageCode.equals(language) &
-          w.cardState.equals(0) &
-          w.isSeen.equals(0))
-      ..orderBy([(u) => OrderingTerm.random()])
-      ..limit(limit);
+      String language, String? level, int limit) async {
+    // ── Shared WHERE clause ──
+    final conditions = StringBuffer(
+      'language_code = ? AND card_state = 0 AND isSeen = 0',
+    );
+    final vars = <Variable>[Variable.withString(language)];
     if (level != null && level != 'fav') {
-      q = select(words)
-        ..where((w) =>
-            w.languageCode.equals(language) &
-            w.level.equals(level) &
-            w.cardState.equals(0) &
-            w.isSeen.equals(0))
-        ..orderBy([(u) => OrderingTerm.random()])
-        ..limit(limit);
+      conditions.write(' AND level = ?');
+      vars.add(Variable.withString(level));
     }
-    return q.get();
+    final whereSql = conditions.toString();
+
+    // ── Find the id range for candidates ──
+    final rangeRow = await customSelect(
+      'SELECT MIN(id) as min_id, MAX(id) as max_id FROM words WHERE $whereSql',
+      variables: vars,
+    ).getSingle();
+    final minId = rangeRow.read<int>('min_id');
+    final maxId = rangeRow.read<int>('max_id');
+    if (minId == null || maxId == null) return [];
+
+    // ── Pick a random start id ──
+    final rng = Random();
+    final idRange = maxId - minId + 1;
+    final startId = minId +
+        (idRange > limit ? rng.nextInt(idRange - limit) : 0);
+
+    // ── Fetch contiguous window starting from startId ──
+    final fetchVars = [
+      ...vars,
+      Variable.withInt(startId),
+      Variable.withInt(limit),
+    ];
+    final rows = await customSelect(
+      'SELECT * FROM words WHERE $whereSql AND id >= ? '
+      'ORDER BY id LIMIT ?',
+      variables: fetchVars,
+      readsFrom: {words},
+    ).get();
+
+    final result = <Word>[];
+    for (final row in rows) {
+      result.add(await words.mapFromRow(row));
+    }
+    return result;
   }
 
   Future<List<Word>> fetchWordsByIsSeen(
@@ -294,6 +328,82 @@ class AppDatabase extends _$AppDatabase {
     return (select(words)
           ..where((w) => w.languageCode.equals(language) & w.id.isIn(ids)))
         .get();
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Transactional card review
+  // ═══════════════════════════════════════════════════════════════
+
+  /// Performs a complete card review in a single transaction.
+  ///
+  /// On success returns `true`.  Returns `false` when the optimistic guard
+  /// detects a double-write (the card's review has already been persisted).
+  ///
+  /// The [guardLastReview] should be the `last_review` value from the card
+  /// *before* this review started — if the DB's current `last_review` no
+  /// longer matches, another write already landed and this call is rejected.
+  Future<bool> reviewWord({
+    required int wordId,
+    required String deckTable,
+    required int rating,
+    required int cardState,
+    required double stability,
+    required double difficulty,
+    String? due,
+    required int elapsedDays,
+    required int scheduledDays,
+    required int reps,
+    required int lapses,
+    String? lastReview,
+    int? legacyFeedback,
+    required String reviewDate,
+    String? guardLastReview,
+  }) async {
+    return transaction(() async {
+      // ── Optimistic guard ──
+      if (guardLastReview != null) {
+        final currentWord = await (select(words)
+              ..where((w) => w.id.equals(wordId)))
+            .getSingleOrNull();
+        // If the stored last_review differs from what we read before the
+        // FSRS computation, another review already committed — reject.
+        if (currentWord?.lastReview != guardLastReview) return false;
+      }
+
+      // ── Update SRS state ──
+      final values = WordsCompanion(
+        cardState: Value(cardState),
+        stability: Value(stability),
+        difficulty: Value(difficulty),
+        due: Value(due),
+        elapsedDays: Value(elapsedDays),
+        scheduledDays: Value(scheduledDays),
+        reps: Value(reps),
+        lapses: Value(lapses),
+        lastReview: Value(lastReview),
+        feedback: legacyFeedback != null
+            ? Value(legacyFeedback)
+            : const Value.absent(),
+      );
+      await (update(words)..where((w) => w.id.equals(wordId))).write(values);
+
+      // ── Insert revlog entry ──
+      await into(revlogEntries).insert(RevlogEntriesCompanion.insert(
+            cardId: wordId,
+            deckTable: deckTable,
+            rating: rating,
+            state: cardState,
+            due: due ?? '',
+            stability: stability,
+            difficulty: difficulty,
+            elapsedDays: elapsedDays,
+            lastElapsedDays: Value(elapsedDays),
+            scheduledDays: scheduledDays,
+            reviewDate: reviewDate,
+          ));
+
+      return true;
+    });
   }
 
   Future<void> updateSrsState(int id,
@@ -429,11 +539,23 @@ class AppDatabase extends _$AppDatabase {
             reviewDate: reviewDate,
           ));
 
+  /// Counts today's new and review cards for [language].
+  ///
+  /// Date storage strategy (see plan §1.6):
+  /// - Day-level fields (`date`, `due`): `YYYY-MM-DD` string
+  /// - Timestamps (`last_review`, `review_date`): UTC ISO-8601
+  /// - This query uses ISO-8601 prefix comparison (lexicographic) to
+  ///   select today's revlog entries regardless of time-of-day or timezone.
   Future<({int newCount, int reviewCount})> getTodayCounts(String language,
       [String? level]) async {
-    final today = DateTime.now();
-    String ds(DateTime d) =>
-        '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+    final nowUtc = DateTime.now().toUtc();
+    // Start of today UTC, as an ISO-8601 date-only prefix.
+    final todayPrefix =
+        '${nowUtc.year}-${nowUtc.month.toString().padLeft(2, '0')}-${nowUtc.day.toString().padLeft(2, '0')}';
+    final tomorrow = nowUtc.add(const Duration(days: 1));
+    final tomorrowPrefix =
+        '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+
     final rows = await customSelect(
       '''SELECT
         SUM(CASE WHEN state = 0 THEN 1 ELSE 0 END) as new_cnt,
@@ -441,8 +563,8 @@ class AppDatabase extends _$AppDatabase {
       FROM revlog WHERE deck_table = ? AND review_date >= ? AND review_date < ?''',
       variables: [
         Variable.withString(language),
-        Variable.withString(ds(today)),
-        Variable.withString(ds(today.add(const Duration(days: 1)))),
+        Variable.withString(todayPrefix),
+        Variable.withString(tomorrowPrefix),
       ],
     ).get();
     return (

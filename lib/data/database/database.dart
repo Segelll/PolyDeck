@@ -132,14 +132,41 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<void> _ensureIndices() async {
+    // Index strategy (see PERFORMANCE_REFACTOR_PLAN_EN.md §1.3):
+    // Column order matters — filtering columns first, then range/order columns,
+    // so SQLite can use the index for both WHERE and ORDER BY / GROUP BY.
+
+    // Drop superseded indexes from the old schema (ignore errors if missing).
+    const oldIdxs = [
+      'DROP INDEX IF EXISTS idx_words_lang_level_state_due',
+      'DROP INDEX IF EXISTS idx_words_lang_level_state_seen',
+      'DROP INDEX IF EXISTS idx_revlog_deck_date_state',
+    ];
+    for (final sql in oldIdxs) {
+      try {
+        await customStatement(sql);
+      } catch (_) {}
+    }
+
+    // Current index set.
     const idxs = [
-      'CREATE INDEX IF NOT EXISTS idx_words_lang_level_state_due ON words (language_code, level, card_state, due)',
-      'CREATE INDEX IF NOT EXISTS idx_words_lang_level_state_seen ON words (language_code, level, card_state, isSeen)',
+      // Due-card queue: ORDER BY due can use this index because `due` comes
+      // before `card_state`, avoiding a temporary B-tree sort.
+      'CREATE INDEX IF NOT EXISTS idx_words_due_queue ON words (language_code, level, due, card_state)',
+      // New-card queue: covers language + level + unseen filtering; `id` at
+      // the end supports deterministic offset/window selection.
+      'CREATE INDEX IF NOT EXISTS idx_words_new_queue ON words (language_code, level, card_state, isSeen, id)',
+      // Progress queries: optimize GROUP BY date and date-range filters.
+      'CREATE INDEX IF NOT EXISTS idx_words_progress_date ON words (language_code, date)',
+      // Favorites: fast word-text lookup within the fav language partition.
+      'CREATE INDEX IF NOT EXISTS idx_words_fav_word ON words (language_code, word)',
+      // Today's review counts.
+      'CREATE INDEX IF NOT EXISTS idx_revlog_today_counts ON revlog (deck_table, review_date, state)',
+      // ── Retained from the original set ──
       'CREATE INDEX IF NOT EXISTS idx_words_lang_level_isSeen ON words (language_code, level, isSeen)',
       'CREATE INDEX IF NOT EXISTS idx_words_feedback ON words (isSeen, feedback)',
       'CREATE INDEX IF NOT EXISTS idx_revlog_card ON revlog (deck_table, card_id)',
       'CREATE INDEX IF NOT EXISTS idx_revlog_date ON revlog (review_date)',
-      'CREATE INDEX IF NOT EXISTS idx_revlog_deck_date_state ON revlog (deck_table, review_date, state)',
     ];
     for (final sql in idxs) {
       try {

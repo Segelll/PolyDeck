@@ -158,8 +158,14 @@ class AppDatabase extends _$AppDatabase {
   //  Type-safe word queries (unified words table)
   // ═══════════════════════════════════════════════════════════════
 
-  Future<Word?> fetchWordById(int id) =>
-      (select(words)..where((w) => w.id.equals(id))).getSingleOrNull();
+  /// Fetches a word by its composite primary key `(languageCode, id)`.
+  /// The same `id` exists across all 7 languages, so the language filter
+  /// is required to avoid returning the wrong language's row.
+  Future<Word?> fetchWordById(String languageCode, int id) =>
+      (select(words)
+            ..where((w) =>
+                w.languageCode.equals(languageCode) & w.id.equals(id)))
+          .getSingleOrNull();
 
   Future<List<Word>> fetchWordsByIds(String language, List<int> ids) {
     if (ids.isEmpty) return Future.value([]);
@@ -168,25 +174,26 @@ class AppDatabase extends _$AppDatabase {
 
   Future<List<Word>> fetchDueCards(
       String language, String? level, String date, int limit) {
-    var q = select(words)
-      ..where((w) =>
+    // Build the query once with a conditional level predicate.
+    // The old code overwrote q when level was set — this is cleaner.
+    final q = select(words);
+    if (level != null && level != 'fav') {
+      q.where((w) =>
+          w.languageCode.equals(language) &
+          w.level.equals(level) &
+          w.due.isNotNull() &
+          w.due.isSmallerOrEqualValue(date) &
+          w.cardState.isIn([1, 2, 3]));
+    } else {
+      q.where((w) =>
           w.languageCode.equals(language) &
           w.due.isNotNull() &
           w.due.isSmallerOrEqualValue(date) &
-          w.cardState.isIn([1, 2, 3]))
+          w.cardState.isIn([1, 2, 3]));
+    }
+    q
       ..orderBy([(u) => OrderingTerm.asc(u.due)])
       ..limit(limit);
-    if (level != null && level != 'fav') {
-      q = select(words)..where((w) => w.level.equals(level));
-      q
-        ..where((w) =>
-            w.languageCode.equals(language) &
-            w.due.isNotNull() &
-            w.due.isSmallerOrEqualValue(date) &
-            w.cardState.isIn([1, 2, 3]))
-        ..orderBy([(u) => OrderingTerm.asc(u.due)])
-        ..limit(limit);
-    }
     return q.get();
   }
 
@@ -214,8 +221,8 @@ class AppDatabase extends _$AppDatabase {
       'SELECT MIN(id) as min_id, MAX(id) as max_id FROM words WHERE $whereSql',
       variables: vars,
     ).getSingle();
-    final minId = rangeRow.read<int>('min_id');
-    final maxId = rangeRow.read<int>('max_id');
+    final minId = rangeRow.readNullable<int>('min_id');
+    final maxId = rangeRow.readNullable<int>('max_id');
     if (minId == null || maxId == null) return [];
 
     // ── Pick a random start id ──
@@ -331,6 +338,10 @@ class AppDatabase extends _$AppDatabase {
   /// The [guardLastReview] should be the `last_review` value from the card
   /// *before* this review started — if the DB's current `last_review` no
   /// longer matches, another write already landed and this call is rejected.
+  ///
+  /// For new cards (where `last_review` is null), the guard still fires:
+  /// if the current `last_review` has become non-null, someone else reviewed
+  /// this card first.
   Future<bool> reviewWord({
     required int wordId,
     required String deckTable,
@@ -350,14 +361,15 @@ class AppDatabase extends _$AppDatabase {
   }) async {
     return transaction(() async {
       // ── Optimistic guard ──
-      if (guardLastReview != null) {
-        final currentWord = await (select(words)
-              ..where((w) => w.id.equals(wordId)))
-            .getSingleOrNull();
-        // If the stored last_review differs from what we read before the
-        // FSRS computation, another review already committed — reject.
-        if (currentWord?.lastReview != guardLastReview) return false;
-      }
+      // Always re-fetch the current row by its full PK to detect duplicate
+      // reviews. Works for both new cards (guardLastReview == null) and
+      // reviewed cards.
+      final currentWord = await (select(words)
+            ..where((w) =>
+                w.languageCode.equals(deckTable) & w.id.equals(wordId)))
+          .getSingleOrNull();
+      if (currentWord == null) return false;
+      if (currentWord.lastReview != guardLastReview) return false;
 
       // ── Update SRS state ──
       final values = WordsCompanion(
@@ -374,7 +386,10 @@ class AppDatabase extends _$AppDatabase {
             ? Value(legacyFeedback)
             : const Value.absent(),
       );
-      await (update(words)..where((w) => w.id.equals(wordId))).write(values);
+      await (update(words)
+            ..where((w) =>
+                w.languageCode.equals(deckTable) & w.id.equals(wordId)))
+          .write(values);
 
       // ── Insert revlog entry ──
       await into(revlogEntries).insert(RevlogEntriesCompanion.insert(
@@ -395,7 +410,7 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  Future<void> updateSrsState(int id,
+  Future<void> updateSrsState(String languageCode, int id,
       {required int cardState,
       required double stability,
       required double difficulty,
@@ -418,19 +433,27 @@ class AppDatabase extends _$AppDatabase {
       lastReview: Value(lastReview),
       feedback: legacyFeedback != null ? Value(legacyFeedback) : const Value.absent(),
     );
-    await (update(words)..where((w) => w.id.equals(id))).write(values);
+    await (update(words)
+          ..where((w) =>
+              w.languageCode.equals(languageCode) & w.id.equals(id)))
+        .write(values);
   }
 
-  Future<void> markAsSeen(int id, String date) =>
-      (update(words)..where((w) => w.id.equals(id)))
+  Future<void> markAsSeen(String languageCode, int id, String date) =>
+      (update(words)
+            ..where((w) =>
+                w.languageCode.equals(languageCode) & w.id.equals(id)))
           .write(WordsCompanion(isSeen: const Value(1), date: Value(date)));
 
-  Future<void> markMultipleAsSeen(List<int> ids, String date) async {
-    // Use customStatement for batch update (more efficient)
+  Future<void> markMultipleAsSeen(
+      String languageCode, List<int> ids, String date) async {
     if (ids.isEmpty) return;
+    // Build parameterized IN clause: language_code = ? AND id IN (?, ?, ...)
+    final placeholders = ids.map((_) => '?').join(',');
     await customStatement(
-        'UPDATE words SET isSeen = 1, date = ? WHERE id IN (${ids.join(',')})',
-        [date]);
+        'UPDATE words SET isSeen = 1, date = ? '
+        'WHERE language_code = ? AND id IN ($placeholders)',
+        [date, languageCode, ...ids]);
   }
 
   // ═══════════════════════════════════════════════════════════════

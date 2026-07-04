@@ -43,9 +43,6 @@ dependencies:
   path: ^1.9.0
   path_provider: ^2.1.5
 
-  # Desktop SQLite support (for tests/tooling)
-  sqflite_common_ffi: ^2.3.4+3
-
   # UI
   cupertino_icons: ^1.0.8
 
@@ -71,6 +68,9 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+
+  # Desktop SQLite support (for tests/tooling only — not needed at runtime)
+  sqflite_common_ffi: ^2.3.4+3
 
   # Drift code generation
   drift_dev: ^2.21.0

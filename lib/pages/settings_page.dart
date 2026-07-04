@@ -146,11 +146,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (data['srsProgress'] != null) {
         for (final entry in data['srsProgress'] as List) {
           final e = entry as Map<String, dynamic>;
+          final langCode =
+              LanguageCodes.tableNameFor((e['language_code'] as String?) ?? 'en');
           final id = (e['id'] as num).toInt();
-          // Only restore if the word exists at the target language
-          final existing = await db.fetchWordById(id);
+          // Verify the word exists at the correct language.
+          final existing = await db.fetchWordById(langCode, id);
           if (existing == null) continue;
-          await db.updateSrsState(id,
+          await db.updateSrsState(langCode, id,
               cardState: (e['card_state'] as num?)?.toInt() ?? 0,
               stability: (e['stability'] as num?)?.toDouble() ?? 0.0,
               difficulty: (e['difficulty'] as num?)?.toDouble() ?? 0.0,
@@ -161,8 +163,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               lapses: (e['lapses'] as num?)?.toInt() ?? 0,
               lastReview: e['last_review'] as String?);
           if ((e['isSeen'] as num?)?.toInt() == 1) {
-            await db.markAsSeen(
-                id, (e['date'] as String?) ?? DateTime.now().toIso8601String());
+            await db.markAsSeen(langCode, id,
+                (e['date'] as String?) ?? DateTime.now().toIso8601String());
           }
         }
       }

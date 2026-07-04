@@ -8,7 +8,8 @@ class WordRepository {
 
   WordRepository(this._db);
 
-  Future<Word?> fetchWordById(int id) => _db.fetchWordById(id);
+  Future<Word?> fetchWordById(String languageCode, int id) =>
+      _db.fetchWordById(languageCode, id);
 
   Future<List<Word>> fetchWordsByIds(String language, List<int> ids) =>
       _db.fetchWordsByIds(language, ids);
@@ -21,16 +22,17 @@ class WordRepository {
           String language, String? level, int isSeen, int limit) =>
       _db.fetchWordsByIsSeen(language, level, isSeen, limit);
 
-  Future<void> markAsSeen(int id) async {
+  Future<void> markAsSeen(String languageCode, int id) async {
     try {
-      await _db.markAsSeen(id, formatDate(DateTime.now()));
+      await _db.markAsSeen(languageCode, id, formatDate(DateTime.now()));
     } catch (e) {
       if (kDebugMode) print('WordRepository.markAsSeen error: $e');
     }
   }
 
-  Future<void> markMultipleAsSeen(List<int> ids, String date) =>
-      _db.markMultipleAsSeen(ids, date);
+  Future<void> markMultipleAsSeen(
+          String languageCode, List<int> ids, String date) =>
+      _db.markMultipleAsSeen(languageCode, ids, date);
 
   /// Returns all word IDs for [language] + [level].
   /// Used for exam generation instead of hardcoded id ranges.
@@ -114,7 +116,7 @@ class WordRepository {
         guardLastReview: guardLastReview,
       );
 
-  Future<void> updateSrsState(int id,
+  Future<void> updateSrsState(String languageCode, int id,
           {required int cardState,
           required double stability,
           required double difficulty,
@@ -125,7 +127,7 @@ class WordRepository {
           required int lapses,
           String? lastReview,
           int? legacyFeedback}) =>
-      _db.updateSrsState(id,
+      _db.updateSrsState(languageCode, id,
           cardState: cardState,
           stability: stability,
           difficulty: difficulty,

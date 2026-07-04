@@ -74,8 +74,8 @@ class DeckNotifier extends StateNotifier<DeckState> {
           PerfTrace.timeAsync('deck.fetchNew',
               () => _wordRepo.fetchNewCards(targetLang, level, remainingNew)),
         ]);
-        final dueWords = cardResults[0] as List<Word>;
-        final newWords = cardResults[1] as List<Word>;
+        final dueWords = cardResults[0]!;
+        final newWords = cardResults[1]!;
 
         allWords = [...dueWords, ...newWords];
 
@@ -108,7 +108,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
       if (selected.isNotEmpty) {
         await PerfTrace.timeAsync('deck.markSeen',
-            () => _wordRepo.markMultipleAsSeen(
+            () => _wordRepo.markMultipleAsSeen(targetLang,
                 selected.map((c) => c.id).toList(), formatDate(DateTime.now())));
       }
 
@@ -140,7 +140,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
     if (language == null) return;
 
     try {
-      final word = await _wordRepo.fetchWordById(card.id);
+      final word = await _wordRepo.fetchWordById(language, card.id);
       if (word == null) return;
 
       final fsrsCard = _fsrs.cardFromDb(

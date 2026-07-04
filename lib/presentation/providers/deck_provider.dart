@@ -16,6 +16,7 @@ import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/core/utils/date_utils.dart';
+import 'package:poly2/core/performance/perf_trace.dart';
 
 // ignore_for_file: lines_longer_than_80_chars
 
@@ -30,6 +31,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
   Future<void> loadDeck(String level) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
+    await PerfTrace.timeAsync('deck.load', () async {
     try {
       final userSettings = await _userRepo.getUserChoices();
       final targetLang =
@@ -60,10 +62,10 @@ class DeckNotifier extends StateNotifier<DeckState> {
             ((config['maxReviewsPerDay'] as int) - todayCounts.reviewCount)
                 .clamp(0, 999);
 
-        final dueWords =
-            await _wordRepo.fetchDueCards(targetLang, level, remainingReviews);
-        final newWords =
-            await _wordRepo.fetchNewCards(targetLang, level, remainingNew);
+        final dueWords = await PerfTrace.timeAsync('deck.fetchDue',
+            () => _wordRepo.fetchDueCards(targetLang, level, remainingReviews));
+        final newWords = await PerfTrace.timeAsync('deck.fetchNew',
+            () => _wordRepo.fetchNewCards(targetLang, level, remainingNew));
 
         allWords = [...dueWords, ...newWords];
 
@@ -77,7 +79,8 @@ class DeckNotifier extends StateNotifier<DeckState> {
 
       // Build CardModel list with mother-language translations (batch)
       final motherWordIds = allWords.map((Word w) => w.id).toList();
-      final motherWords = await _wordRepo.fetchWordsByIds(motherLang, motherWordIds);
+      final motherWords = await PerfTrace.timeAsync('deck.fetchTranslations',
+          () => _wordRepo.fetchWordsByIds(motherLang, motherWordIds));
       final motherMap = <int, String>{};
       for (final mw in motherWords) {
         motherMap[mw.id] = mw.word;
@@ -94,8 +97,9 @@ class DeckNotifier extends StateNotifier<DeckState> {
       final selected = allCards.take(AppConstants.cardsPerDeck).toList();
 
       if (selected.isNotEmpty) {
-        await _wordRepo.markMultipleAsSeen(
-            selected.map((c) => c.id).toList(), formatDate(DateTime.now()));
+        await PerfTrace.timeAsync('deck.markSeen',
+            () => _wordRepo.markMultipleAsSeen(
+                selected.map((c) => c.id).toList(), formatDate(DateTime.now())));
       }
 
       state = state.copyWith(
@@ -115,6 +119,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
       state = state.copyWith(
           isLoading: false, errorMessage: 'Failed to load deck: $e');
     }
+    }); // end deck.load trace
   }
 
   Future<void> reviewCard(Rating rating) async {
@@ -142,6 +147,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
       final legacyFeedback =
           rating == Rating.again ? 1 : rating == Rating.hard ? 3 : 2;
 
+      await PerfTrace.timeAsync('deck.review', () async {
       await _wordRepo.updateSrsState(card.id,
           cardState: result.cardState.value,
           stability: result.stability,
@@ -167,6 +173,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
         scheduledDays: result.scheduledDays,
         reviewDate: result.lastReview,
       );
+      }); // end deck.review trace
 
       final color = _colorForRating(rating);
       final newColors = List<Color>.from(state.colorTracker)

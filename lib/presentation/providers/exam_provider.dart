@@ -10,6 +10,7 @@ import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/utils/random_utils.dart';
+import 'package:poly2/core/performance/perf_trace.dart';
 
 class ExamNotifier extends StateNotifier<ExamState> {
   final WordRepository _wordRepo;
@@ -19,6 +20,7 @@ class ExamNotifier extends StateNotifier<ExamState> {
 
   Future<void> loadQuestions() async {
     state = state.copyWith(isLoading: true, clearError: true);
+    await PerfTrace.timeAsync('exam.loadQuestions', () async {
     try {
       final userSettings = await _userRepo.getUserChoices();
       final questionLanguage = userSettings?['targetLanguage'] ?? 'tr';
@@ -67,6 +69,7 @@ class ExamNotifier extends StateNotifier<ExamState> {
       state = state.copyWith(
           isLoading: false, errorMessage: 'Failed to load exam: $e');
     }
+    }); // end exam.loadQuestions trace
   }
 
   void selectAnswer(int answerIndex) {

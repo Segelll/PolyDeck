@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart' show Variable;
 import 'package:poly2/data/database/database.dart';
+import 'package:poly2/core/performance/perf_trace.dart';
 
 /// Repository for progress tracking (weekly/monthly charts).
 class ProgressRepository {
@@ -18,12 +19,12 @@ class ProgressRepository {
 
   Future<Map<String, int>> fetchDateCounts(String language) async {
     try {
-      final rows = await _db.customSelect(
+      final rows = await PerfTrace.timeAsync('progress.weekly', () => _db.customSelect(
         'SELECT date, COUNT(*) as count FROM words '
         'WHERE language_code = ? AND date IS NOT NULL AND date != "0" '
         'GROUP BY date ORDER BY date ASC',
         variables: [Variable.withString(language)],
-      ).get();
+      ).get());
       final combined = <String, int>{};
       for (final row in rows) {
         final date = row.read<String>('date');
@@ -40,6 +41,7 @@ class ProgressRepository {
   Future<List<int>> fetchMonthlyCounts(DateTime startDate, String language) async {
     try {
       final counts = <int>[];
+      await PerfTrace.timeAsync('progress.monthly', () async {
       for (int i = 0; i < 4; i++) {
         final cur = DateTime(startDate.year, startDate.month + i);
         final next = DateTime(cur.year, cur.month + 1);
@@ -52,6 +54,7 @@ class ProgressRepository {
         ).get();
         counts.add(rows.firstOrNull?.read<int>('count') ?? 0);
       }
+      }); // end progress.monthly trace
       return counts;
     } catch (e) {
       if (kDebugMode) print('ProgressRepository.fetchMonthlyCounts error: $e');

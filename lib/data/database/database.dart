@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'tables.dart';
+import '../../core/performance/perf_trace.dart';
 
 part 'database.g.dart';
 
@@ -20,25 +21,31 @@ class AppDatabase extends _$AppDatabase {
     final dbPath = p.join(appDir.path, 'polydesk.db');
 
     if (!await File(dbPath).exists()) {
-      try {
-        final data = await rootBundle.load('assets/polydesk.db');
-        final bytes =
-            data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
-        await File(dbPath).writeAsBytes(bytes, flush: true);
-      } catch (_) {}
+      await PerfTrace.timeAsync('db.copyAsset', () async {
+        try {
+          final data = await rootBundle.load('assets/polydesk.db');
+          final bytes =
+              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          await File(dbPath).writeAsBytes(bytes, flush: true);
+        } catch (e) {
+          if (kDebugMode) print('DB copy failed: $e');
+        }
+      });
     }
 
-    return DatabaseConnection(NativeDatabase(
-      File(dbPath),
-      setup: (rawDb) {
-        rawDb.execute('PRAGMA journal_mode=WAL');
-        rawDb.execute('PRAGMA synchronous=NORMAL');
-        rawDb.execute('PRAGMA cache_size=-64000');
-        rawDb.execute('PRAGMA temp_store=MEMORY');
-        rawDb.execute('PRAGMA mmap_size=67108864');
-        rawDb.execute('PRAGMA foreign_keys=ON');
-      },
-    ));
+    return PerfTrace.timeSync('db.open', () {
+      return DatabaseConnection(NativeDatabase(
+        File(dbPath),
+        setup: (rawDb) {
+          rawDb.execute('PRAGMA journal_mode=WAL');
+          rawDb.execute('PRAGMA synchronous=NORMAL');
+          rawDb.execute('PRAGMA cache_size=-64000');
+          rawDb.execute('PRAGMA temp_store=MEMORY');
+          rawDb.execute('PRAGMA mmap_size=67108864');
+          rawDb.execute('PRAGMA foreign_keys=ON');
+        },
+      ));
+    });
   }
 
   @override

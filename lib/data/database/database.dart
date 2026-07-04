@@ -33,18 +33,22 @@ class AppDatabase extends _$AppDatabase {
       });
     }
 
-    return PerfTrace.timeSync('db.open', () {
-      return DatabaseConnection(NativeDatabase(
-        File(dbPath),
-        setup: (rawDb) {
-          rawDb.execute('PRAGMA journal_mode=WAL');
-          rawDb.execute('PRAGMA synchronous=NORMAL');
-          rawDb.execute('PRAGMA cache_size=-64000');
-          rawDb.execute('PRAGMA temp_store=MEMORY');
-          rawDb.execute('PRAGMA mmap_size=67108864');
-          rawDb.execute('PRAGMA foreign_keys=ON');
-        },
-      ));
+    return PerfTrace.timeAsync('db.open', () async {
+      // Open the database on a background isolate so SQLite IO never blocks
+      // the UI thread. The setup callback configures WAL, cache, and PRAGMAs.
+      return DatabaseConnection(
+        await NativeDatabase.createInBackground(
+          File(dbPath),
+          setup: (rawDb) {
+            rawDb.execute('PRAGMA journal_mode=WAL');
+            rawDb.execute('PRAGMA synchronous=NORMAL');
+            rawDb.execute('PRAGMA cache_size=-64000');
+            rawDb.execute('PRAGMA temp_store=MEMORY');
+            rawDb.execute('PRAGMA mmap_size=67108864');
+            rawDb.execute('PRAGMA foreign_keys=ON');
+          },
+        ),
+      );
     });
   }
 

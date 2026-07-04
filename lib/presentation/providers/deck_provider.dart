@@ -101,14 +101,18 @@ class DeckNotifier extends StateNotifier<DeckState> {
             w.languageCode == 'fav' ? (w.backword ?? '') : (motherMap[w.id] ?? ''),
             w.languageCode == 'fav' ? (w.backsentence ?? '') : '',
             w.level,
+            w.languageCode, // carries the card's actual DB language_code
           )).toList();
 
       allCards.shuffle(Random());
       final selected = allCards.take(AppConstants.cardsPerDeck).toList();
 
       if (selected.isNotEmpty) {
+        // All cards in a deck share the same language_code (targetLang for
+        // normal decks, 'fav' for the favorites deck).
+        final deckLang = level == 'fav' ? 'fav' : targetLang;
         await PerfTrace.timeAsync('deck.markSeen',
-            () => _wordRepo.markMultipleAsSeen(targetLang,
+            () => _wordRepo.markMultipleAsSeen(deckLang,
                 selected.map((c) => c.id).toList(), formatDate(DateTime.now())));
       }
 
@@ -136,12 +140,17 @@ class DeckNotifier extends StateNotifier<DeckState> {
     if (state.isEmpty || !state.isFlipped || state.isReviewing) return;
     state = state.copyWith(isReviewing: true);
     final card = state.currentCard;
-    final language = state.targetLang;
-    if (language == null) return;
+
+    // Use the card's own languageCode so fav cards target 'fav'
+    // instead of state.targetLang.
+    final lang = card.languageCode;
 
     try {
-      final word = await _wordRepo.fetchWordById(language, card.id);
-      if (word == null) return;
+      final word = await _wordRepo.fetchWordById(lang, card.id);
+      if (word == null) {
+        state = state.copyWith(isReviewing: false);
+        return;
+      }
 
       final fsrsCard = _fsrs.cardFromDb(
         cardId: word.id,
@@ -172,10 +181,11 @@ class DeckNotifier extends StateNotifier<DeckState> {
       // Use transactional review with optimistic guard against double-writes.
       // The guard checks that last_review still matches the value we read
       // before computing FSRS — if it changed, another review already landed.
+      var saved = false;
       await PerfTrace.timeAsync('deck.review', () async {
-        await _wordRepo.reviewWord(
+        saved = await _wordRepo.reviewWord(
           wordId: card.id,
-          deckTable: language,
+          deckTable: lang,
           rating: rating.value,
           cardState: result.cardState.value,
           stability: result.stability,
@@ -191,6 +201,12 @@ class DeckNotifier extends StateNotifier<DeckState> {
           guardLastReview: word.lastReview,
         );
       }); // end deck.review trace
+
+      // Guard rejected the write — another tap already landed for this card.
+      if (!saved) {
+        state = state.copyWith(isReviewing: false);
+        return;
+      }
 
       final color = _colorForRating(rating);
       final newColors = List<Color>.from(state.colorTracker)

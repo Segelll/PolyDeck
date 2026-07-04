@@ -72,16 +72,10 @@ class AppDatabase extends _$AppDatabase {
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (Migrator m) async {
-          await m.createAll();
-          await _ensureIndices();
-        },
-        onUpgrade: (Migrator m, int from, int to) async {},
         beforeOpen: (details) async {
-          // If the DB was copied from assets, it already has the tables.
-          // This just ensures indices are present in case they were missed.
+          // Fresh install — the DB was just copied from assets.
+          // Ensure indices and validate integrity.
           await _ensureIndices();
-          // Verify the copied database is intact and contains the expected data.
           await _validateDatabase();
         },
       );
@@ -135,36 +129,19 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> _ensureIndices() async {
     // Index strategy (see PERFORMANCE_REFACTOR_PLAN_EN.md §1.3):
-    // Column order matters — filtering columns first, then range/order columns,
-    // so SQLite can use the index for both WHERE and ORDER BY / GROUP BY.
-
-    // Drop superseded indexes from the old schema (ignore errors if missing).
-    const oldIdxs = [
-      'DROP INDEX IF EXISTS idx_words_lang_level_state_due',
-      'DROP INDEX IF EXISTS idx_words_lang_level_state_seen',
-      'DROP INDEX IF EXISTS idx_revlog_deck_date_state',
-    ];
-    for (final sql in oldIdxs) {
-      try {
-        await customStatement(sql);
-      } catch (_) {}
-    }
-
-    // Current index set.
+    // Column order matters — filtering columns first, then range/order columns.
     const idxs = [
-      // Due-card queue: ORDER BY due can use this index because `due` comes
-      // before `card_state`, avoiding a temporary B-tree sort.
+      // Due-card queue: `due` before `card_state` so ORDER BY due uses the index.
       'CREATE INDEX IF NOT EXISTS idx_words_due_queue ON words (language_code, level, due, card_state)',
-      // New-card queue: covers language + level + unseen filtering; `id` at
-      // the end supports deterministic offset/window selection.
+      // New-card queue: `id` at end for deterministic range selection.
       'CREATE INDEX IF NOT EXISTS idx_words_new_queue ON words (language_code, level, card_state, isSeen, id)',
-      // Progress queries: optimize GROUP BY date and date-range filters.
+      // Progress: optimize GROUP BY date and date-range filters.
       'CREATE INDEX IF NOT EXISTS idx_words_progress_date ON words (language_code, date)',
-      // Favorites: fast word-text lookup within the fav language partition.
+      // Favorites: word lookup within the fav partition.
       'CREATE INDEX IF NOT EXISTS idx_words_fav_word ON words (language_code, word)',
       // Today's review counts.
       'CREATE INDEX IF NOT EXISTS idx_revlog_today_counts ON revlog (deck_table, review_date, state)',
-      // ── Retained from the original set ──
+      // Supporting indexes.
       'CREATE INDEX IF NOT EXISTS idx_words_lang_level_isSeen ON words (language_code, level, isSeen)',
       'CREATE INDEX IF NOT EXISTS idx_words_feedback ON words (isSeen, feedback)',
       'CREATE INDEX IF NOT EXISTS idx_revlog_card ON revlog (deck_table, card_id)',

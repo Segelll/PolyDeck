@@ -9,7 +9,6 @@ import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
-import 'package:poly2/core/utils/random_utils.dart';
 import 'package:poly2/core/performance/perf_trace.dart';
 
 class ExamNotifier extends StateNotifier<ExamState> {

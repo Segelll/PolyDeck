@@ -19,7 +19,6 @@ import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
-import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 
@@ -147,8 +146,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       if (data['srsProgress'] != null) {
         for (final entry in data['srsProgress'] as List) {
           final e = entry as Map<String, dynamic>;
-          final lang = LanguageCodes.tableNameFor(
-              (e['language_code'] as String?) ?? 'en');
           final id = (e['id'] as num).toInt();
           // Only restore if the word exists at the target language
           final existing = await db.fetchWordById(id);

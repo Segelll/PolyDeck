@@ -53,23 +53,31 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
   Future<void> _exportData() async {
     try {
-      final wordRepo = ref.read(wordRepositoryProvider);
+      final db = ref.read(appDatabaseProvider);
       final userRepo = ref.read(userRepositoryProvider);
-      final progressRepo = ref.read(progressRepositoryProvider);
 
-      final favWords = await wordRepo.fetchAllFavorites();
+      final favWords = await db.fetchAllFavorites();
       final userChoices = await userRepo.getUserChoices();
-
-      final Map<String, List<Map<String, dynamic>>> seenWords = {};
-      for (final lang in AppConstants.languageTables) {
-        seenWords[lang] = []; // Simplified — full impl would need DB access
-      }
+      final revlog = await db.fetchAllRevlog();
+      final srsProgress = await db.fetchSrsProgress();
+      final deckConfigs = await db.fetchAllDeckConfigs();
 
       final exportData = {
-        'version': '1.0.0',
+        'schemaVersion': 2,
         'exportedAt': DateTime.now().toIso8601String(),
         'userChoices': userChoices,
-        'favorites': favWords,
+        'favorites': favWords
+            .map((w) => {
+                  'word': w.word,
+                  'sentence': w.sentence,
+                  'level': w.level,
+                  'backword': w.backword,
+                  'backsentence': w.backsentence,
+                })
+            .toList(),
+        'srsProgress': srsProgress,
+        'revlog': revlog,
+        'deckConfig': deckConfigs,
       };
 
       final dir = await getApplicationDocumentsDirectory();
@@ -101,26 +109,84 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       final content = await file.readAsString();
       final data = jsonDecode(content) as Map<String, dynamic>;
 
+      // Validate schema
+      final schemaVersion = data['schemaVersion'] as int? ?? 1;
+      if (schemaVersion < 1 || schemaVersion > 2) {
+        throw FormatException('Unsupported schema version: $schemaVersion');
+      }
+
+      final db = ref.read(appDatabaseProvider);
       final wordRepo = ref.read(wordRepositoryProvider);
 
+      // ── Import favorites ──
       if (data['favorites'] != null) {
         for (final fav in data['favorites'] as List) {
+          final favMap = fav as Map<String, dynamic>;
           await wordRepo.addToFavorites(
-            word: fav['word'] as String,
-            sentence: fav['sentence'] as String? ?? '',
-            level: fav['level'] as String? ?? 'fav',
-            backWord: fav['backword'] as String?,
-            backSentence: fav['backsentence'] as String?,
+            word: favMap['word'] as String,
+            sentence: (favMap['sentence'] as String?) ?? '',
+            level: (favMap['level'] as String?) ?? 'fav',
+            backWord: favMap['backword'] as String?,
+            backSentence: favMap['backsentence'] as String?,
           );
         }
       }
 
+      // ── Import user choices (normalize legacy codes) ──
       if (data['userChoices'] != null) {
         final uc = data['userChoices'] as Map<String, dynamic>;
         await ref.read(settingsProvider.notifier).saveLanguages(
-              LanguageCodes.displayCodeFor(uc['mainLanguage'] as String),
-              LanguageCodes.displayCodeFor(uc['targetLanguage'] as String),
+              LanguageCodes.displayCodeFor(
+                  (uc['mainLanguage'] as String?) ?? 'en'),
+              LanguageCodes.displayCodeFor(
+                  (uc['targetLanguage'] as String?) ?? 'tr'),
             );
+      }
+
+      // ── Restore SRS progress (schema v2+) ──
+      if (data['srsProgress'] != null) {
+        for (final entry in data['srsProgress'] as List) {
+          final e = entry as Map<String, dynamic>;
+          final lang = LanguageCodes.tableNameFor(
+              (e['language_code'] as String?) ?? 'en');
+          final id = (e['id'] as num).toInt();
+          // Only restore if the word exists at the target language
+          final existing = await db.fetchWordById(id);
+          if (existing == null) continue;
+          await db.updateSrsState(id,
+              cardState: (e['card_state'] as num?)?.toInt() ?? 0,
+              stability: (e['stability'] as num?)?.toDouble() ?? 0.0,
+              difficulty: (e['difficulty'] as num?)?.toDouble() ?? 0.0,
+              due: e['due'] as String?,
+              elapsedDays: (e['elapsed_days'] as num?)?.toInt() ?? 0,
+              scheduledDays: (e['scheduled_days'] as num?)?.toInt() ?? 0,
+              reps: (e['reps'] as num?)?.toInt() ?? 0,
+              lapses: (e['lapses'] as num?)?.toInt() ?? 0,
+              lastReview: e['last_review'] as String?);
+          if ((e['isSeen'] as num?)?.toInt() == 1) {
+            await db.markAsSeen(
+                id, (e['date'] as String?) ?? DateTime.now().toIso8601String());
+          }
+        }
+      }
+
+      // ── Restore deck configs ──
+      if (data['deckConfig'] != null) {
+        for (final entry in data['deckConfig'] as List) {
+          final e = entry as Map<String, dynamic>;
+          await db.saveDeckConfigEntry(
+            level: (e['level'] as String?) ?? 'default',
+            maxNewPerDay: (e['max_new_per_day'] as num?)?.toInt() ?? 10,
+            maxReviewsPerDay:
+                (e['max_reviews_per_day'] as num?)?.toInt() ?? 20,
+            learningSteps:
+                (e['learning_steps'] as String?) ?? '[1,10]',
+            enableFuzz: (e['enable_fuzz'] as num?)?.toInt() == 1,
+            requestRetention:
+                (e['request_retention'] as num?)?.toDouble() ?? 0.9,
+            w: e['w'] as String?,
+          );
+        }
       }
 
       _loadPrefs();

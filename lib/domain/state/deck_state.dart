@@ -15,6 +15,7 @@ class DeckState {
   final String? targetLang;
   final String? motherLang;
   final bool isFavorite;
+  final bool isReviewing;
   final String? errorMessage;
   final Rating? lastRating;
 
@@ -29,6 +30,7 @@ class DeckState {
     this.targetLang,
     this.motherLang,
     this.isFavorite = false,
+    this.isReviewing = false,
     this.errorMessage,
     this.lastRating,
   });
@@ -44,6 +46,7 @@ class DeckState {
     String? targetLang,
     String? motherLang,
     bool? isFavorite,
+    bool? isReviewing,
     String? errorMessage,
     bool clearError = false,
     Rating? lastRating,
@@ -59,6 +62,7 @@ class DeckState {
       targetLang: targetLang ?? this.targetLang,
       motherLang: motherLang ?? this.motherLang,
       isFavorite: isFavorite ?? this.isFavorite,
+      isReviewing: isReviewing ?? this.isReviewing,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
       lastRating: lastRating ?? this.lastRating,
     );

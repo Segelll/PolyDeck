@@ -91,45 +91,58 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
     final isHorizontalFlip = widget.flipDirection != FlipDirection.topToBottom;
     final isReverse = widget.flipDirection == FlipDirection.rightToLeft;
 
-    return AnimatedBuilder(
-      animation: _flipAnimation,
-      builder: (context, child) {
-        final angle = _flipAnimation.value * pi;
-        final transform = Matrix4.identity()..setEntry(3, 2, 0.001);
+    // Static labels are lifted into the AnimatedBuilder's `child` so they
+    // aren't rebuilt on every animation tick.
+    final staticLabels = _buildStaticLabels();
 
-        if (isHorizontalFlip) {
-          transform.rotateY(isReverse ? -angle : angle);
-        } else {
-          transform.rotateX(angle);
-        }
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _flipAnimation,
+        child: staticLabels,
+        builder: (context, child) {
+          final angle = _flipAnimation.value * pi;
+          final transform = Matrix4.identity()..setEntry(3, 2, 0.001);
 
-        return Transform(
-          transform: transform,
-          alignment: Alignment.center,
-          child: Container(
-            width: 250,
-            height: 350,
-            decoration: BoxDecoration(
-              color: widget.isFlipped
-                  ? widget.backCardColor
-                  : widget.frontCardColor,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: const [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 5,
-                  offset: Offset(2, 2),
-                ),
-              ],
+          if (isHorizontalFlip) {
+            transform.rotateY(isReverse ? -angle : angle);
+          } else {
+            transform.rotateX(angle);
+          }
+
+          return Transform(
+            transform: transform,
+            alignment: Alignment.center,
+            child: Container(
+              width: 250,
+              height: 350,
+              decoration: BoxDecoration(
+                color: widget.isFlipped
+                    ? widget.backCardColor
+                    : widget.frontCardColor,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 5,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: Stack(
+                children: [
+                  _buildFlipDependentContent(isHorizontalFlip, isReverse),
+                  if (child != null) child,
+                ],
+              ),
             ),
-            child: _buildCardContent(isHorizontalFlip, isReverse),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildCardContent(bool isHorizontalFlip, bool isReverse) {
+  /// Content that depends on the current flip angle (text + sentence swap).
+  Widget _buildFlipDependentContent(bool isHorizontalFlip, bool isReverse) {
     final isUnder = _flipAnimation.value > 0.5;
     final contentText = isUnder ? widget.backText : widget.frontText;
     final contentSentence =
@@ -149,50 +162,67 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
       return m;
     }
 
-    Widget buildLabel(String text) {
-      return Transform(
-        alignment: Alignment.center,
-        transform: buildTextTransform(),
-        child: Text(
-          text,
-          style: const TextStyle(color: Colors.white70, fontSize: 16),
-        ),
-      );
-    }
-
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: Center(
-            child: Transform(
-              alignment: Alignment.center,
-              transform: buildTextTransform(),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
+    return Positioned.fill(
+      child: Center(
+        child: Transform(
+          alignment: Alignment.center,
+          transform: buildTextTransform(),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
                     contentText,
                     style: const TextStyle(color: Colors.white, fontSize: 28),
                     textAlign: TextAlign.center,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 10),
-                  Text(
+                ),
+                const SizedBox(height: 10),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
                     contentSentence,
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
-        Positioned(top: 8, left: 8, child: buildLabel(widget.level)),
+      ),
+    );
+  }
+
+  /// Labels that never change during the animation (level, card number).
+  Widget _buildStaticLabels() {
+    return Stack(
+      children: [
+        Positioned(
+          top: 8,
+          left: 8,
+          child: Text(
+            widget.level,
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
+          ),
+        ),
         Positioned(
           bottom: 8,
           right: 8,
-          child: buildLabel('Card ${widget.cardNumber}'),
+          child: Text(
+            'Card ${widget.cardNumber}',
+            style: const TextStyle(color: Colors.white70, fontSize: 16),
+          ),
         ),
       ],
     );
   }
+
 }

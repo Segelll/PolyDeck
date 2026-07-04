@@ -28,7 +28,8 @@ final weeklyProgressProvider =
     return const WeeklyProgressState(isLoading: false);
   }
   final weekDates = generateWeekDates(DateTime.parse(earliestDate));
-  final dateCounts = await repo.fetchDateCounts(language);
+  final dateCounts = await repo.fetchDateCounts(language,
+      dateStart: weekDates.first);
   final data = weekDates.map((d) => dateCounts[d] ?? 0).toList();
   return WeeklyProgressState(data: data, dates: weekDates, isLoading: false);
 });

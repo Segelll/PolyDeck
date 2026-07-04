@@ -222,7 +222,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _SliderSetting extends StatelessWidget {
+class _SliderSetting extends StatefulWidget {
   final String label;
   final double value;
   final double min;
@@ -240,19 +240,41 @@ class _SliderSetting extends StatelessWidget {
   });
 
   @override
+  State<_SliderSetting> createState() => _SliderSettingState();
+}
+
+class _SliderSettingState extends State<_SliderSetting> {
+  late double _localValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _localValue = widget.value;
+  }
+
+  @override
+  void didUpdateWidget(covariant _SliderSetting oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.value != oldWidget.value) {
+      _localValue = widget.value;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13)),
+          Text(widget.label, style: const TextStyle(fontSize: 13)),
           Slider(
-            value: value,
-            min: min,
-            max: max,
-            divisions: divisions,
-            onChanged: onChanged,
+            value: _localValue,
+            min: widget.min,
+            max: widget.max,
+            divisions: widget.divisions,
+            onChanged: (v) => setState(() => _localValue = v),
+            onChangeEnd: (v) => widget.onChanged(v),
           ),
         ],
       ),

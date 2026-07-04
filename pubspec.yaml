@@ -46,9 +46,6 @@ dependencies:
   # Desktop SQLite support (for tests/tooling)
   sqflite_common_ffi: ^2.3.4+3
 
-  # Key-value storage
-  shared_preferences: ^2.0.17
-
   # UI
   cupertino_icons: ^1.0.8
 

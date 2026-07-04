@@ -53,8 +53,13 @@ class DeckNotifier extends StateNotifier<DeckState> {
         picked.addAll(indices.map((i) => allWords[i]));
         allWords = picked;
       } else {
-        final config = await _wordRepo.getDeckConfig(level);
-        final todayCounts = await _wordRepo.getTodayCounts(targetLang, level);
+        // Parallel: config + today counts are independent.
+        final results = await Future.wait([
+          _wordRepo.getDeckConfig(level),
+          _wordRepo.getTodayCounts(targetLang, level),
+        ]);
+        final config = results[0] as Map<String, dynamic>;
+        final todayCounts = results[1] as ({int newCount, int reviewCount});
 
         final remainingNew =
             ((config['maxNewPerDay'] as int) - todayCounts.newCount).clamp(0, 999);
@@ -62,10 +67,15 @@ class DeckNotifier extends StateNotifier<DeckState> {
             ((config['maxReviewsPerDay'] as int) - todayCounts.reviewCount)
                 .clamp(0, 999);
 
-        final dueWords = await PerfTrace.timeAsync('deck.fetchDue',
-            () => _wordRepo.fetchDueCards(targetLang, level, remainingReviews));
-        final newWords = await PerfTrace.timeAsync('deck.fetchNew',
-            () => _wordRepo.fetchNewCards(targetLang, level, remainingNew));
+        // Parallel: due + new card queries are independent.
+        final cardResults = await Future.wait([
+          PerfTrace.timeAsync('deck.fetchDue',
+              () => _wordRepo.fetchDueCards(targetLang, level, remainingReviews)),
+          PerfTrace.timeAsync('deck.fetchNew',
+              () => _wordRepo.fetchNewCards(targetLang, level, remainingNew)),
+        ]);
+        final dueWords = cardResults[0] as List<Word>;
+        final newWords = cardResults[1] as List<Word>;
 
         allWords = [...dueWords, ...newWords];
 
@@ -123,7 +133,8 @@ class DeckNotifier extends StateNotifier<DeckState> {
   }
 
   Future<void> reviewCard(Rating rating) async {
-    if (state.isEmpty || !state.isFlipped) return;
+    if (state.isEmpty || !state.isFlipped || state.isReviewing) return;
+    state = state.copyWith(isReviewing: true);
     final card = state.currentCard;
     final language = state.targetLang;
     if (language == null) return;
@@ -142,7 +153,18 @@ class DeckNotifier extends StateNotifier<DeckState> {
         due: word.due,
       );
 
-      final result = _fsrs.review(card: fsrsCard, rating: rating);
+      // Fetch the deck config for this card's level so FSRS parameters
+      // (retention, fuzz, learning steps, w) take immediate effect.
+      final deckConfig = await _wordRepo.getDeckConfig(word.level);
+
+      final result = _fsrs.reviewWithConfig(
+        card: fsrsCard,
+        rating: rating,
+        requestRetention: (deckConfig['requestRetention'] as num?)?.toDouble(),
+        enableFuzz: deckConfig['enableFuzz'] as bool?,
+        learningStepsJson: deckConfig['learningSteps'] as String?,
+        wJson: deckConfig['w'] as String?,
+      );
 
       final legacyFeedback =
           rating == Rating.again ? 1 : rating == Rating.hard ? 3 : 2;
@@ -178,9 +200,13 @@ class DeckNotifier extends StateNotifier<DeckState> {
             word: card.frontText, meaning: card.backText, color: color));
 
       state = state.copyWith(
-          colorTracker: newColors, analysisResults: newAnalysis, lastRating: rating);
+          colorTracker: newColors,
+          analysisResults: newAnalysis,
+          lastRating: rating,
+          isReviewing: false);
     } catch (e) {
       if (kDebugMode) print('DeckNotifier.reviewCard error: $e');
+      state = state.copyWith(isReviewing: false);
     }
   }
 
@@ -192,7 +218,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
       };
 
   Future<void> flipCard(Color color) async {
-    if (state.isEmpty || state.isFlipped) return;
+    if (state.isEmpty || state.isFlipped || state.isReviewing) return;
     Rating rating;
     if (color == AppTheme.cardRed || color == Colors.red.shade200) {
       rating = Rating.again;

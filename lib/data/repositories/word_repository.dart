@@ -32,6 +32,12 @@ class WordRepository {
   Future<void> markMultipleAsSeen(List<int> ids, String date) =>
       _db.markMultipleAsSeen(ids, date);
 
+  /// Returns all word IDs for [language] + [level].
+  /// Used for exam generation instead of hardcoded id ranges.
+  Future<List<int>> fetchWordIds(
+          {required String language, required String level}) =>
+      _db.fetchWordIds(language: language, level: level);
+
   Future<List<Word>> fetchExamWords(String language, int id) =>
       _db.fetchExamWords(language, id);
 

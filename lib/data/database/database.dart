@@ -318,6 +318,18 @@ class AppDatabase extends _$AppDatabase {
     return row?.read(words.date);
   }
 
+  /// Fetches all word IDs for [language] + [level], ordered by id.
+  /// Used by exam generation to sample questions without hardcoded ranges.
+  Future<List<int>> fetchWordIds(
+      {required String language, required String level}) async {
+    final rows = await (selectOnly(words)
+          ..addColumns([words.id])
+          ..where(words.languageCode.equals(language) & words.level.equals(level))
+          ..orderBy([OrderingTerm.asc(words.id)]))
+        .get();
+    return rows.map((r) => r.read<int>(words.id)!).toList();
+  }
+
   Future<List<Word>> fetchExamWords(String language, int id) =>
       (select(words)
             ..where((w) => w.languageCode.equals(language) & w.id.equals(id)))
@@ -602,6 +614,72 @@ class AppDatabase extends _$AppDatabase {
             requestRetention: Value(requestRetention),
             w: Value(w),
           ));
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Export helpers
+  // ═══════════════════════════════════════════════════════════════
+
+  /// All revlog entries for export.
+  Future<List<Map<String, dynamic>>> fetchAllRevlog() async {
+    final rows = await customSelect('SELECT * FROM revlog').get();
+    return rows
+        .map((r) => {
+              'card_id': r.read<int>('card_id'),
+              'deck_table': r.read<String>('deck_table'),
+              'rating': r.read<int>('rating'),
+              'state': r.read<int>('state'),
+              'due': r.read<String>('due'),
+              'stability': r.read<double>('stability'),
+              'difficulty': r.read<double>('difficulty'),
+              'elapsed_days': r.read<int>('elapsed_days'),
+              'last_elapsed_days': r.read<int>('last_elapsed_days'),
+              'scheduled_days': r.read<int>('scheduled_days'),
+              'review_date': r.read<String>('review_date'),
+            })
+        .toList();
+  }
+
+  /// All deck configs for export.
+  Future<List<Map<String, dynamic>>> fetchAllDeckConfigs() async {
+    final rows = await customSelect('SELECT * FROM deck_config').get();
+    return rows
+        .map((r) => {
+              'level': r.read<String>('level'),
+              'max_new_per_day': r.read<int>('max_new_per_day'),
+              'max_reviews_per_day': r.read<int>('max_reviews_per_day'),
+              'learning_steps': r.read<String>('learning_steps'),
+              'enable_fuzz': r.read<int>('enable_fuzz'),
+              'request_retention': r.read<double>('request_retention'),
+              'w': r.readNullable<String>('w'),
+            })
+        .toList();
+  }
+
+  /// Words with SRS progress (isSeen=1 or cardState != 0).
+  Future<List<Map<String, dynamic>>> fetchSrsProgress() async {
+    final rows = await customSelect(
+      'SELECT * FROM words WHERE isSeen = 1 OR card_state != 0',
+    ).get();
+    return rows
+        .map((r) => {
+              'id': r.read<int>('id'),
+              'language_code': r.read<String>('language_code'),
+              'word': r.read<String>('word'),
+              'level': r.read<String>('level'),
+              'card_state': r.read<int>('card_state'),
+              'stability': r.read<double>('stability'),
+              'difficulty': r.read<double>('difficulty'),
+              'due': r.readNullable<String>('due'),
+              'elapsed_days': r.read<int>('elapsed_days'),
+              'scheduled_days': r.read<int>('scheduled_days'),
+              'reps': r.read<int>('reps'),
+              'lapses': r.read<int>('lapses'),
+              'last_review': r.readNullable<String>('last_review'),
+              'isSeen': r.read<int>('isSeen'),
+              'date': r.readNullable<String>('date'),
+            })
+        .toList();
+  }
 
   // ═══════════════════════════════════════════════════════════════
   //  Reset

@@ -191,7 +191,7 @@ class _ResetSrsButton extends ConsumerWidget {
             );
             if (confirmed == true) {
               final repo = ref.read(wordRepositoryProvider);
-              for (final lang in ['en', 'tr', 'de', 'fr', 'it', 'pr', 'esp', 'fav']) {
+              for (final lang in ['en', 'tr', 'de', 'fr', 'it', 'pt', 'es', 'fav']) {
                 await repo.resetSrsState(lang);
               }
               if (context.mounted) {

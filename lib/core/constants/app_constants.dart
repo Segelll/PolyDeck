@@ -29,14 +29,14 @@ class AppConstants {
     'C1': [3543, 4790],
   };
 
-  /// All language database table names for progress queries.
+  /// All language codes for progress queries (standard ISO 639-1).
   static const List<String> languageTables = [
     'en',
     'tr',
     'de',
     'fr',
     'it',
-    'pr',
-    'esp',
+    'pt',
+    'es',
   ];
 }

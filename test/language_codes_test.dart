@@ -4,12 +4,12 @@ import 'package:poly2/core/constants/language_codes.dart';
 void main() {
   group('LanguageCodes', () {
     group('tableNameFor', () {
-      test('returns correct table name for Portuguese', () {
-        expect(LanguageCodes.tableNameFor('pt'), 'pr');
+      test('returns same ISO code for Portuguese (unified DB)', () {
+        expect(LanguageCodes.tableNameFor('pt'), 'pt');
       });
 
-      test('returns correct table name for Spanish', () {
-        expect(LanguageCodes.tableNameFor('es'), 'esp');
+      test('returns same ISO code for Spanish (unified DB)', () {
+        expect(LanguageCodes.tableNameFor('es'), 'es');
       });
 
       test('returns same code for standard languages', () {
@@ -18,6 +18,13 @@ void main() {
         expect(LanguageCodes.tableNameFor('de'), 'de');
         expect(LanguageCodes.tableNameFor('fr'), 'fr');
         expect(LanguageCodes.tableNameFor('it'), 'it');
+      });
+
+      test('normalizes legacy pr/esp to pt/es', () {
+        expect(LanguageCodes.tableNameFor('pr'), 'pt',
+            reason: 'Legacy "pr" code should normalize to "pt"');
+        expect(LanguageCodes.tableNameFor('esp'), 'es',
+            reason: 'Legacy "esp" code should normalize to "es"');
       });
     });
 
@@ -33,11 +40,19 @@ void main() {
       test('returns same code for standard language tables', () {
         expect(LanguageCodes.displayCodeFor('en'), 'en');
         expect(LanguageCodes.displayCodeFor('tr'), 'tr');
+        expect(LanguageCodes.displayCodeFor('pt'), 'pt');
+        expect(LanguageCodes.displayCodeFor('es'), 'es');
       });
     });
 
     test('displayCodes contains only proper ISO codes', () {
       expect(LanguageCodes.displayCodes, [
+        'en', 'tr', 'de', 'fr', 'it', 'pt', 'es',
+      ]);
+    });
+
+    test('tableNames contains only proper ISO codes', () {
+      expect(LanguageCodes.tableNames, [
         'en', 'tr', 'de', 'fr', 'it', 'pt', 'es',
       ]);
     });

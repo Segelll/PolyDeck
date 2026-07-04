@@ -12,6 +12,16 @@ import '../../core/performance/perf_trace.dart';
 
 part 'database.g.dart';
 
+/// Thrown when the pre-populated database fails integrity checks.
+/// The app layer should catch this and surface a blocking error dialog
+/// so the user knows to reinstall.
+class DatabaseIntegrityException implements Exception {
+  final String message;
+  const DatabaseIntegrityException(this.message);
+  @override
+  String toString() => 'DatabaseIntegrityException: $message';
+}
+
 @DriftDatabase(tables: [Words, RevlogEntries, DeckConfigs, UserSettings])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(DatabaseConnection.delayed(_connect()));
@@ -52,6 +62,9 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+  /// Schema version for the pre-populated asset DB.
+  /// Must match the user_version PRAGMA stored in assets/polydesk.db.
+  /// Bump when the asset DB structure changes and a migration is needed.
   @override
   int get schemaVersion => 1;
 
@@ -66,8 +79,57 @@ class AppDatabase extends _$AppDatabase {
           // If the DB was copied from assets, it already has the tables.
           // This just ensures indices are present in case they were missed.
           await _ensureIndices();
+          // Verify the copied database is intact and contains the expected data.
+          await _validateDatabase();
         },
       );
+
+  /// Runs a lightweight integrity check after DB open.
+  ///
+  /// Verifies that:
+  /// - The words table is non-empty
+  /// - All expected language codes are present
+  /// - All five CEFR levels (A1-C1) exist per language
+  ///
+  /// Throws [DatabaseIntegrityException] if any check fails, which the app
+  /// layer should catch and surface as a blocking error dialog.
+  Future<void> _validateDatabase() async {
+    // 1) Word count — must be non-empty.
+    final rowCount = await (selectOnly(words)..addColumns([words.id.count()]))
+        .map((r) => r.read<int>(words.id.count()))
+        .getSingle();
+    if (rowCount == 0) {
+      throw DatabaseIntegrityException(
+          'Database is empty. Please reinstall the app.');
+    }
+
+    // 2) Expected language codes must be present.
+    const expectedLangs = ['en', 'tr', 'de', 'fr', 'it', 'pt', 'es'];
+    final langRows = await customSelect(
+      'SELECT DISTINCT language_code FROM words',
+    ).get();
+    final langs = langRows.map((r) => r.read<String>('language_code')).toSet();
+    for (final lang in expectedLangs) {
+      if (!langs.contains(lang)) {
+        throw DatabaseIntegrityException(
+            'Missing language data for "$lang". Please reinstall the app.');
+      }
+    }
+
+    // 3) All five CEFR levels must be present for at least one language.
+    const expectedLevels = ['A1', 'A2', 'B1', 'B2', 'C1'];
+    for (final level in expectedLevels) {
+      final cnt = await (selectOnly(words)
+            ..addColumns([words.id.count()])
+            ..where(words.level.equals(level)))
+          .map((r) => r.read<int>(words.id.count()))
+          .getSingle();
+      if (cnt == 0) {
+        throw DatabaseIntegrityException(
+            'Missing CEFR level "$level". Please reinstall the app.');
+      }
+    }
+  }
 
   Future<void> _ensureIndices() async {
     const idxs = [

@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 import 'package:poly2/main.dart';
+import 'package:poly2/pages/first_time_selection_page.dart';
 
 void main() {
   setUpAll(() {
@@ -20,9 +21,14 @@ void main() {
     expect(find.byType(MaterialApp), findsOneWidget);
 
     // Let the splash timer fire and navigation complete
-    await tester.pumpAndSettle(const Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 10));
+    await tester.pumpAndSettle();
 
     // After splash, we should have navigated somewhere
     expect(find.byType(MaterialApp), findsOneWidget);
+    final hasHome = find.text('Ana Sayfa').evaluate().isNotEmpty;
+    final hasFirstTime =
+        find.byType(FirstTimeSelectionPage).evaluate().isNotEmpty;
+    expect(hasHome || hasFirstTime, isTrue);
   });
 }

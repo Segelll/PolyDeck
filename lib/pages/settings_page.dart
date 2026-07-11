@@ -10,13 +10,10 @@ import 'package:file_picker/file_picker.dart';
 import 'weekly_page.dart';
 import 'monthly_page.dart';
 import 'srs_settings_page.dart';
-import 'decks_page.dart';
-import 'package:poly2/data/repositories/progress_repository.dart';
-import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
-import 'package:poly2/presentation/providers/deck_provider.dart';
+import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
@@ -54,15 +51,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     try {
       final db = ref.read(appDatabaseProvider);
       final userRepo = ref.read(userRepositoryProvider);
+      final deckRepo = ref.read(deckRepositoryProvider);
 
       final favWords = await db.fetchAllFavorites();
       final userChoices = await userRepo.getUserChoices();
       final revlog = await db.fetchAllRevlog();
       final srsProgress = await db.fetchSrsProgress();
       final deckConfigs = await db.fetchAllDeckConfigs();
+      final decks = await db.fetchDeckSummaries();
+      final deckCards = await deckRepo.fetchAllDeckCardsForExport();
 
       final exportData = {
-        'schemaVersion': 2,
+        'schemaVersion': 3,
         'exportedAt': DateTime.now().toIso8601String(),
         'userChoices': userChoices,
         'favorites': favWords
@@ -77,6 +77,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         'srsProgress': srsProgress,
         'revlog': revlog,
         'deckConfig': deckConfigs,
+        'decks': decks
+            .map((deck) => {
+                  'id': deck.id,
+                  'name': deck.name,
+                  'deck_type': deck.deckType,
+                  'system_key': deck.systemKey,
+                })
+            .toList(),
+        'deckCards': deckCards,
       };
 
       final dir = await getApplicationDocumentsDirectory();
@@ -110,27 +119,15 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
 
       // Validate schema
       final schemaVersion = data['schemaVersion'] as int? ?? 1;
-      if (schemaVersion < 1 || schemaVersion > 2) {
+      if (schemaVersion < 1 || schemaVersion > 3) {
         throw FormatException('Unsupported schema version: $schemaVersion');
       }
 
       final db = ref.read(appDatabaseProvider);
       final wordRepo = ref.read(wordRepositoryProvider);
+      final deckRepo = ref.read(deckRepositoryProvider);
 
       // ── Import favorites ──
-      if (data['favorites'] != null) {
-        for (final fav in data['favorites'] as List) {
-          final favMap = fav as Map<String, dynamic>;
-          await wordRepo.addToFavorites(
-            word: favMap['word'] as String,
-            sentence: (favMap['sentence'] as String?) ?? '',
-            level: (favMap['level'] as String?) ?? 'fav',
-            backWord: favMap['backword'] as String?,
-            backSentence: favMap['backsentence'] as String?,
-          );
-        }
-      }
-
       // ── Import user choices (normalize legacy codes) ──
       if (data['userChoices'] != null) {
         final uc = data['userChoices'] as Map<String, dynamic>;
@@ -143,6 +140,64 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       }
 
       // ── Restore SRS progress (schema v2+) ──
+      final choices = await ref.read(userRepositoryProvider).getUserChoices();
+      final sourceLanguage =
+          LanguageCodes.tableNameFor(choices?['mainLanguage'] ?? 'en');
+      final targetLanguage =
+          LanguageCodes.tableNameFor(choices?['targetLanguage'] ?? 'tr');
+      final favoriteDeckId = await deckRepo.ensureFavoritesDeck();
+      final importedDeckIds = <int, int>{};
+
+      if (data['decks'] != null) {
+        for (final rawDeck in data['decks'] as List) {
+          final deck = rawDeck as Map<String, dynamic>;
+          final oldId = (deck['id'] as num?)?.toInt();
+          if (oldId == null) continue;
+          if (deck['system_key'] == 'favorites') {
+            importedDeckIds[oldId] = favoriteDeckId;
+          } else if (deck['deck_type'] == 'custom') {
+            final name = (deck['name'] as String?)?.trim() ?? '';
+            if (name.isNotEmpty) {
+              importedDeckIds[oldId] = await deckRepo.createCustomDeck(name);
+            }
+          }
+        }
+      }
+
+      if (data['deckCards'] != null) {
+        for (final rawCard in data['deckCards'] as List) {
+          final card = rawCard as Map<String, dynamic>;
+          final oldDeckId = (card['deck_id'] as num?)?.toInt();
+          final newDeckId = oldDeckId == null ? null : importedDeckIds[oldDeckId];
+          if (newDeckId == null) continue;
+          final target = (card['target_language'] as String?) ?? targetLanguage;
+          final word = await wordRepo.fetchWordById(
+              target, (card['word_id'] as num).toInt());
+          if (word == null) continue;
+          await deckRepo.addWordToDeck(
+            deckId: newDeckId,
+            wordId: word.id,
+            sourceLanguage: (card['source_language'] as String?) ?? sourceLanguage,
+            targetLanguage: target,
+          );
+        }
+      }
+
+      if (data['favorites'] != null) {
+        for (final rawFavorite in data['favorites'] as List) {
+          final favorite = rawFavorite as Map<String, dynamic>;
+          final word = await wordRepo.fetchWordByText(
+              targetLanguage, favorite['word'] as String);
+          if (word == null) continue;
+          await deckRepo.addWordToDeck(
+            deckId: favoriteDeckId,
+            wordId: word.id,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+          );
+        }
+      }
+
       if (data['srsProgress'] != null) {
         for (final entry in data['srsProgress'] as List) {
           final e = entry as Map<String, dynamic>;
@@ -254,10 +309,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               _targetLang!,
             );
         _loadPrefs();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const DecksPage()),
-        );
+        if (mounted) Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

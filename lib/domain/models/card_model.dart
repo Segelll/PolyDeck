@@ -8,7 +8,11 @@ class CardModel {
   /// The language this card belongs to (`language_code` in the DB).
   /// Either a standard ISO code (e.g. 'tr') or 'fav' for favorites.
   final String languageCode;
+  final String sourceLanguageCode;
+  final String targetLanguageCode;
 
   CardModel(this.id, this.frontText, this.frontSentence, this.backText,
-      this.backSentence, this.level, this.languageCode);
+      this.backSentence, this.level, this.languageCode,
+      {this.sourceLanguageCode = 'en', String? targetLanguageCode})
+      : targetLanguageCode = targetLanguageCode ?? languageCode;
 }

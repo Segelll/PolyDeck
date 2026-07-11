@@ -6,12 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/data/database/database.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
+import 'package:poly2/data/repositories/deck_repository.dart';
 import 'package:poly2/domain/models/card_model.dart';
 import 'package:poly2/domain/models/analysis_result.dart';
 import 'package:poly2/domain/enums/rating.dart';
 import 'package:poly2/domain/state/deck_state.dart';
 import 'package:poly2/services/fsrs_service.dart';
 import 'package:poly2/presentation/providers/database_provider.dart';
+import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_theme.dart';
@@ -23,12 +25,13 @@ import 'package:poly2/core/performance/perf_trace.dart';
 class DeckNotifier extends StateNotifier<DeckState> {
   final WordRepository _wordRepo;
   final UserRepository _userRepo;
+  final DeckRepository _deckRepo;
   final FsrsService _fsrs;
 
-  DeckNotifier(this._wordRepo, this._userRepo, this._fsrs)
+  DeckNotifier(this._wordRepo, this._userRepo, this._deckRepo, this._fsrs)
       : super(const DeckState());
 
-  Future<void> loadDeck(String level) async {
+  Future<void> loadDeck(String level, {int? deckId}) async {
     state = state.copyWith(isLoading: true, clearError: true);
 
     await PerfTrace.timeAsync('deck.load', () async {
@@ -39,12 +42,28 @@ class DeckNotifier extends StateNotifier<DeckState> {
         final motherLang =
             LanguageCodes.tableNameFor(userSettings?['mainLanguage'] ?? 'en');
 
-        List<Word> allWords;
+        final requestedDeckId = deckId ??
+            (level == 'fav' ? await _deckRepo.ensureFavoritesDeck() : null);
+        List<CardModel> allCards;
 
-        if (level == 'fav') {
-          allWords =
-              await _wordRepo.fetchFavoriteDeckWords(AppConstants.cardsPerDeck);
+        if (requestedDeckId != null) {
+          final entries = await _deckRepo.fetchDeckWords(
+              requestedDeckId, AppConstants.cardsPerDeck);
+          allCards = entries
+              .map((entry) => CardModel(
+                    entry.word.id,
+                    entry.word.word,
+                    entry.word.sentence,
+                    entry.sourceWord ?? '',
+                    entry.sourceSentence ?? '',
+                    entry.word.level,
+                    entry.targetLanguage,
+                    sourceLanguageCode: entry.sourceLanguage,
+                    targetLanguageCode: entry.targetLanguage,
+                  ))
+              .toList();
         } else {
+          List<Word> allWords;
           // Parallel: config + today counts are independent.
           final results = await Future.wait([
             _wordRepo.getDeckConfig(level),
@@ -80,47 +99,42 @@ class DeckNotifier extends StateNotifier<DeckState> {
                 targetLang, level, 0, missing);
             allWords.addAll(fillers);
           }
-        }
+          // Build CardModel list with mother-language translations (batch)
+          final motherWordIds = allWords.map((Word w) => w.id).toList();
+          final motherWords = await PerfTrace.timeAsync('deck.fetchTranslations',
+              () => _wordRepo.fetchWordsByIds(motherLang, motherWordIds));
+          final motherMap = <int, String>{};
+          for (final mw in motherWords) {
+            motherMap[mw.id] = mw.word;
+          }
 
-        // Build CardModel list with mother-language translations (batch)
-        final motherWordIds = allWords.map((Word w) => w.id).toList();
-        final motherWords = await PerfTrace.timeAsync('deck.fetchTranslations',
-            () => _wordRepo.fetchWordsByIds(motherLang, motherWordIds));
-        final motherMap = <int, String>{};
-        for (final mw in motherWords) {
-          motherMap[mw.id] = mw.word;
+          allCards = allWords
+              .map((Word w) => CardModel(
+                    w.id, w.word, w.sentence,
+                    motherMap[w.id] ?? '',
+                    '',
+                    w.level,
+                    targetLang,
+                    sourceLanguageCode: motherLang,
+                    targetLanguageCode: targetLang,
+                  ))
+              .toList();
         }
-
-        final allCards = allWords
-            .map((Word w) => CardModel(
-                  w.id, w.word, w.sentence,
-                  w.languageCode == 'fav'
-                      ? (w.backword ?? '')
-                      : (motherMap[w.id] ?? ''),
-                  w.languageCode == 'fav' ? (w.backsentence ?? '') : '',
-                  w.level,
-                  w.languageCode, // carries the card's actual DB language_code
-                ))
-            .toList();
 
         allCards.shuffle(Random());
         final selected = allCards.take(AppConstants.cardsPerDeck).toList();
 
         if (selected.isNotEmpty) {
-          // All cards in a deck share the same language_code (targetLang for
-          // normal decks, 'fav' for the favorites deck).
-          final deckLang = level == 'fav' ? 'fav' : targetLang;
-          await PerfTrace.timeAsync(
-              'deck.markSeen',
-              () => _wordRepo.markMultipleAsSeen(
-                  deckLang,
-                  selected.map((c) => c.id).toList(),
-                  formatDate(DateTime.now())));
+          final idsByLanguage = <String, List<int>>{};
+          for (final card in selected) {
+            idsByLanguage.putIfAbsent(card.targetLanguageCode, () => [])
+                .add(card.id);
+          }
+          await Future.wait(idsByLanguage.entries.map((entry) =>
+              PerfTrace.timeAsync('deck.markSeen', () =>
+                  _wordRepo.markMultipleAsSeen(entry.key, entry.value,
+                      formatDate(DateTime.now())))));
         }
-
-        final initialFavorite = selected.isNotEmpty &&
-            (level == 'fav' ||
-                await _wordRepo.isFavorite(selected.first.frontText));
 
         state = state.copyWith(
           cards: selected,
@@ -132,7 +146,7 @@ class DeckNotifier extends StateNotifier<DeckState> {
           analysisResults: [],
           targetLang: targetLang,
           motherLang: motherLang,
-          isFavorite: initialFavorite,
+          isFavorite: false,
         );
       } catch (e) {
         if (kDebugMode) print('DeckNotifier.loadDeck error: $e');
@@ -325,6 +339,7 @@ final deckProvider =
     StateNotifierProvider.autoDispose<DeckNotifier, DeckState>((ref) {
   final wordRepo = ref.read(wordRepositoryProvider);
   final userRepo = ref.read(userRepositoryProvider);
+  final deckRepo = ref.read(deckRepositoryProvider);
   final fsrs = ref.read(fsrsServiceProvider);
-  return DeckNotifier(wordRepo, userRepo, fsrs);
+  return DeckNotifier(wordRepo, userRepo, deckRepo, fsrs);
 });

@@ -5,6 +5,8 @@ import 'package:poly2/domain/enums/flip_direction.dart';
 import 'package:poly2/domain/enums/rating.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
+import 'package:poly2/presentation/providers/deck_repository_provider.dart';
+import 'package:poly2/pages/add_to_deck_sheet.dart';
 import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/pages/settings_page.dart';
@@ -13,8 +15,15 @@ import 'package:poly2/presentation/widgets/half_colored_title.dart';
 
 class CardFlipPage extends ConsumerStatefulWidget {
   final String levels;
+  final int? deckId;
+  final String? deckName;
 
-  const CardFlipPage({super.key, required this.levels});
+  const CardFlipPage({
+    super.key,
+    required this.levels,
+    this.deckId,
+    this.deckName,
+  });
 
   @override
   ConsumerState<CardFlipPage> createState() => _CardFlipPageState();
@@ -42,7 +51,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
 
   Future<void> _loadDeck() async {
     final notifier = ref.read(deckProvider.notifier);
-    await notifier.loadDeck(widget.levels);
+    await notifier.loadDeck(widget.levels, deckId: widget.deckId);
     _initDrawCardAnimation();
   }
 
@@ -168,6 +177,34 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     _loadDeck();
   }
 
+  Future<void> _openAddToDeck() async {
+    final state = ref.read(deckProvider);
+    if (state.isEmpty || state.isReviewing) return;
+
+    final repo = ref.read(deckRepositoryProvider);
+    final decks = await repo.fetchDeckSummaries();
+    if (!mounted) return;
+
+    final card = state.currentCard;
+    final addedDeckId = await showModalBottomSheet<int>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (_) => AddToDeckSheet(
+        decks: decks,
+        wordId: card.id,
+        sourceLanguage: card.sourceLanguageCode,
+        targetLanguage: card.targetLanguageCode,
+      ),
+    );
+
+    if (addedDeckId != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kart desteye eklendi')),
+      );
+    }
+  }
+
   void _showInstructions() {
     final local = AppLocalizations.of(context)!;
     showDialog(
@@ -205,7 +242,6 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     final currentCard = ref.watch(deckProvider.select((s) =>
         s.isEmpty ? null : s.currentCard));
     final currentIndex = ref.watch(deckProvider.select((s) => s.currentIndex));
-    final isFavorite = ref.watch(deckProvider.select((s) => s.isFavorite));
     final isReviewing = ref.watch(deckProvider.select((s) => s.isReviewing));
     final isLast = ref.watch(deckProvider.select((s) => s.isLastCard));
     final colorTracker = ref.watch(deckProvider.select((s) => s.colorTracker));
@@ -280,17 +316,13 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
 
     return Scaffold(
       appBar: AppBar(
-        title: HalfColoredTitle(local.appTitle),
+        title: Text(widget.deckName ?? local.appTitle),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(
-              isFavorite ? Icons.star : Icons.star_border,
-              color: Colors.yellow.shade700,
-            ),
-            onPressed: isReviewing
-                ? null
-                : () => ref.read(deckProvider.notifier).toggleFavorite(),
+            tooltip: 'Desteye ekle',
+            icon: const Icon(Icons.add),
+            onPressed: isReviewing ? null : _openAddToDeck,
           ),
           IconButton(
             icon: const Icon(Icons.settings),

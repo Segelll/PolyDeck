@@ -11,6 +11,9 @@ class WordRepository {
   Future<Word?> fetchWordById(String languageCode, int id) =>
       _db.fetchWordById(languageCode, id);
 
+  Future<Word?> fetchWordByText(String language, String text) =>
+      _db.fetchWordByText(language, text);
+
   Future<List<Word>> fetchWordsByIds(String language, List<int> ids) =>
       _db.fetchWordsByIds(language, ids);
 
@@ -70,6 +73,9 @@ class WordRepository {
       _db.fetchFavoriteDeckWords(limit);
 
   Future<List<Word>> fetchAllFavorites() => _db.fetchAllFavorites();
+
+  Future<int> getTodaySeenCount(String language) =>
+      _db.getTodaySeenCount(language);
 
   // ── FSRS ──
 

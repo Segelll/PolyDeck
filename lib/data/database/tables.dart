@@ -75,3 +75,34 @@ class UserSettings extends Table {
   @override
   String get tableName => 'user';
 }
+
+/// User-owned and system decks. CEFR decks remain virtual and are represented
+/// by their level code; the favorites deck is persisted as a system deck.
+class Decks extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text()();
+  TextColumn get deckType => text().named('deck_type')();
+  TextColumn get systemKey => text().named('system_key').nullable()();
+  TextColumn get createdAt => text().named('created_at')();
+}
+
+/// Memberships between a deck and a vocabulary word.
+///
+/// The language pair is stored on the membership, not inferred later from
+/// current settings. This keeps a card tied to the pair used when it was
+/// added to the deck.
+class DeckCards extends Table {
+  IntColumn get deckId => integer().named('deck_id')();
+  IntColumn get wordId => integer().named('word_id')();
+  TextColumn get sourceLanguage => text().named('source_language')();
+  TextColumn get targetLanguage => text().named('target_language')();
+  TextColumn get addedAt => text().named('added_at')();
+
+  @override
+  Set<Column> get primaryKey => {
+        deckId,
+        wordId,
+        sourceLanguage,
+        targetLanguage,
+      };
+}

@@ -11,6 +11,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'tables.dart';
 import '../../core/performance/perf_trace.dart';
+import '../../domain/models/deck_summary.dart';
 
 part 'database.g.dart';
 
@@ -24,9 +25,36 @@ class DatabaseIntegrityException implements Exception {
   String toString() => 'DatabaseIntegrityException: $message';
 }
 
-@DriftDatabase(tables: [Words, RevlogEntries, DeckConfigs, UserSettings])
+/// A vocabulary row together with the language pair stored in a deck.
+class DeckWordEntry {
+  final Word word;
+  final String sourceLanguage;
+  final String targetLanguage;
+  final String? sourceWord;
+  final String? sourceSentence;
+
+  const DeckWordEntry({
+    required this.word,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    this.sourceWord,
+    this.sourceSentence,
+  });
+}
+
+@DriftDatabase(
+    tables: [Words, RevlogEntries, DeckConfigs, UserSettings, Decks, DeckCards])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase() : super(DatabaseConnection.delayed(_connect()));
+  final bool _validatePreloadedData;
+
+  AppDatabase()
+      : _validatePreloadedData = true,
+        super(DatabaseConnection.delayed(_connect()));
+
+  /// In-memory constructor for repository/database tests.
+  AppDatabase.forTesting(QueryExecutor executor)
+      : _validatePreloadedData = false,
+        super(DatabaseConnection(executor));
 
   static Future<DatabaseConnection> _connect() async {
     final appDir = await getApplicationDocumentsDirectory();
@@ -68,17 +96,61 @@ class AppDatabase extends _$AppDatabase {
   /// Must match the user_version PRAGMA stored in assets/polydesk.db.
   /// Bump when the asset DB structure changes and a migration is needed.
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+        onUpgrade: (m, from, to) async {
+          if (from < 3) {
+            await m.createTable(decks);
+            await m.createTable(deckCards);
+          }
+        },
         beforeOpen: (details) async {
           // Fresh install — the DB was just copied from assets.
           // Ensure indices and validate integrity.
+          await _ensureDeckTables();
           await _ensureIndices();
-          await _validateDatabase();
+          await _ensureFavoritesDeck();
+          if (_validatePreloadedData) await _validateDatabase();
         },
       );
+
+  Future<void> _ensureDeckTables() async {
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS decks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        deck_type TEXT NOT NULL,
+        system_key TEXT,
+        created_at TEXT NOT NULL
+      )
+    ''');
+    await customStatement('''
+      CREATE TABLE IF NOT EXISTS deck_cards (
+        deck_id INTEGER NOT NULL,
+        word_id INTEGER NOT NULL,
+        source_language TEXT NOT NULL,
+        target_language TEXT NOT NULL,
+        added_at TEXT NOT NULL,
+        PRIMARY KEY (deck_id, word_id, source_language, target_language)
+      )
+    ''');
+  }
+
+  Future<void> _ensureFavoritesDeck() async {
+    final existing = await (select(decks)
+          ..where((d) => d.systemKey.equals('favorites')))
+        .getSingleOrNull();
+    if (existing != null) return;
+
+    await into(decks).insert(DecksCompanion.insert(
+          name: 'Favoriler',
+          deckType: 'system',
+          systemKey: const Value('favorites'),
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+        ));
+  }
 
   /// Runs a lightweight integrity check after DB open.
   ///
@@ -146,6 +218,9 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_words_feedback ON words (isSeen, feedback)',
       'CREATE INDEX IF NOT EXISTS idx_revlog_card ON revlog (deck_table, card_id)',
       'CREATE INDEX IF NOT EXISTS idx_revlog_date ON revlog (review_date)',
+      'CREATE INDEX IF NOT EXISTS idx_decks_type ON decks (deck_type, system_key)',
+      'CREATE INDEX IF NOT EXISTS idx_deck_cards_deck ON deck_cards (deck_id, added_at)',
+      'CREATE INDEX IF NOT EXISTS idx_deck_cards_word ON deck_cards (target_language, word_id)',
     ];
     for (final sql in idxs) {
       try {
@@ -457,7 +532,175 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // ═══════════════════════════════════════════════════════════════
-  //  Favorites (subset of words where language_code = 'fav')
+  //  User decks
+  // ═══════════════════════════════════════════════════════════════
+
+  Future<int> ensureFavoritesDeck() async {
+    await _ensureFavoritesDeck();
+    final row = await (select(decks)
+          ..where((d) => d.systemKey.equals('favorites')))
+        .getSingle();
+    return row.id;
+  }
+
+  Future<List<DeckSummary>> fetchDeckSummaries() async {
+    await _ensureFavoritesDeck();
+    final rows = await customSelect('''
+      SELECT d.id, d.name, d.deck_type, d.system_key, d.created_at,
+             COUNT(dc.deck_id) AS card_count
+      FROM decks d
+      LEFT JOIN deck_cards dc ON dc.deck_id = d.id
+      WHERE d.deck_type IN ('system', 'custom')
+      GROUP BY d.id
+      ORDER BY CASE WHEN d.system_key = 'favorites' THEN 0 ELSE 1 END,
+               d.created_at ASC
+    ''').get();
+
+    return rows
+        .map((row) => DeckSummary(
+              id: row.read<int>('id'),
+              name: row.read<String>('name'),
+              deckType: row.read<String>('deck_type'),
+              systemKey: row.readNullable<String>('system_key'),
+              cardCount: row.read<int>('card_count'),
+            ))
+        .toList();
+  }
+
+  Future<int> createCustomDeck(String name) async {
+    final trimmed = name.trim();
+    if (trimmed.isEmpty) throw ArgumentError('Deck name cannot be empty');
+    if (trimmed.length > 60) {
+      throw ArgumentError('Deck name cannot exceed 60 characters');
+    }
+
+    return into(decks).insert(DecksCompanion.insert(
+          name: trimmed,
+          deckType: 'custom',
+          createdAt: DateTime.now().toUtc().toIso8601String(),
+        ));
+  }
+
+  Future<void> deleteCustomDeck(int deckId) async {
+    await transaction(() async {
+      await (delete(deckCards)..where((c) => c.deckId.equals(deckId))).go();
+      await (delete(decks)
+            ..where((d) => d.id.equals(deckId) & d.deckType.equals('custom')))
+          .go();
+    });
+  }
+
+  Future<void> addWordToDeck({
+    required int deckId,
+    required int wordId,
+    required String sourceLanguage,
+    required String targetLanguage,
+  }) async {
+    await into(deckCards).insertOnConflictUpdate(DeckCardsCompanion.insert(
+          deckId: deckId,
+          wordId: wordId,
+          sourceLanguage: sourceLanguage,
+          targetLanguage: targetLanguage,
+          addedAt: DateTime.now().toUtc().toIso8601String(),
+        ));
+  }
+
+  Future<bool> isWordInDeck({
+    required int deckId,
+    required int wordId,
+    required String sourceLanguage,
+    required String targetLanguage,
+  }) async {
+    final row = await (select(deckCards)..where((c) =>
+          c.deckId.equals(deckId) &
+          c.wordId.equals(wordId) &
+          c.sourceLanguage.equals(sourceLanguage) &
+          c.targetLanguage.equals(targetLanguage)))
+        .getSingleOrNull();
+    return row != null;
+  }
+
+  Future<List<DeckWordEntry>> fetchDeckWords(int deckId, int limit) async {
+    if (limit <= 0) return [];
+    final now = DateTime.now().toUtc();
+    final today =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+
+    final rows = await customSelect('''
+      SELECT w.*,
+             dc.source_language AS deck_source_language,
+             dc.target_language AS deck_target_language,
+             source.word AS source_word,
+             source.sentence AS source_sentence
+      FROM deck_cards dc
+      JOIN words w
+        ON w.language_code = dc.target_language AND w.id = dc.word_id
+      LEFT JOIN words source
+        ON source.language_code = dc.source_language AND source.id = dc.word_id
+      WHERE dc.deck_id = ?
+      ORDER BY CASE
+                 WHEN w.due IS NOT NULL AND w.due <= ?
+                      AND w.card_state IN (1, 2, 3) THEN 0
+                 WHEN w.card_state = 0 THEN 1
+                 ELSE 2
+               END,
+               COALESCE(w.due, '9999-12-31'), dc.added_at
+      LIMIT ?
+    ''', variables: [
+      Variable.withInt(deckId),
+      Variable.withString(today),
+      Variable.withInt(limit),
+    ], readsFrom: {words, deckCards}).get();
+
+    final entries = <DeckWordEntry>[];
+    for (final row in rows) {
+      entries.add(DeckWordEntry(
+        word: await words.mapFromRow(row),
+        sourceLanguage: row.read<String>('deck_source_language'),
+        targetLanguage: row.read<String>('deck_target_language'),
+        sourceWord: row.readNullable<String>('source_word'),
+        sourceSentence: row.readNullable<String>('source_sentence'),
+      ));
+    }
+    return entries;
+  }
+
+  Future<int> getTodaySeenCount(String language) async {
+    final now = DateTime.now();
+    final today =
+        '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+    final row = await customSelect(
+      'SELECT COUNT(*) AS count FROM words '
+      'WHERE language_code = ? AND isSeen = 1 AND date = ?',
+      variables: [Variable.withString(language), Variable.withString(today)],
+    ).getSingle();
+    return row.read<int>('count');
+  }
+
+  Future<Word?> fetchWordByText(String language, String text) =>
+      (select(words)
+            ..where((w) =>
+                w.languageCode.equals(language) & w.word.equals(text)))
+          .getSingleOrNull();
+
+  Future<List<Map<String, dynamic>>> fetchAllDeckCardsForExport() async {
+    final rows = await customSelect('''
+      SELECT deck_id, word_id, source_language, target_language, added_at
+      FROM deck_cards ORDER BY deck_id, added_at
+    ''').get();
+    return rows
+        .map((row) => {
+              'deck_id': row.read<int>('deck_id'),
+              'word_id': row.read<int>('word_id'),
+              'source_language': row.read<String>('source_language'),
+              'target_language': row.read<String>('target_language'),
+              'added_at': row.read<String>('added_at'),
+            })
+        .toList();
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  //  Legacy favorite helpers
   // ═══════════════════════════════════════════════════════════════
 
   /// Fetches a bounded, deterministic-random window of favorite cards.
@@ -746,6 +989,9 @@ class AppDatabase extends _$AppDatabase {
       reps: Value(0),
       lapses: Value(0),
     ));
+    await delete(deckCards).go();
+    await (delete(decks)..where((d) => d.deckType.equals('custom'))).go();
+    await _ensureFavoritesDeck();
     await customStatement('DELETE FROM revlog');
   }
 }

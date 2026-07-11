@@ -2114,6 +2114,623 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
   }
 }
 
+class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DecksTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _deckTypeMeta =
+      const VerificationMeta('deckType');
+  @override
+  late final GeneratedColumn<String> deckType = GeneratedColumn<String>(
+      'deck_type', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _systemKeyMeta =
+      const VerificationMeta('systemKey');
+  @override
+  late final GeneratedColumn<String> systemKey = GeneratedColumn<String>(
+      'system_key', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, name, deckType, systemKey, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'decks';
+  @override
+  VerificationContext validateIntegrity(Insertable<Deck> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('deck_type')) {
+      context.handle(_deckTypeMeta,
+          deckType.isAcceptableOrUnknown(data['deck_type']!, _deckTypeMeta));
+    } else if (isInserting) {
+      context.missing(_deckTypeMeta);
+    }
+    if (data.containsKey('system_key')) {
+      context.handle(_systemKeyMeta,
+          systemKey.isAcceptableOrUnknown(data['system_key']!, _systemKeyMeta));
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Deck map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Deck(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
+      deckType: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}deck_type'])!,
+      systemKey: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}system_key']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $DecksTable createAlias(String alias) {
+    return $DecksTable(attachedDatabase, alias);
+  }
+}
+
+class Deck extends DataClass implements Insertable<Deck> {
+  final int id;
+  final String name;
+  final String deckType;
+  final String? systemKey;
+  final String createdAt;
+  const Deck(
+      {required this.id,
+      required this.name,
+      required this.deckType,
+      this.systemKey,
+      required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['name'] = Variable<String>(name);
+    map['deck_type'] = Variable<String>(deckType);
+    if (!nullToAbsent || systemKey != null) {
+      map['system_key'] = Variable<String>(systemKey);
+    }
+    map['created_at'] = Variable<String>(createdAt);
+    return map;
+  }
+
+  DecksCompanion toCompanion(bool nullToAbsent) {
+    return DecksCompanion(
+      id: Value(id),
+      name: Value(name),
+      deckType: Value(deckType),
+      systemKey: systemKey == null && nullToAbsent
+          ? const Value.absent()
+          : Value(systemKey),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory Deck.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Deck(
+      id: serializer.fromJson<int>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      deckType: serializer.fromJson<String>(json['deckType']),
+      systemKey: serializer.fromJson<String?>(json['systemKey']),
+      createdAt: serializer.fromJson<String>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'name': serializer.toJson<String>(name),
+      'deckType': serializer.toJson<String>(deckType),
+      'systemKey': serializer.toJson<String?>(systemKey),
+      'createdAt': serializer.toJson<String>(createdAt),
+    };
+  }
+
+  Deck copyWith(
+          {int? id,
+          String? name,
+          String? deckType,
+          Value<String?> systemKey = const Value.absent(),
+          String? createdAt}) =>
+      Deck(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        deckType: deckType ?? this.deckType,
+        systemKey: systemKey.present ? systemKey.value : this.systemKey,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  Deck copyWithCompanion(DecksCompanion data) {
+    return Deck(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      deckType: data.deckType.present ? data.deckType.value : this.deckType,
+      systemKey: data.systemKey.present ? data.systemKey.value : this.systemKey,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Deck(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('deckType: $deckType, ')
+          ..write('systemKey: $systemKey, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, name, deckType, systemKey, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Deck &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.deckType == this.deckType &&
+          other.systemKey == this.systemKey &&
+          other.createdAt == this.createdAt);
+}
+
+class DecksCompanion extends UpdateCompanion<Deck> {
+  final Value<int> id;
+  final Value<String> name;
+  final Value<String> deckType;
+  final Value<String?> systemKey;
+  final Value<String> createdAt;
+  const DecksCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.deckType = const Value.absent(),
+    this.systemKey = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  DecksCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String deckType,
+    this.systemKey = const Value.absent(),
+    required String createdAt,
+  })  : name = Value(name),
+        deckType = Value(deckType),
+        createdAt = Value(createdAt);
+  static Insertable<Deck> custom({
+    Expression<int>? id,
+    Expression<String>? name,
+    Expression<String>? deckType,
+    Expression<String>? systemKey,
+    Expression<String>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (deckType != null) 'deck_type': deckType,
+      if (systemKey != null) 'system_key': systemKey,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  DecksCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? name,
+      Value<String>? deckType,
+      Value<String?>? systemKey,
+      Value<String>? createdAt}) {
+    return DecksCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      deckType: deckType ?? this.deckType,
+      systemKey: systemKey ?? this.systemKey,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (deckType.present) {
+      map['deck_type'] = Variable<String>(deckType.value);
+    }
+    if (systemKey.present) {
+      map['system_key'] = Variable<String>(systemKey.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<String>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DecksCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('deckType: $deckType, ')
+          ..write('systemKey: $systemKey, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $DeckCardsTable extends DeckCards
+    with TableInfo<$DeckCardsTable, DeckCard> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $DeckCardsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
+  @override
+  late final GeneratedColumn<int> deckId = GeneratedColumn<int>(
+      'deck_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _wordIdMeta = const VerificationMeta('wordId');
+  @override
+  late final GeneratedColumn<int> wordId = GeneratedColumn<int>(
+      'word_id', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _sourceLanguageMeta =
+      const VerificationMeta('sourceLanguage');
+  @override
+  late final GeneratedColumn<String> sourceLanguage = GeneratedColumn<String>(
+      'source_language', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _targetLanguageMeta =
+      const VerificationMeta('targetLanguage');
+  @override
+  late final GeneratedColumn<String> targetLanguage = GeneratedColumn<String>(
+      'target_language', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _addedAtMeta =
+      const VerificationMeta('addedAt');
+  @override
+  late final GeneratedColumn<String> addedAt = GeneratedColumn<String>(
+      'added_at', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [deckId, wordId, sourceLanguage, targetLanguage, addedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'deck_cards';
+  @override
+  VerificationContext validateIntegrity(Insertable<DeckCard> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('deck_id')) {
+      context.handle(_deckIdMeta,
+          deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta));
+    } else if (isInserting) {
+      context.missing(_deckIdMeta);
+    }
+    if (data.containsKey('word_id')) {
+      context.handle(_wordIdMeta,
+          wordId.isAcceptableOrUnknown(data['word_id']!, _wordIdMeta));
+    } else if (isInserting) {
+      context.missing(_wordIdMeta);
+    }
+    if (data.containsKey('source_language')) {
+      context.handle(
+          _sourceLanguageMeta,
+          sourceLanguage.isAcceptableOrUnknown(
+              data['source_language']!, _sourceLanguageMeta));
+    } else if (isInserting) {
+      context.missing(_sourceLanguageMeta);
+    }
+    if (data.containsKey('target_language')) {
+      context.handle(
+          _targetLanguageMeta,
+          targetLanguage.isAcceptableOrUnknown(
+              data['target_language']!, _targetLanguageMeta));
+    } else if (isInserting) {
+      context.missing(_targetLanguageMeta);
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(_addedAtMeta,
+          addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta));
+    } else if (isInserting) {
+      context.missing(_addedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey =>
+      {deckId, wordId, sourceLanguage, targetLanguage};
+  @override
+  DeckCard map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return DeckCard(
+      deckId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}deck_id'])!,
+      wordId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}word_id'])!,
+      sourceLanguage: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}source_language'])!,
+      targetLanguage: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}target_language'])!,
+      addedAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}added_at'])!,
+    );
+  }
+
+  @override
+  $DeckCardsTable createAlias(String alias) {
+    return $DeckCardsTable(attachedDatabase, alias);
+  }
+}
+
+class DeckCard extends DataClass implements Insertable<DeckCard> {
+  final int deckId;
+  final int wordId;
+  final String sourceLanguage;
+  final String targetLanguage;
+  final String addedAt;
+  const DeckCard(
+      {required this.deckId,
+      required this.wordId,
+      required this.sourceLanguage,
+      required this.targetLanguage,
+      required this.addedAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['deck_id'] = Variable<int>(deckId);
+    map['word_id'] = Variable<int>(wordId);
+    map['source_language'] = Variable<String>(sourceLanguage);
+    map['target_language'] = Variable<String>(targetLanguage);
+    map['added_at'] = Variable<String>(addedAt);
+    return map;
+  }
+
+  DeckCardsCompanion toCompanion(bool nullToAbsent) {
+    return DeckCardsCompanion(
+      deckId: Value(deckId),
+      wordId: Value(wordId),
+      sourceLanguage: Value(sourceLanguage),
+      targetLanguage: Value(targetLanguage),
+      addedAt: Value(addedAt),
+    );
+  }
+
+  factory DeckCard.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return DeckCard(
+      deckId: serializer.fromJson<int>(json['deckId']),
+      wordId: serializer.fromJson<int>(json['wordId']),
+      sourceLanguage: serializer.fromJson<String>(json['sourceLanguage']),
+      targetLanguage: serializer.fromJson<String>(json['targetLanguage']),
+      addedAt: serializer.fromJson<String>(json['addedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'deckId': serializer.toJson<int>(deckId),
+      'wordId': serializer.toJson<int>(wordId),
+      'sourceLanguage': serializer.toJson<String>(sourceLanguage),
+      'targetLanguage': serializer.toJson<String>(targetLanguage),
+      'addedAt': serializer.toJson<String>(addedAt),
+    };
+  }
+
+  DeckCard copyWith(
+          {int? deckId,
+          int? wordId,
+          String? sourceLanguage,
+          String? targetLanguage,
+          String? addedAt}) =>
+      DeckCard(
+        deckId: deckId ?? this.deckId,
+        wordId: wordId ?? this.wordId,
+        sourceLanguage: sourceLanguage ?? this.sourceLanguage,
+        targetLanguage: targetLanguage ?? this.targetLanguage,
+        addedAt: addedAt ?? this.addedAt,
+      );
+  DeckCard copyWithCompanion(DeckCardsCompanion data) {
+    return DeckCard(
+      deckId: data.deckId.present ? data.deckId.value : this.deckId,
+      wordId: data.wordId.present ? data.wordId.value : this.wordId,
+      sourceLanguage: data.sourceLanguage.present
+          ? data.sourceLanguage.value
+          : this.sourceLanguage,
+      targetLanguage: data.targetLanguage.present
+          ? data.targetLanguage.value
+          : this.targetLanguage,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeckCard(')
+          ..write('deckId: $deckId, ')
+          ..write('wordId: $wordId, ')
+          ..write('sourceLanguage: $sourceLanguage, ')
+          ..write('targetLanguage: $targetLanguage, ')
+          ..write('addedAt: $addedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(deckId, wordId, sourceLanguage, targetLanguage, addedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is DeckCard &&
+          other.deckId == this.deckId &&
+          other.wordId == this.wordId &&
+          other.sourceLanguage == this.sourceLanguage &&
+          other.targetLanguage == this.targetLanguage &&
+          other.addedAt == this.addedAt);
+}
+
+class DeckCardsCompanion extends UpdateCompanion<DeckCard> {
+  final Value<int> deckId;
+  final Value<int> wordId;
+  final Value<String> sourceLanguage;
+  final Value<String> targetLanguage;
+  final Value<String> addedAt;
+  final Value<int> rowid;
+  const DeckCardsCompanion({
+    this.deckId = const Value.absent(),
+    this.wordId = const Value.absent(),
+    this.sourceLanguage = const Value.absent(),
+    this.targetLanguage = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  DeckCardsCompanion.insert({
+    required int deckId,
+    required int wordId,
+    required String sourceLanguage,
+    required String targetLanguage,
+    required String addedAt,
+    this.rowid = const Value.absent(),
+  })  : deckId = Value(deckId),
+        wordId = Value(wordId),
+        sourceLanguage = Value(sourceLanguage),
+        targetLanguage = Value(targetLanguage),
+        addedAt = Value(addedAt);
+  static Insertable<DeckCard> custom({
+    Expression<int>? deckId,
+    Expression<int>? wordId,
+    Expression<String>? sourceLanguage,
+    Expression<String>? targetLanguage,
+    Expression<String>? addedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (deckId != null) 'deck_id': deckId,
+      if (wordId != null) 'word_id': wordId,
+      if (sourceLanguage != null) 'source_language': sourceLanguage,
+      if (targetLanguage != null) 'target_language': targetLanguage,
+      if (addedAt != null) 'added_at': addedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  DeckCardsCompanion copyWith(
+      {Value<int>? deckId,
+      Value<int>? wordId,
+      Value<String>? sourceLanguage,
+      Value<String>? targetLanguage,
+      Value<String>? addedAt,
+      Value<int>? rowid}) {
+    return DeckCardsCompanion(
+      deckId: deckId ?? this.deckId,
+      wordId: wordId ?? this.wordId,
+      sourceLanguage: sourceLanguage ?? this.sourceLanguage,
+      targetLanguage: targetLanguage ?? this.targetLanguage,
+      addedAt: addedAt ?? this.addedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (deckId.present) {
+      map['deck_id'] = Variable<int>(deckId.value);
+    }
+    if (wordId.present) {
+      map['word_id'] = Variable<int>(wordId.value);
+    }
+    if (sourceLanguage.present) {
+      map['source_language'] = Variable<String>(sourceLanguage.value);
+    }
+    if (targetLanguage.present) {
+      map['target_language'] = Variable<String>(targetLanguage.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<String>(addedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('DeckCardsCompanion(')
+          ..write('deckId: $deckId, ')
+          ..write('wordId: $wordId, ')
+          ..write('sourceLanguage: $sourceLanguage, ')
+          ..write('targetLanguage: $targetLanguage, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -2121,12 +2738,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $RevlogEntriesTable revlogEntries = $RevlogEntriesTable(this);
   late final $DeckConfigsTable deckConfigs = $DeckConfigsTable(this);
   late final $UserSettingsTable userSettings = $UserSettingsTable(this);
+  late final $DecksTable decks = $DecksTable(this);
+  late final $DeckCardsTable deckCards = $DeckCardsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [words, revlogEntries, deckConfigs, userSettings];
+      [words, revlogEntries, deckConfigs, userSettings, decks, deckCards];
 }
 
 typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
@@ -3130,6 +3749,333 @@ typedef $$UserSettingsTableProcessedTableManager = ProcessedTableManager<
     ),
     UserSetting,
     PrefetchHooks Function()>;
+typedef $$DecksTableCreateCompanionBuilder = DecksCompanion Function({
+  Value<int> id,
+  required String name,
+  required String deckType,
+  Value<String?> systemKey,
+  required String createdAt,
+});
+typedef $$DecksTableUpdateCompanionBuilder = DecksCompanion Function({
+  Value<int> id,
+  Value<String> name,
+  Value<String> deckType,
+  Value<String?> systemKey,
+  Value<String> createdAt,
+});
+
+class $$DecksTableFilterComposer extends Composer<_$AppDatabase, $DecksTable> {
+  $$DecksTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get deckType => $composableBuilder(
+      column: $table.deckType, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get systemKey => $composableBuilder(
+      column: $table.systemKey, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$DecksTableOrderingComposer
+    extends Composer<_$AppDatabase, $DecksTable> {
+  $$DecksTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get deckType => $composableBuilder(
+      column: $table.deckType, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get systemKey => $composableBuilder(
+      column: $table.systemKey, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$DecksTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DecksTable> {
+  $$DecksTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get deckType =>
+      $composableBuilder(column: $table.deckType, builder: (column) => column);
+
+  GeneratedColumn<String> get systemKey =>
+      $composableBuilder(column: $table.systemKey, builder: (column) => column);
+
+  GeneratedColumn<String> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$DecksTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DecksTable,
+    Deck,
+    $$DecksTableFilterComposer,
+    $$DecksTableOrderingComposer,
+    $$DecksTableAnnotationComposer,
+    $$DecksTableCreateCompanionBuilder,
+    $$DecksTableUpdateCompanionBuilder,
+    (Deck, BaseReferences<_$AppDatabase, $DecksTable, Deck>),
+    Deck,
+    PrefetchHooks Function()> {
+  $$DecksTableTableManager(_$AppDatabase db, $DecksTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DecksTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DecksTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DecksTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> name = const Value.absent(),
+            Value<String> deckType = const Value.absent(),
+            Value<String?> systemKey = const Value.absent(),
+            Value<String> createdAt = const Value.absent(),
+          }) =>
+              DecksCompanion(
+            id: id,
+            name: name,
+            deckType: deckType,
+            systemKey: systemKey,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String name,
+            required String deckType,
+            Value<String?> systemKey = const Value.absent(),
+            required String createdAt,
+          }) =>
+              DecksCompanion.insert(
+            id: id,
+            name: name,
+            deckType: deckType,
+            systemKey: systemKey,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$DecksTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DecksTable,
+    Deck,
+    $$DecksTableFilterComposer,
+    $$DecksTableOrderingComposer,
+    $$DecksTableAnnotationComposer,
+    $$DecksTableCreateCompanionBuilder,
+    $$DecksTableUpdateCompanionBuilder,
+    (Deck, BaseReferences<_$AppDatabase, $DecksTable, Deck>),
+    Deck,
+    PrefetchHooks Function()>;
+typedef $$DeckCardsTableCreateCompanionBuilder = DeckCardsCompanion Function({
+  required int deckId,
+  required int wordId,
+  required String sourceLanguage,
+  required String targetLanguage,
+  required String addedAt,
+  Value<int> rowid,
+});
+typedef $$DeckCardsTableUpdateCompanionBuilder = DeckCardsCompanion Function({
+  Value<int> deckId,
+  Value<int> wordId,
+  Value<String> sourceLanguage,
+  Value<String> targetLanguage,
+  Value<String> addedAt,
+  Value<int> rowid,
+});
+
+class $$DeckCardsTableFilterComposer
+    extends Composer<_$AppDatabase, $DeckCardsTable> {
+  $$DeckCardsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get deckId => $composableBuilder(
+      column: $table.deckId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get wordId => $composableBuilder(
+      column: $table.wordId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get sourceLanguage => $composableBuilder(
+      column: $table.sourceLanguage,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get targetLanguage => $composableBuilder(
+      column: $table.targetLanguage,
+      builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get addedAt => $composableBuilder(
+      column: $table.addedAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$DeckCardsTableOrderingComposer
+    extends Composer<_$AppDatabase, $DeckCardsTable> {
+  $$DeckCardsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get deckId => $composableBuilder(
+      column: $table.deckId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get wordId => $composableBuilder(
+      column: $table.wordId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get sourceLanguage => $composableBuilder(
+      column: $table.sourceLanguage,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get targetLanguage => $composableBuilder(
+      column: $table.targetLanguage,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get addedAt => $composableBuilder(
+      column: $table.addedAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$DeckCardsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $DeckCardsTable> {
+  $$DeckCardsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get deckId =>
+      $composableBuilder(column: $table.deckId, builder: (column) => column);
+
+  GeneratedColumn<int> get wordId =>
+      $composableBuilder(column: $table.wordId, builder: (column) => column);
+
+  GeneratedColumn<String> get sourceLanguage => $composableBuilder(
+      column: $table.sourceLanguage, builder: (column) => column);
+
+  GeneratedColumn<String> get targetLanguage => $composableBuilder(
+      column: $table.targetLanguage, builder: (column) => column);
+
+  GeneratedColumn<String> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+}
+
+class $$DeckCardsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $DeckCardsTable,
+    DeckCard,
+    $$DeckCardsTableFilterComposer,
+    $$DeckCardsTableOrderingComposer,
+    $$DeckCardsTableAnnotationComposer,
+    $$DeckCardsTableCreateCompanionBuilder,
+    $$DeckCardsTableUpdateCompanionBuilder,
+    (DeckCard, BaseReferences<_$AppDatabase, $DeckCardsTable, DeckCard>),
+    DeckCard,
+    PrefetchHooks Function()> {
+  $$DeckCardsTableTableManager(_$AppDatabase db, $DeckCardsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$DeckCardsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$DeckCardsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$DeckCardsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> deckId = const Value.absent(),
+            Value<int> wordId = const Value.absent(),
+            Value<String> sourceLanguage = const Value.absent(),
+            Value<String> targetLanguage = const Value.absent(),
+            Value<String> addedAt = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DeckCardsCompanion(
+            deckId: deckId,
+            wordId: wordId,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            addedAt: addedAt,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int deckId,
+            required int wordId,
+            required String sourceLanguage,
+            required String targetLanguage,
+            required String addedAt,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              DeckCardsCompanion.insert(
+            deckId: deckId,
+            wordId: wordId,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage,
+            addedAt: addedAt,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$DeckCardsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $DeckCardsTable,
+    DeckCard,
+    $$DeckCardsTableFilterComposer,
+    $$DeckCardsTableOrderingComposer,
+    $$DeckCardsTableAnnotationComposer,
+    $$DeckCardsTableCreateCompanionBuilder,
+    $$DeckCardsTableUpdateCompanionBuilder,
+    (DeckCard, BaseReferences<_$AppDatabase, $DeckCardsTable, DeckCard>),
+    DeckCard,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -3142,4 +4088,8 @@ class $AppDatabaseManager {
       $$DeckConfigsTableTableManager(_db, _db.deckConfigs);
   $$UserSettingsTableTableManager get userSettings =>
       $$UserSettingsTableTableManager(_db, _db.userSettings);
+  $$DecksTableTableManager get decks =>
+      $$DecksTableTableManager(_db, _db.decks);
+  $$DeckCardsTableTableManager get deckCards =>
+      $$DeckCardsTableTableManager(_db, _db.deckCards);
 }

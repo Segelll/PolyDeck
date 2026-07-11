@@ -5,7 +5,7 @@ enum ProficiencyLevel {
   b1('B1', 'Intermediate'),
   b2('B2', 'Upper-Interm.'),
   c1('C1', 'Advanced'),
-  favourites('fav', 'Favourites');
+  favourites('fav', 'Favoriler');
 
   const ProficiencyLevel(this.code, this.label);
 

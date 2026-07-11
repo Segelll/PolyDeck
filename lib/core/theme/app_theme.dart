@@ -41,49 +41,59 @@ class AppTheme {
   // ── Theme Data ──
 
   static ThemeData get lightTheme {
-    return ThemeData(
-      primarySwatch: Colors.blueGrey,
+    final scheme = ColorScheme.fromSeed(
+      seedColor: const Color(0xFF4E8572),
       brightness: Brightness.light,
-      scaffoldBackgroundColor: Colors.white,
+    ).copyWith(
+      primary: const Color(0xFF31554A),
+      onPrimary: Colors.white,
+      secondary: const Color(0xFFD9785A),
+      surface: const Color(0xFFF8FAF8),
+    );
+    return ThemeData(
+      colorScheme: scheme,
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: const Color(0xFFF8FAF8),
       appBarTheme: const AppBarTheme(
-        elevation: 1,
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        elevation: 0,
+        backgroundColor: Color(0xFFF8FAF8),
+        foregroundColor: Color(0xFF162A32),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+          minimumSize: const Size(0, 46),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
         ),
       ),
-      cardTheme: CardThemeData(
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+      cardTheme: const CardThemeData(
+        elevation: 0,
+        color: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
+      ),
+      navigationDrawerTheme: const NavigationDrawerThemeData(
+        backgroundColor: Color(0xFFF8FAF8),
+        indicatorColor: Color(0xFFD5E5DE),
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: Color(0xFF31554A),
+        unselectedLabelColor: Color(0xFF6D7C80),
+        indicatorColor: Color(0xFFD9785A),
       ),
     );
   }
 
   static ThemeData get darkTheme {
     return ThemeData(
-      primarySwatch: Colors.blueGrey,
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: const Color(0xFF4E8572),
+        brightness: Brightness.dark,
+      ),
       brightness: Brightness.dark,
-      appBarTheme: const AppBarTheme(
-        elevation: 1,
-        centerTitle: true,
-      ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(double.infinity, 50),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      ),
+      appBarTheme: const AppBarTheme(elevation: 0),
     );
   }
 }

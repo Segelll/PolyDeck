@@ -1,216 +1,273 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/proficiency_level.dart';
-import 'package:poly2/presentation/providers/database_provider.dart';
-import 'package:poly2/presentation/providers/deck_provider.dart';
-import 'package:poly2/presentation/providers/settings_provider.dart';
-import 'package:poly2/presentation/providers/deck_config_provider.dart';
-import 'package:poly2/core/constants/language_codes.dart';
-import 'package:poly2/pages/exam_page.dart';
-import 'package:poly2/pages/settings_page.dart';
-import 'card_flip_page.dart';
-import 'package:poly2/l10n/generated/app_localizations.dart';
-import 'package:poly2/presentation/widgets/half_colored_title.dart';
+import 'package:poly2/domain/models/deck_summary.dart';
+import 'package:poly2/pages/card_flip_page.dart';
+import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 
-class DecksPage extends ConsumerStatefulWidget {
+class DecksPage extends ConsumerWidget {
   const DecksPage({super.key});
 
   @override
-  ConsumerState<DecksPage> createState() => _DecksPageState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final catalog = ref.watch(deckCatalogProvider);
 
-class _DecksPageState extends ConsumerState<DecksPage> {
-  String? _selectedLevel;
-
-  void _toggleLevel(String code) {
-    setState(() {
-      _selectedLevel = (_selectedLevel == code) ? null : code;
-    });
-  }
-
-  void _proceedToDeck(AppLocalizations local) {
-    if (_selectedLevel == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(local.selectLanguages)),
-      );
-      return;
-    }
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => CardFlipPage(levels: _selectedLevel!),
-      ),
-    );
-  }
-
-  void _goToExam() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ExamPage()),
-    );
-  }
-
-  void _openSettings() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const SettingsPage()),
-    ).then((_) => setState(() {}));
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final local = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: HalfColoredTitle(local.deckPage),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            tooltip: local.examIconTooltip,
-            icon: const Icon(Icons.quiz),
-            onPressed: _goToExam,
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          const Material(
+            color: Color(0xFFF8FAF8),
+            child: TabBar(
+              tabs: [
+                Tab(text: 'Varsayılan'),
+                Tab(text: 'Kişiselleştirilmiş'),
+                Tab(text: 'Kategoriler'),
+              ],
+            ),
           ),
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: _openSettings,
+          Expanded(
+            child: catalog.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, _) => _CatalogError(
+                message: error.toString(),
+                onRetry: () => ref.invalidate(deckCatalogProvider),
+              ),
+              data: (decks) => TabBarView(
+                children: [
+                  _DefaultDeckList(decks: decks),
+                  _CustomDeckList(decks: decks),
+                  const _CategoryPlaceholder(),
+                ],
+              ),
+            ),
           ),
         ],
       ),
-      body: Container(
-        color: Colors.blueGrey.shade50,
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            // Daily progress indicator
-            if (_selectedLevel != null && _selectedLevel != 'fav')
-              _DailyProgressBar(level: _selectedLevel!),
-            const SizedBox(height: 20),
-            Icon(Icons.view_agenda, size: 60, color: Colors.blueGrey[700]),
-            const SizedBox(height: 10),
-            Text(
-              local.selectLevel,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
+    );
+  }
+}
 
-            // Build deck cards from ProficiencyLevel enum
-            for (var i = 0; i < ProficiencyLevel.values.length; i += 2)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 24),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildDeck(ProficiencyLevel.values[i]),
-                    if (i + 1 < ProficiencyLevel.values.length)
-                      _buildDeck(ProficiencyLevel.values[i + 1]),
-                  ],
-                ),
-              ),
+class _DefaultDeckList extends StatelessWidget {
+  final List<DeckSummary> decks;
 
-            const Spacer(),
-            ElevatedButton(
-              onPressed: () => _proceedToDeck(local),
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(180, 50),
-              ),
-              child: Text(local.proceed),
-            ),
-            const SizedBox(height: 40),
-          ],
-        ),
+  const _DefaultDeckList({required this.decks});
+
+  @override
+  Widget build(BuildContext context) {
+    final favorites = decks.where((deck) => deck.isFavorites).firstOrNull;
+    final levels = ProficiencyLevel.standardLevels
+        .map((level) => DeckSummary(
+              id: 0,
+              name: level.code,
+              deckType: 'system',
+              systemKey: level.code,
+              cardCount: 0,
+            ))
+        .toList();
+    if (favorites != null) levels.insert(0, favorites);
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+      itemCount: levels.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) => _DeckRow(
+        deck: levels[index],
+        icon: levels[index].isFavorites
+            ? Icons.star_rounded
+            : Icons.auto_awesome_outlined,
+        subtitle: levels[index].isFavorites
+            ? '${levels[index].cardCount} kart'
+            : 'CEFR seviye destesi',
+        onTap: () => _openDeck(context, levels[index]),
       ),
     );
   }
+}
 
-  Widget _buildDeck(ProficiencyLevel level) {
-    final bool isSelected = _selectedLevel == level.code;
+class _CustomDeckList extends ConsumerWidget {
+  final List<DeckSummary> decks;
 
-    final Color primary = isSelected ? Colors.blue : Colors.grey;
-    final Color mid =
-        isSelected ? Colors.blue.shade300 : Colors.grey.shade400;
-    final Color back =
-        isSelected ? Colors.blue.shade100 : Colors.grey.shade200;
-    final Color textColor = isSelected ? Colors.white : Colors.black87;
+  const _CustomDeckList({required this.decks});
 
-    Positioned buildLayer(Color color, {double left = 0, double top = 0}) {
-      return Positioned(
-        left: left,
-        top: top,
-        child: Container(
-          width: 70,
-          height: 100,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [color, color.withValues(alpha: 0.7)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(6),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 3,
-                offset: Offset(2, 2),
+  Future<void> _createDeck(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final name = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Yeni deste oluştur'),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          maxLength: 60,
+          decoration: const InputDecoration(labelText: 'Deste adı'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Vazgeç'),
+          ),
+          FilledButton(
+            onPressed: () =>
+                Navigator.pop(dialogContext, controller.text.trim()),
+            child: const Text('Oluştur'),
+          ),
+        ],
+      ),
+    );
+    controller.dispose();
+    if (name == null || name.isEmpty || !context.mounted) return;
+    await ref.read(deckRepositoryProvider).createCustomDeck(name);
+    ref.invalidate(deckCatalogProvider);
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final customDecks = decks.where((deck) => deck.isCustom).toList();
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  'Kendi çalışma listelerin',
+                  style: TextStyle(color: Color(0xFF6D7C80)),
+                ),
+              ),
+              IconButton(
+                tooltip: 'Yeni deste oluştur',
+                icon: const Icon(Icons.add),
+                onPressed: () => _createDeck(context, ref),
               ),
             ],
           ),
         ),
-      );
-    }
-
-    return GestureDetector(
-      onTap: () => _toggleLevel(level.code),
-      child: SizedBox(
-        width: 100,
-        height: 140,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            buildLayer(back, left: 12, top: 12),
-            buildLayer(mid, left: 6, top: 6),
-            Positioned.fill(
-              child: Container(
-                width: 70,
-                height: 100,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [primary, mid],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+        Expanded(
+          child: customDecks.isEmpty
+              ? Center(
+                  child: TextButton.icon(
+                    onPressed: () => _createDeck(context, ref),
+                    icon: const Icon(Icons.add),
+                    label: const Text('İlk desteni oluştur'),
                   ),
-                  borderRadius: BorderRadius.circular(6),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black26,
-                      blurRadius: 3,
-                      offset: Offset(2, 2),
-                    ),
-                  ],
+                )
+              : ListView.separated(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+                  itemCount: customDecks.length,
+                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  itemBuilder: (context, index) {
+                    final deck = customDecks[index];
+                    return _DeckRow(
+                      deck: deck,
+                      icon: Icons.folder_outlined,
+                      subtitle: '${deck.cardCount} kart',
+                      onTap: () => _openDeck(context, deck),
+                    );
+                  },
                 ),
-                alignment: Alignment.center,
+        ),
+      ],
+    );
+  }
+}
+
+class _DeckRow extends StatelessWidget {
+  final DeckSummary deck;
+  final IconData icon;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  const _DeckRow({
+    required this.deck,
+    required this.icon,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            children: [
+              Icon(icon, color: const Color(0xFF4E8572)),
+              const SizedBox(width: 14),
+              Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      level.code,
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: textColor,
-                        fontWeight: FontWeight.bold,
+                      deck.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF162A32),
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 3),
                     Text(
-                      level.label,
-                      style: TextStyle(fontSize: 12, color: textColor),
-                      textAlign: TextAlign.center,
+                      subtitle,
+                      style: const TextStyle(color: Color(0xFF6D7C80)),
                     ),
                   ],
                 ),
               ),
-            ),
+              const Icon(Icons.chevron_right, color: Color(0xFF9AA8A6)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryPlaceholder extends StatelessWidget {
+  const _CategoryPlaceholder();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.category_outlined, size: 46, color: Color(0xFF4E8572)),
+          SizedBox(height: 12),
+          Text('Kategoriler yakında burada.'),
+        ],
+      ),
+    );
+  }
+}
+
+class _CatalogError extends StatelessWidget {
+  final String message;
+  final VoidCallback onRetry;
+
+  const _CatalogError({required this.message, required this.onRetry});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline, size: 40, color: Colors.redAccent),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 12),
+            OutlinedButton(onPressed: onRetry, child: const Text('Tekrar dene')),
           ],
         ),
       ),
@@ -218,115 +275,14 @@ class _DecksPageState extends ConsumerState<DecksPage> {
   }
 }
 
-/// Widget showing today's new/review counts for a level.
-class _DailyProgressBar extends ConsumerStatefulWidget {
-  final String level;
-
-  const _DailyProgressBar({required this.level});
-
-  @override
-  ConsumerState<_DailyProgressBar> createState() => _DailyProgressBarState();
-}
-
-class _DailyProgressBarState extends ConsumerState<_DailyProgressBar> {
-  Future<({int newCount, int reviewCount})>? _countsFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _countsFuture = _fetchCounts(ref, widget.level);
-  }
-
-  @override
-  void didUpdateWidget(covariant _DailyProgressBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.level != widget.level) {
-      _countsFuture = _fetchCounts(ref, widget.level);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final local = AppLocalizations.of(context)!;
-    final configAsync = ref.watch(deckConfigProvider(widget.level));
-
-    return configAsync.when(
-      loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
-      data: (config) {
-        // Fetch counts in a FutureBuilder since we need async
-        return FutureBuilder<({int newCount, int reviewCount})>(
-          future: _countsFuture,
-          builder: (context, snapshot) {
-            final newCount = snapshot.data?.newCount ?? 0;
-            final reviewCount = snapshot.data?.reviewCount ?? 0;
-
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16),
-              padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 12),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: const [
-                  BoxShadow(color: Colors.black12, blurRadius: 2),
-                ],
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _StatChip(
-                    icon: Icons.fiber_new,
-                    color: Colors.blue,
-                    label: local.newCount(newCount, config['maxNewPerDay'] as int),
-                  ),
-                  const SizedBox(width: 16),
-                  _StatChip(
-                    icon: Icons.replay,
-                    color: Colors.orange,
-                    label: local.reviewCount(reviewCount, config['maxReviewsPerDay'] as int),
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<({int newCount, int reviewCount})> _fetchCounts(
-      WidgetRef ref, String level) async {
-    final repo = ref.read(wordRepositoryProvider);
-    final userSettings =
-        await ref.read(userRepositoryProvider).getUserChoices();
-    final tableName = LanguageCodes.tableNameFor(
-        userSettings?['targetLanguage'] ?? 'tr');
-    // Single combined query instead of two
-    return repo.getTodayCounts(tableName, level);
-  }
-}
-
-/// Small chip showing an icon + label for daily stats.
-class _StatChip extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
-
-  const _StatChip({
-    required this.icon,
-    required this.color,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12)),
-      ],
-    );
-  }
+void _openDeck(BuildContext context, DeckSummary deck) {
+  unawaited(Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => CardFlipPage(
+        levels: deck.systemKey ?? 'custom',
+        deckId: deck.id == 0 ? null : deck.id,
+        deckName: deck.name,
+      ),
+    ),
+  ));
 }

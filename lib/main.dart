@@ -4,7 +4,7 @@ import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:poly2/pages/splash_screen.dart';
-import 'package:poly2/presentation/providers/settings_provider.dart';
+import 'package:poly2/core/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,8 +16,6 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final settingsAsync = ref.watch(settingsProvider);
-
     return MaterialApp(
       title: 'PolyDeck',
       localizationsDelegates: const [
@@ -46,14 +44,8 @@ class MyApp extends ConsumerWidget {
         }
         return const Locale('en');
       },
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        brightness: Brightness.dark,
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
       themeMode: ThemeMode.light,
       home: const SplashScreen(),
     );

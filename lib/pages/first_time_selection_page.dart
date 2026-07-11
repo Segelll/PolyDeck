@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:poly2/pages/decks_page.dart';
+import 'package:poly2/pages/app_shell.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
@@ -102,7 +102,7 @@ class _FirstTimeSelectionPageState
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const DecksPage()),
+                              builder: (context) => const AppShell()),
                         );
                       } catch (e) {
                         ScaffoldMessenger.of(context).showSnackBar(

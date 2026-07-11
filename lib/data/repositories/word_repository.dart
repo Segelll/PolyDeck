@@ -66,6 +66,9 @@ class WordRepository {
 
   Future<bool> isFavorite(String word) => _db.isFavorite(word);
 
+  Future<List<Word>> fetchFavoriteDeckWords(int limit) =>
+      _db.fetchFavoriteDeckWords(limit);
+
   Future<List<Word>> fetchAllFavorites() => _db.fetchAllFavorites();
 
   // ── FSRS ──

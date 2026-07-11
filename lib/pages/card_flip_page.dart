@@ -65,7 +65,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     required String label,
     required Color color,
     required IconData icon,
-    required VoidCallback onPressed,
+    required VoidCallback? onPressed,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -123,6 +123,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   }
 
   void _reflipCard() {
+    if (ref.read(deckProvider).isReviewing) return;
     _isFlippedLocally = false;
     _cardKey.currentState?.addStatusListener((status) {
       if (status == AnimationStatus.dismissed) {
@@ -205,6 +206,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
         s.isEmpty ? null : s.currentCard));
     final currentIndex = ref.watch(deckProvider.select((s) => s.currentIndex));
     final isFavorite = ref.watch(deckProvider.select((s) => s.isFavorite));
+    final isReviewing = ref.watch(deckProvider.select((s) => s.isReviewing));
     final isLast = ref.watch(deckProvider.select((s) => s.isLastCard));
     final colorTracker = ref.watch(deckProvider.select((s) => s.colorTracker));
     final deckIndex = ref.watch(deckProvider.select((s) => s.deckIndex));
@@ -286,7 +288,9 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
               isFavorite ? Icons.star : Icons.star_border,
               color: Colors.yellow.shade700,
             ),
-            onPressed: () => ref.read(deckProvider.notifier).toggleFavorite(),
+            onPressed: isReviewing
+                ? null
+                : () => ref.read(deckProvider.notifier).toggleFavorite(),
           ),
           IconButton(
             icon: const Icon(Icons.settings),
@@ -434,45 +438,53 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           label: local.again,
                           color: AppTheme.ratingAgain,
                           icon: Icons.replay,
-                          onPressed: () {
-                            ref
-                                .read(deckProvider.notifier)
-                                .reviewCard(Rating.again);
-                            setState(() => _isFlippedLocally = false);
-                          },
+                          onPressed: isReviewing
+                              ? null
+                              : () {
+                                  ref
+                                      .read(deckProvider.notifier)
+                                      .reviewCard(Rating.again);
+                                  setState(() => _isFlippedLocally = false);
+                                },
                         ),
                         _buildRatingButton(
                           label: local.hard,
                           color: AppTheme.ratingHard,
                           icon: Icons.trending_down,
-                          onPressed: () {
-                            ref
-                                .read(deckProvider.notifier)
-                                .reviewCard(Rating.hard);
-                            setState(() => _isFlippedLocally = false);
-                          },
+                          onPressed: isReviewing
+                              ? null
+                              : () {
+                                  ref
+                                      .read(deckProvider.notifier)
+                                      .reviewCard(Rating.hard);
+                                  setState(() => _isFlippedLocally = false);
+                                },
                         ),
                         _buildRatingButton(
                           label: local.good,
                           color: AppTheme.ratingGood,
                           icon: Icons.check,
-                          onPressed: () {
-                            ref
-                                .read(deckProvider.notifier)
-                                .reviewCard(Rating.good);
-                            setState(() => _isFlippedLocally = false);
-                          },
+                          onPressed: isReviewing
+                              ? null
+                              : () {
+                                  ref
+                                      .read(deckProvider.notifier)
+                                      .reviewCard(Rating.good);
+                                  setState(() => _isFlippedLocally = false);
+                                },
                         ),
                         _buildRatingButton(
                           label: local.easy,
                           color: AppTheme.ratingEasy,
                           icon: Icons.thumb_up,
-                          onPressed: () {
-                            ref
-                                .read(deckProvider.notifier)
-                                .reviewCard(Rating.easy);
-                            setState(() => _isFlippedLocally = false);
-                          },
+                          onPressed: isReviewing
+                              ? null
+                              : () {
+                                  ref
+                                      .read(deckProvider.notifier)
+                                      .reviewCard(Rating.easy);
+                                  setState(() => _isFlippedLocally = false);
+                                },
                         ),
                       ],
                     ),
@@ -494,13 +506,13 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                     children: [
                       ElevatedButton.icon(
                         icon: const Icon(Icons.refresh),
-                        onPressed: _reflipCard,
+                        onPressed: isReviewing ? null : _reflipCard,
                         label: Text(local.reflip),
                       ),
                       const SizedBox(width: 10),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.skip_next),
-                        onPressed: _nextCard,
+                        onPressed: isReviewing ? null : _nextCard,
                         label: Text(local.newCard),
                       ),
                     ],

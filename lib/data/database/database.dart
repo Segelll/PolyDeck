@@ -460,6 +460,34 @@ class AppDatabase extends _$AppDatabase {
   //  Favorites (subset of words where language_code = 'fav')
   // ═══════════════════════════════════════════════════════════════
 
+  /// Fetches a bounded, deterministic-random window of favorite cards.
+  ///
+  /// The count keeps the result bounded in memory while the random offset
+  /// preserves variety without sorting the whole favorites table with
+  /// `ORDER BY RANDOM()`.
+  Future<List<Word>> fetchFavoriteDeckWords(int limit) async {
+    if (limit <= 0) return [];
+
+    final countRow = await customSelect(
+      'SELECT COUNT(*) AS favorite_count '
+      'FROM words WHERE language_code = ?',
+      variables: [Variable.withString('fav')],
+    ).getSingle();
+    final count = countRow.read<int>('favorite_count');
+    if (count == 0) return [];
+
+    final windowSize = min(limit, count);
+    final offset =
+        count > windowSize ? Random().nextInt(count - windowSize + 1) : 0;
+
+    return (select(words)
+          ..where((w) => w.languageCode.equals('fav'))
+          ..orderBy([(w) => OrderingTerm.asc(w.id)])
+          ..limit(windowSize, offset: offset))
+        .get();
+  }
+
+  /// Fetches all favorites for export and backup operations.
   Future<List<Word>> fetchAllFavorites() =>
       (select(words)..where((w) => w.languageCode.equals('fav'))).get();
 
@@ -484,6 +512,10 @@ class AppDatabase extends _$AppDatabase {
       required String level,
       String? backWord,
       String? backSentence}) async {
+    // Keep favorite insertion idempotent. This also protects callers whose
+    // cached favorite state has not been initialized yet.
+    if (await isFavorite(word)) return;
+
     final maxIdRow = await customSelect(
         'SELECT MAX(id) as max_id FROM words WHERE language_code = "fav"').getSingle();
     final nextId = (maxIdRow.readNullable<int>('max_id') ?? 0) + 1;

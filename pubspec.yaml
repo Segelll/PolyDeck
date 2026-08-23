@@ -19,7 +19,8 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.5.4
+  sdk: ^3.13.0
+  flutter: ">=3.47.0"
 
 # Dependencies specify other packages that your package needs in order to work.
 # To automatically upgrade your package dependencies to the latest versions
@@ -38,22 +39,22 @@ dependencies:
   flutter_riverpod: ^2.6.1
 
   # Local database — Drift (type-safe SQLite)
-  drift: ^2.21.0
-  sqlite3_flutter_libs: ^0.5.27
+  drift: ^2.34.3
+  sqlite3_flutter_libs: ^0.5.42
   path: ^1.9.0
-  path_provider: ^2.1.5
+  path_provider: ^2.1.6
 
   # UI
   cupertino_icons: ^1.0.8
 
   # i18n
-  intl: any
+  intl: ^0.20.2
   flutter_localizations:
     sdk: flutter
 
   # Export/Import
-  share_plus: ^10.1.4
-  file_picker: ^8.1.7
+  share_plus: ^13.3.0
+  file_picker: ^12.0.0
 
   # FSRS Spaced Repetition
   fsrs: ^2.0.1
@@ -67,14 +68,14 @@ dev_dependencies:
   # activated in the `analysis_options.yaml` file located at the root of your
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
 
   # Desktop SQLite support (for tests/tooling only — not needed at runtime)
-  sqflite_common_ffi: ^2.3.4+3
+  sqflite_common_ffi: ^2.4.2+1
 
   # Drift code generation
-  drift_dev: ^2.21.0
-  build_runner: ^2.4.0
+  drift_dev: ^2.34.5
+  build_runner: ^2.15.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

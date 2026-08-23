@@ -31,13 +31,15 @@ class ExamNotifier extends StateNotifier<ExamState> {
         // ── Phase 1: pick random question IDs per level ──
         const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
         final allQuestionIds = <int>[];
+        final idsByLevel = await PerfTrace.timeAsync(
+          'exam.fetchQuestionIds',
+          () => _wordRepo.fetchWordIdsByLevels(
+            language: questionLang,
+            levels: levels,
+          ),
+        );
         for (final level in levels) {
-          // Query the actual ID range for this language + level from the DB
-          // instead of relying on hardcoded AppConstants.levelIdRanges.
-          final ids = await PerfTrace.timeAsync(
-            'exam.fetchIds',
-            () => _wordRepo.fetchWordIds(language: questionLang, level: level),
-          );
+          final ids = List<int>.from(idsByLevel[level] ?? const <int>[]);
           if (ids.isEmpty) continue;
           ids.shuffle(rng);
           allQuestionIds.addAll(ids.take(AppConstants.questionsPerLevel));
@@ -52,14 +54,18 @@ class ExamNotifier extends StateNotifier<ExamState> {
         }
 
         // ── Phase 2: batch-fetch question + answer words ──
-        final questionWords = await PerfTrace.timeAsync(
-          'exam.fetchQuestions',
-          () => _wordRepo.fetchWordsByIds(questionLang, allQuestionIds),
-        );
-        final answerWords = await PerfTrace.timeAsync(
-          'exam.fetchAnswers',
-          () => _wordRepo.fetchWordsByIds(answerLang, allQuestionIds),
-        );
+        final wordBatches = await Future.wait([
+          PerfTrace.timeAsync(
+            'exam.fetchQuestions',
+            () => _wordRepo.fetchWordsByIds(questionLang, allQuestionIds),
+          ),
+          PerfTrace.timeAsync(
+            'exam.fetchAnswers',
+            () => _wordRepo.fetchWordsByIds(answerLang, allQuestionIds),
+          ),
+        ]);
+        final questionWords = wordBatches[0];
+        final answerWords = wordBatches[1];
 
         final qMap = <int, String>{};
         for (final w in questionWords) {
@@ -74,11 +80,15 @@ class ExamNotifier extends StateNotifier<ExamState> {
         // Fetch a larger pool of words in the answer language, then sample
         // per question.
         final poolIds = <int>[];
-        for (final level in levels) {
-          final ids = await _wordRepo.fetchWordIds(
+        final answerIdsByLevel = await PerfTrace.timeAsync(
+          'exam.fetchAnswerPoolIds',
+          () => _wordRepo.fetchWordIdsByLevels(
             language: answerLang,
-            level: level,
-          );
+            levels: levels,
+          ),
+        );
+        for (final level in levels) {
+          final ids = List<int>.from(answerIdsByLevel[level] ?? const <int>[]);
           ids.shuffle(rng);
           poolIds.addAll(ids.take(30)); // generous pool per level
         }

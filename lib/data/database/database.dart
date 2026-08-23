@@ -105,8 +105,10 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) => m.createAll(),
     beforeOpen: (details) async {
-      await _ensureIndices();
-      await _ensureFavoritesDeck();
+      // The shipped asset already contains its indexes and the favorites
+      // system deck. Avoid issuing schema-write statements on every launch.
+      // In-memory databases use Drift's normal createAll path; the favorites
+      // deck is ensured by the repository before it is queried.
       if (_validatePreloadedData) await _validateDatabase();
     },
   );
@@ -137,72 +139,44 @@ class AppDatabase extends _$AppDatabase {
   /// Throws [DatabaseIntegrityException] if any check fails, which the app
   /// layer should catch and surface as a blocking error dialog.
   Future<void> _validateDatabase() async {
-    // 1) Word count — must be non-empty.
-    final rowCount = await (selectOnly(words)..addColumns([words.id.count()]))
-        .map((r) => r.read<int>(words.id.count()))
-        .getSingle();
-    if (rowCount == 0) {
+    // One grouped read replaces separate count, language, and level queries.
+    // The shipped vocabulary is small enough that the result is only one row
+    // per language-level pair, while startup avoids seven DB round trips.
+    final rows = await customSelect(
+      'SELECT language_code, level, COUNT(*) AS word_count '
+      'FROM words GROUP BY language_code, level',
+    ).get();
+    if (rows.isEmpty) {
       throw const DatabaseIntegrityException(
         'Database is empty. Please reinstall the app.',
       );
     }
 
-    // 2) Expected language codes must be present.
+    final languages = <String>{};
+    final levels = <String>{};
+    for (final row in rows) {
+      languages.add(row.read<String>('language_code'));
+      levels.add(row.read<String>('level'));
+    }
+
+    // Expected language codes must be present.
     const expectedLangs = ['en', 'tr', 'de', 'fr', 'it', 'pt', 'es'];
-    final langRows = await customSelect(
-      'SELECT DISTINCT language_code FROM words',
-    ).get();
-    final langs = langRows.map((r) => r.read<String>('language_code')).toSet();
     for (final lang in expectedLangs) {
-      if (!langs.contains(lang)) {
+      if (!languages.contains(lang)) {
         throw DatabaseIntegrityException(
           'Missing language data for "$lang". Please reinstall the app.',
         );
       }
     }
 
-    // 3) All five CEFR levels must be present for at least one language.
+    // All five CEFR levels must be present for at least one language.
     const expectedLevels = ['A1', 'A2', 'B1', 'B2', 'C1'];
     for (final level in expectedLevels) {
-      final cnt =
-          await (selectOnly(words)
-                ..addColumns([words.id.count()])
-                ..where(words.level.equals(level)))
-              .map((r) => r.read<int>(words.id.count()))
-              .getSingle();
-      if (cnt == 0) {
+      if (!levels.contains(level)) {
         throw DatabaseIntegrityException(
           'Missing CEFR level "$level". Please reinstall the app.',
         );
       }
-    }
-  }
-
-  Future<void> _ensureIndices() async {
-    // Index strategy (see PERFORMANCE_REFACTOR_PLAN_EN.md §1.3):
-    // Column order matters — filtering columns first, then range/order columns.
-    const idxs = [
-      // Due-card queue: `due` before `card_state` so ORDER BY due uses the index.
-      'CREATE INDEX IF NOT EXISTS idx_words_due_queue ON words (language_code, level, due, card_state)',
-      // New-card queue: `id` at end for deterministic range selection.
-      'CREATE INDEX IF NOT EXISTS idx_words_new_queue ON words (language_code, level, card_state, isSeen, id)',
-      // Progress: optimize GROUP BY date and date-range filters.
-      'CREATE INDEX IF NOT EXISTS idx_words_progress_date ON words (language_code, date)',
-      // Today's review counts.
-      'CREATE INDEX IF NOT EXISTS idx_revlog_today_counts ON revlog (deck_table, review_date, state)',
-      // Supporting indexes.
-      'CREATE INDEX IF NOT EXISTS idx_words_lang_level_isSeen ON words (language_code, level, isSeen)',
-      'CREATE INDEX IF NOT EXISTS idx_words_feedback ON words (isSeen, feedback)',
-      'CREATE INDEX IF NOT EXISTS idx_revlog_card ON revlog (deck_table, card_id)',
-      'CREATE INDEX IF NOT EXISTS idx_revlog_date ON revlog (review_date)',
-      'CREATE INDEX IF NOT EXISTS idx_decks_type ON decks (deck_type, system_key)',
-      'CREATE INDEX IF NOT EXISTS idx_deck_cards_deck ON deck_cards (deck_id, added_at)',
-      'CREATE INDEX IF NOT EXISTS idx_deck_cards_word ON deck_cards (target_language, word_id)',
-    ];
-    for (final sql in idxs) {
-      try {
-        await customStatement(sql);
-      } catch (_) {}
     }
   }
 
@@ -399,12 +373,9 @@ class AppDatabase extends _$AppDatabase {
     final rows = await customSelect(
       'SELECT date FROM words '
       'WHERE language_code = ? AND date IS NOT NULL '
-      'AND date != ? AND date != ? ORDER BY date ASC LIMIT 1',
-      variables: [
-        Variable.withString(language),
-        Variable.withString(''),
-        Variable.withString('0'),
-      ],
+      "AND date GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*' "
+      'ORDER BY date ASC LIMIT 1',
+      variables: [Variable.withString(language)],
       readsFrom: {words},
     ).get();
     return rows.firstOrNull?.readNullable<String>('date');
@@ -425,6 +396,39 @@ class AppDatabase extends _$AppDatabase {
               ..orderBy([OrderingTerm.asc(words.id)]))
             .get();
     return rows.map((r) => r.read<int>(words.id)!).toList();
+  }
+
+  /// Fetches word IDs for several CEFR levels with one database query.
+  ///
+  /// The returned map contains every requested level, including levels with
+  /// no matching words. IDs are ordered so callers can apply the same random
+  /// sampling policy without depending on SQLite row order.
+  Future<Map<String, List<int>>> fetchWordIdsByLevels({
+    required String language,
+    required List<String> levels,
+  }) async {
+    if (levels.isEmpty) return {};
+
+    final rows =
+        await (selectOnly(words)
+              ..addColumns([words.level, words.id])
+              ..where(
+                words.languageCode.equals(language) & words.level.isIn(levels),
+              )
+              ..orderBy([
+                OrderingTerm.asc(words.level),
+                OrderingTerm.asc(words.id),
+              ]))
+            .get();
+
+    final result = <String, List<int>>{
+      for (final level in levels) level: <int>[],
+    };
+    for (final row in rows) {
+      final level = row.read<String>(words.level);
+      result[level]!.add(row.read<int>(words.id)!);
+    }
+    return result;
   }
 
   Future<List<Word>> fetchExamWords(String language, int id) => (select(

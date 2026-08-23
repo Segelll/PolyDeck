@@ -59,6 +59,11 @@ class WordRepository {
     required String level,
   }) => _db.fetchWordIds(language: language, level: level);
 
+  Future<Map<String, List<int>>> fetchWordIdsByLevels({
+    required String language,
+    required List<String> levels,
+  }) => _db.fetchWordIdsByLevels(language: language, levels: levels);
+
   Future<List<Word>> fetchExamWords(String language, int id) =>
       _db.fetchExamWords(language, id);
 

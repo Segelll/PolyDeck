@@ -131,6 +131,13 @@
   "close": "Close",
 
   "weeklyProgress": "Weekly Progress",
+  "weeklySeenWords": "{count} words seen this week",
+  "@weeklySeenWords": {
+    "description": "Weekly total of seen words",
+    "placeholders": {
+      "count": {}
+    }
+  },
   "monthlyProgress": "Monthly Progress",
   "chartWeekly": "Weekly Chart",
   "chartMonthly": "Monthly Chart",

@@ -131,6 +131,13 @@
   "close": "Chiudi",
 
   "weeklyProgress": "Progressione Settimanale",
+  "weeklySeenWords": "Parole viste questa settimana: {count}",
+  "@weeklySeenWords": {
+    "description": "Totale settimanale delle parole viste",
+    "placeholders": {
+      "count": {}
+    }
+  },
   "monthlyProgress": "Progressione Mensile",
   "chartWeekly": "Grafico Settimanale",
   "chartMonthly": "Grafico Mensile",

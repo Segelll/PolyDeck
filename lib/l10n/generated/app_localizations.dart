@@ -504,6 +504,12 @@ abstract class AppLocalizations {
   /// **'Weekly Progress'**
   String get weeklyProgress;
 
+  /// Weekly total of seen words
+  ///
+  /// In en, this message translates to:
+  /// **'{count} words seen this week'**
+  String weeklySeenWords(Object count);
+
   /// No description provided for @monthlyProgress.
   ///
   /// In en, this message translates to:

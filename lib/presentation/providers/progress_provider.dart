@@ -11,28 +11,28 @@ class WeeklyProgressState {
   final List<int> data;
   final List<String> dates;
   final bool isLoading;
-  const WeeklyProgressState(
-      {this.data = const [], this.dates = const [], this.isLoading = true});
+  const WeeklyProgressState({
+    this.data = const [],
+    this.dates = const [],
+    this.isLoading = true,
+  });
 }
 
-final weeklyProgressProvider =
-    FutureProvider.autoDispose<WeeklyProgressState>((ref) async {
+final weeklyProgressProvider = FutureProvider.autoDispose<WeeklyProgressState>((
+  ref,
+) async {
   final repo = ref.read(progressRepositoryProvider);
   final userRepo = ref.read(userRepositoryProvider);
   final settings = await userRepo.getUserChoices();
   final language = settings?['targetLanguage'] ?? 'tr';
 
-  final earliestDate = await repo.getEarliestDate(language);
-  if (earliestDate == null) {
-    return const WeeklyProgressState(isLoading: false);
-  }
-  final parsedEarliestDate = DateTime.tryParse(earliestDate);
-  if (parsedEarliestDate == null) {
-    return const WeeklyProgressState(isLoading: false);
-  }
-  final weekDates = generateWeekDates(parsedEarliestDate);
-  final dateCounts =
-      await repo.fetchDateCounts(language, dateStart: weekDates.first);
+  final weekStart = startOfWeek(DateTime.now());
+  final weekDates = generateWeekDates(weekStart);
+  final dateCounts = await repo.fetchDateCounts(
+    language,
+    dateStart: formatDate(weekStart),
+    dateEnd: formatDate(weekStart.add(const Duration(days: 7))),
+  );
   final data = weekDates.map((d) => dateCounts[d] ?? 0).toList();
   return WeeklyProgressState(data: data, dates: weekDates, isLoading: false);
 });
@@ -41,29 +41,33 @@ class MonthlyProgressState {
   final List<int> data;
   final List<String> monthLabels;
   final bool isLoading;
-  const MonthlyProgressState(
-      {this.data = const [],
-      this.monthLabels = const [],
-      this.isLoading = true});
+  const MonthlyProgressState({
+    this.data = const [],
+    this.monthLabels = const [],
+    this.isLoading = true,
+  });
 }
 
 final monthlyProgressProvider =
     FutureProvider.autoDispose<MonthlyProgressState>((ref) async {
-  final repo = ref.read(progressRepositoryProvider);
-  final userRepo = ref.read(userRepositoryProvider);
-  final settings = await userRepo.getUserChoices();
-  final language = settings?['targetLanguage'] ?? 'tr';
+      final repo = ref.read(progressRepositoryProvider);
+      final userRepo = ref.read(userRepositoryProvider);
+      final settings = await userRepo.getUserChoices();
+      final language = settings?['targetLanguage'] ?? 'tr';
 
-  final earliestDateStr = await repo.getEarliestDate(language);
-  if (earliestDateStr == null) {
-    return const MonthlyProgressState(isLoading: false);
-  }
-  final earliestDate = DateTime.tryParse(earliestDateStr);
-  if (earliestDate == null) {
-    return const MonthlyProgressState(isLoading: false);
-  }
-  final data = await repo.fetchMonthlyCounts(earliestDate, language);
-  final labels = generateMonthLabels(earliestDate);
-  return MonthlyProgressState(
-      data: data, monthLabels: labels, isLoading: false);
-});
+      final earliestDateStr = await repo.getEarliestDate(language);
+      if (earliestDateStr == null) {
+        return const MonthlyProgressState(isLoading: false);
+      }
+      final earliestDate = DateTime.tryParse(earliestDateStr);
+      if (earliestDate == null) {
+        return const MonthlyProgressState(isLoading: false);
+      }
+      final data = await repo.fetchMonthlyCounts(earliestDate, language);
+      final labels = generateMonthLabels(earliestDate);
+      return MonthlyProgressState(
+        data: data,
+        monthLabels: labels,
+        isLoading: false,
+      );
+    });

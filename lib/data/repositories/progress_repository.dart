@@ -23,16 +23,25 @@ class ProgressRepository {
   Future<Map<String, int>> fetchDateCounts(
     String language, {
     String? dateStart,
+    String? dateEnd,
   }) async {
     try {
       String sql =
           'SELECT date, COUNT(*) as count FROM words '
           'WHERE language_code = ? AND date IS NOT NULL '
-          'AND date != "" AND date != "0"';
-      final vars = <Variable>[Variable.withString(language)];
+          'AND date != ? AND date != ?';
+      final vars = <Variable>[
+        Variable.withString(language),
+        Variable.withString(''),
+        Variable.withString('0'),
+      ];
       if (dateStart != null) {
         sql += ' AND date >= ?';
         vars.add(Variable.withString(dateStart));
+      }
+      if (dateEnd != null) {
+        sql += ' AND date < ?';
+        vars.add(Variable.withString(dateEnd));
       }
       sql += ' GROUP BY date ORDER BY date ASC';
 

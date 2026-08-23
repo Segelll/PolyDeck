@@ -131,6 +131,13 @@
   "close": "Kapat",
 
   "weeklyProgress": "Haftalık İlerleme",
+  "weeklySeenWords": "Bu hafta görülen kelime: {count}",
+  "@weeklySeenWords": {
+    "description": "Haftalık görülen kelime toplamı",
+    "placeholders": {
+      "count": {}
+    }
+  },
   "monthlyProgress": "Aylık İlerleme",
   "chartWeekly": "Haftalık Grafik",
   "chartMonthly": "Aylık Grafik",

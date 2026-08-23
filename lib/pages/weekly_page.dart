@@ -22,9 +22,10 @@ class WeeklyPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(child: Text('Error: $err')),
         data: (progress) {
-          if (progress.data.isEmpty || progress.dates.isEmpty) {
-            return const Center(child: Text('No data yet.'));
-          }
+          final totalCount = progress.data.fold<int>(
+            0,
+            (total, value) => total + value,
+          );
 
           final maxVal = progress.data
               .reduce((a, b) => a > b ? a : b)
@@ -35,7 +36,41 @@ class WeeklyPage extends ConsumerWidget {
             color: AppPalette.cloudDancer,
             child: Column(
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 16),
+                Card(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  color: AppPalette.almostAqua,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 14,
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.auto_graph, color: AppPalette.ink),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            local.weeklySeenWords(totalCount),
+                            style: const TextStyle(
+                              color: AppPalette.ink,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        Text(
+                          '$totalCount',
+                          style: const TextStyle(
+                            color: AppPalette.ink,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -50,14 +85,21 @@ class WeeklyPage extends ConsumerWidget {
                       return Column(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          Text(
+                            '$value',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
                           Container(
                             width: 20,
-                            height: barHeight,
+                            height: barHeight == 0 ? 2 : barHeight,
                             color: AppPalette.iceMelt,
                           ),
                           const SizedBox(height: 4),
                           Text(dayLabel, style: const TextStyle(fontSize: 14)),
-                          Text('$value', style: const TextStyle(fontSize: 14)),
                         ],
                       );
                     }).toList(),

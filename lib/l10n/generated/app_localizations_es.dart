@@ -225,6 +225,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get weeklyProgress => 'Progreso Semanal';
 
   @override
+  String weeklySeenWords(Object count) {
+    return 'Palabras vistas esta semana: $count';
+  }
+
+  @override
   String get monthlyProgress => 'Progreso Mensual';
 
   @override

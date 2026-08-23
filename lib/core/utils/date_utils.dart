@@ -14,6 +14,12 @@ List<String> generateWeekDates(DateTime startDate) {
   return weekDates;
 }
 
+/// Returns the Monday that starts the calendar week containing [date].
+DateTime startOfWeek(DateTime date) {
+  final day = DateTime(date.year, date.month, date.day);
+  return day.subtract(Duration(days: day.weekday - DateTime.monday));
+}
+
 /// Generates a list of 4 month-label strings starting from [startDate].
 List<String> generateMonthLabels(DateTime startDate) {
   final List<String> labels = [];

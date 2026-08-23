@@ -226,6 +226,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get weeklyProgress => 'Wöchentlicher Fortschritt';
 
   @override
+  String weeklySeenWords(Object count) {
+    return 'Diese Woche gesehene Wörter: $count';
+  }
+
+  @override
   String get monthlyProgress => 'Monatlicher Fortschritt';
 
   @override

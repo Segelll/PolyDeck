@@ -225,6 +225,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get weeklyProgress => 'Haftalık İlerleme';
 
   @override
+  String weeklySeenWords(Object count) {
+    return 'Bu hafta görülen kelime: $count';
+  }
+
+  @override
   String get monthlyProgress => 'Aylık İlerleme';
 
   @override

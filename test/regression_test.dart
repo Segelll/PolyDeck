@@ -4,14 +4,19 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:poly2/data/database/database.dart';
 import 'package:poly2/data/repositories/deck_repository.dart';
+import 'package:poly2/data/repositories/progress_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
+import 'package:poly2/pages/app_shell.dart';
 import 'package:poly2/pages/analysis_page.dart';
+import 'package:poly2/pages/exam_result_page.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
+import 'package:poly2/presentation/providers/exam_provider.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/widgets/highlighted_sentence.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
@@ -43,6 +48,18 @@ void main() {
             level: 'A1',
             languageCode: 'tr',
             date: const Value('2026-08-01'),
+          ),
+        );
+    await db
+        .into(db.words)
+        .insert(
+          WordsCompanion.insert(
+            id: 3,
+            word: 'invalid',
+            sentence: 'invalid',
+            level: 'A1',
+            languageCode: 'tr',
+            date: const Value('0000-invalid'),
           ),
         );
 
@@ -91,6 +108,113 @@ void main() {
     expect(
       userColumns.map((row) => row.read<String>('name')),
       contains('review_mode'),
+    );
+    await db.close();
+  });
+
+  test(
+    'word ID batches preserve requested levels and deterministic order',
+    () async {
+      final db = AppDatabase.forTesting(NativeDatabase.memory());
+
+      for (final entry in [
+        (id: 3, level: 'A2'),
+        (id: 1, level: 'A1'),
+        (id: 2, level: 'A1'),
+      ]) {
+        await db
+            .into(db.words)
+            .insert(
+              WordsCompanion.insert(
+                id: entry.id,
+                word: 'word-${entry.id}',
+                sentence: 'sentence-${entry.id}',
+                level: entry.level,
+                languageCode: 'tr',
+              ),
+            );
+      }
+
+      final batches = await db.fetchWordIdsByLevels(
+        language: 'tr',
+        levels: const ['A1', 'A2', 'B1'],
+      );
+
+      expect(batches, {
+        'A1': [1, 2],
+        'A2': [3],
+        'B1': <int>[],
+      });
+      await db.close();
+    },
+  );
+
+  test('monthly progress ignores invalid and sentinel dates', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    for (final entry in [
+      (id: 1, date: '0'),
+      (id: 2, date: ''),
+      (id: 3, date: 'not-a-date'),
+      (id: 4, date: '2026-08-15'),
+    ]) {
+      await db
+          .into(db.words)
+          .insert(
+            WordsCompanion.insert(
+              id: entry.id,
+              word: 'word-${entry.id}',
+              sentence: 'sentence-${entry.id}',
+              level: 'A1',
+              languageCode: 'tr',
+              date: Value(entry.date),
+            ),
+          );
+    }
+
+    final counts = await ProgressRepository(db)
+        .fetchMonthlyCounts(DateTime(2026, 8), 'tr');
+
+    expect(counts, [1, 0, 0, 0]);
+    await db.close();
+  });
+
+  test('exam generation keeps all level questions after ID batching', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    const levels = ['A1', 'A2', 'B1', 'B2', 'C1'];
+
+    for (var levelIndex = 0; levelIndex < levels.length; levelIndex++) {
+      for (var wordIndex = 1; wordIndex <= 4; wordIndex++) {
+        final id = (levelIndex + 1) * 100 + wordIndex;
+        for (final language in ['tr', 'en']) {
+          await db
+              .into(db.words)
+              .insert(
+                WordsCompanion.insert(
+                  id: id,
+                  word: '$language-word-$id',
+                  sentence: '$language sentence $id',
+                  level: levels[levelIndex],
+                  languageCode: language,
+                ),
+              );
+        }
+      }
+    }
+    await db.saveUserChoices('en', 'tr');
+
+    final notifier = ExamNotifier(WordRepository(db), UserRepository(db));
+    await notifier.loadQuestions();
+
+    expect(notifier.state.errorMessage, equals(null));
+    expect(notifier.state.questions, hasLength(20));
+    expect(
+      notifier.state.questions.every(
+        (question) =>
+            question.options.length == 4 &&
+            question.correctAnswerIndex >= 0 &&
+            question.correctAnswerIndex < question.options.length,
+      ),
+      isTrue,
     );
     await db.close();
   });
@@ -443,6 +567,32 @@ void main() {
     expect(textPainter.computeLineMetrics().length, greaterThan(1));
   });
 
+  testWidgets('flipped card stays centered in its card slot', (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: CardFlipAnimation(
+          isFlipped: true,
+          frontCardColor: Colors.blue,
+          backCardColor: Colors.green,
+          frontText: 'hello',
+          backText: 'merhaba',
+          frontSentence: 'Hello world.',
+          backSentence: 'Merhaba dünya.',
+          flipDirection: FlipDirection.leftToRight,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final cardTransform = tester.widget<Transform>(
+      find.byWidgetPredicate(
+        (widget) => widget is Transform && widget.child is Container,
+      ),
+    );
+
+    expect(cardTransform.alignment, Alignment.center);
+  });
+
   testWidgets('new deck starts after the analysis route closes', (
     tester,
   ) async {
@@ -482,6 +632,50 @@ void main() {
 
     expect(callbackCount, 1);
     expect(find.byType(AnalysisPage), findsNothing);
+  });
+
+  testWidgets('exam result returns to the shell deck destination', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        child: MaterialApp(
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en')],
+          home: Builder(
+            builder: (context) => ElevatedButton(
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const ResultPage(
+                    score: 0,
+                    totalQuestions: 0,
+                    questions: [],
+                    userAnswers: [],
+                  ),
+                ),
+              ),
+              child: const Text('open result'),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('open result'));
+    await tester.pumpAndSettle();
+    expect(find.byType(ResultPage), findsOneWidget);
+
+    await tester.tap(find.byType(IconButton));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.byType(AppShell), findsOneWidget);
   });
 }
 

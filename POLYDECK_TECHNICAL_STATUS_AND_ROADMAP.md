@@ -175,6 +175,9 @@ Review sırası:
 - `buttons`: Again, Hard, Good, Easy düğmeleri görünür.
 - `swipe`: rating düğmeleri gizlenir; kart kaydırma gesture'ı kullanılır.
 - İki mod aynı anda render edilmemelidir.
+- Settings'te seçim yapıldığında `user.review_mode` hemen persist edilir ve açık kart ekranı yeni modu yeniden açılmadan kullanır.
+- Swipe modunda `Reflip`/`New Card` yardımcı butonları da gizlenir; review girişi yalnızca kaydırmadır.
+- Button modunda dört FSRS rating kontrolü aynı satırda görünür; yardımcı aksiyonlar metinli `ElevatedButton` yerine tooltip'li kompakt ikonlardır.
 
 ### 5.5 Sınav
 
@@ -186,6 +189,7 @@ Sonuç ekranının geri düğmesi bare `DecksPage` açmaz; `AppShell(initialInde
 
 - Ana sayfa bugünkü görülen kelime sayısını çalışma aktivitesi provider'ı ile yeniler.
 - Haftalık grafik geçersiz tarihleri `DateTime.tryParse` ile güvenli ele alır.
+- Haftalık grafik her zaman geçerli haftanın pazartesi-pazar günlerini getirir; toplam sayı üstte ve her günün sayısı ilgili çubuğun üzerinde görünür.
 - Aylık grafik geçersiz/sentinel tarihleri filtreler; `0` veya boş tarih `FormatException` üretmez.
 - SRS ayarlarında seviye limitleri, retention, fuzz ve SRS sıfırlama bulunur.
 - Export Android paylaşım seçicisini açar.
@@ -204,6 +208,8 @@ Sonuç ekranının geri düğmesi bare `DecksPage` açmaz; `AppShell(initialInde
 - Sınav soruları için seviyeler tek batch sorguda çekiliyor.
 - Sınav soru/cevap kelimeleri paralel batch sorgularla getiriliyor.
 - Progress aylık sorgusu dört ayrı/UNION bucket yerine tek date range scan kullanıyor.
+- Progress date filtreleri parameter binding kullanıyor; boş ve `0` sentinel değerleri SQLite sözdizimi hatası üretmeden eleniyor.
+- Haftalık progress sorgusu yalnızca mevcut pazartesi-pazar aralığını okuyor ve yedi günlük sabit çıktı üretiyor.
 - Review update + revlog insert transaction içinde ve optimistic guard ile yapılıyor.
 - Stale deck load sonuçlarının yeni state'i ezmesi engellendi.
 - Deste üyeliği ve dil çifti repository katmanında açıkça taşınıyor.
@@ -217,6 +223,7 @@ Sonuç ekranının geri düğmesi bare `DecksPage` açmaz; `AppShell(initialInde
 - Deste kartları iki sütun yerine bir satırda bir deste olacak şekilde sadeleştirildi.
 - Kart animasyonu Transform alignment'ı merkezlendi.
 - Kart review düğmeleri pastel yüzeylerde koyu ve okunabilir foreground kullanıyor.
+- Kart rating ve yardımcı aksiyonları `ReviewRatingControls` / `ReviewUtilityControls` widget'larına ayrıldı; swipe modunda görünür buton üretmiyor, button modunda ikon + tooltip kullanıyor.
 - Add-to-deck sheet, yavaş DB sorgusu bitene kadar tıklamayı kilitlemek yerine hemen açılıyor ve yükleniyor state'i gösteriyor.
 
 ### 6.3 Testler ve doğrulama
@@ -233,6 +240,9 @@ Sonuç ekranının geri düğmesi bare `DecksPage` açmaz; `AppShell(initialInde
 - Cümle kelime vurgusunun tam eşleşmesi
 - Uzun cümlelerin satır kırması
 - Kart transform alignment'ının merkezde kalması
+- Review mode değişikliğinin provider ve Drift üzerinde anında persist edilmesi
+- Swipe modunda yardımcı butonların gizlenmesi ve button modunda ikon aksiyonlarının çalışması
+- Haftalık tarih aralığının ve gün bazlı toplamların doğru olması
 - Analysis sonrası yeni destenin gerçekten başlaması
 - Exam result dönüşünün shell'e yapılması
 
@@ -250,7 +260,7 @@ flutter build apk --release
 
 Sonuçlar:
 
-- Flutter testleri: `42` test başarılı.
+- Flutter testleri: `47` test başarılı.
 - Static analysis: `No issues found!`
 - Release APK: `build/app/outputs/flutter-apk/app-release.apk`, yaklaşık `61.4 MB`.
 - APK Android emülatöre kurulup yeniden başlatıldı; Ana Sayfa, drawer ve bugünkü sayaç smoke testinden geçti.
@@ -264,8 +274,10 @@ Android emülatörde manuel olarak şu akışlar çalıştırıldı:
 - Plus ile karta deste ekleme ve dil çiftiyle saklama
 - Kart açma, hedef dil cümlesi, ana dil cümlesi, underline ve rating
 - Butonlar/Kaydırma modlarının birbirini dışlaması
+- Kaydırma modunda kart açıldıktan sonra görünür rating/yardımcı buton bulunmaması
+- Buton modunda dört rating aksiyonunun ve kompakt yardımcı ikonların görünmesi
 - Analysis sonrası aynı desteyi doğrudan yeniden başlatma
-- Haftalık, aylık ve SRS ekranları
+- Haftalık ekranda geçerli hafta toplamı ve günlük sayımların görünmesi, aylık ve SRS ekranları
 - Export paylaşım seçicisi ve Import dosya seçicisi
 - Genel veri ve SRS reset onaylarının iptali
 - 20 soruluk sınav ve sonuçtan Destelerim shell'ine dönüş

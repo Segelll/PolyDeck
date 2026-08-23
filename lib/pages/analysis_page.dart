@@ -1,21 +1,40 @@
 import 'package:flutter/material.dart';
-import 'package:poly2/pages/decks_page.dart';
 import 'package:poly2/domain/models/analysis_result.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 
-class AnalysisPage extends StatelessWidget {
+class AnalysisPage extends StatefulWidget {
   final List<AnalysisResult> analysisResults;
   final String previousDeckName;
-  final Function onNewDeck;
+  final Future<void> Function() onNewDeck;
   final int deckIndex;
 
-  const AnalysisPage({super.key,
+  const AnalysisPage({
+    super.key,
     required this.analysisResults,
     required this.previousDeckName,
     required this.onNewDeck,
     required this.deckIndex,
   });
+
+  @override
+  State<AnalysisPage> createState() => _AnalysisPageState();
+}
+
+class _AnalysisPageState extends State<AnalysisPage> {
+  bool _isStartingNewDeck = false;
+
+  Future<void> _startNewDeck() async {
+    if (_isStartingNewDeck) return;
+    setState(() => _isStartingNewDeck = true);
+    Navigator.of(context).pop();
+    await Future<void>.delayed(Duration.zero);
+    try {
+      await widget.onNewDeck();
+    } finally {
+      if (mounted) setState(() => _isStartingNewDeck = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +51,7 @@ class AnalysisPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              previousDeckName,
+              widget.previousDeckName,
               style: const TextStyle(fontSize: 20),
             ),
             const SizedBox(height: 20),
@@ -43,9 +62,9 @@ class AnalysisPage extends StatelessWidget {
             const SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
-                itemCount: analysisResults.length,
+                itemCount: widget.analysisResults.length,
                 itemBuilder: (context, index) {
-                  final result = analysisResults[index];
+                  final result = widget.analysisResults[index];
 
                   return ListTile(
                     leading: CircleAvatar(
@@ -65,22 +84,22 @@ class AnalysisPage extends StatelessWidget {
               children: [
                 // "New Deck" Button
                 ElevatedButton(
-                  onPressed: () {
-                    onNewDeck();
-                    Navigator.of(context).pop();
-                  }, // Use localized string
+                  onPressed: _isStartingNewDeck ? null : _startNewDeck,
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(150, 50),
                   ),
-                  child: Text(local.startNewDeck),
+                  child: _isStartingNewDeck
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(local.startNewDeck),
                 ),
                 // "Back to Decks Page" Button
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const DecksPage()),
-                    );
+                    Navigator.of(context).popUntil((route) => route.isFirst);
                   }, // Use localized string
                   style: ElevatedButton.styleFrom(
                     minimumSize: const Size(150, 50),

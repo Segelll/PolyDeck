@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/presentation/providers/exam_provider.dart';
+
 import 'exam_result_page.dart';
+
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 
@@ -16,9 +20,9 @@ class _ExamPageState extends ConsumerState<ExamPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      ref.read(examProvider.notifier).loadQuestions();
-    });
+    unawaited(
+      Future.microtask(() => ref.read(examProvider.notifier).loadQuestions()),
+    );
   }
 
   void _nextQuestion() {
@@ -27,14 +31,16 @@ class _ExamPageState extends ConsumerState<ExamPage> {
 
     if (state.isLastQuestion) {
       final score = state.calculateScore();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => ResultPage(
-            score: score,
-            totalQuestions: state.questions.length,
-            questions: state.questions,
-            userAnswers: state.userAnswers,
+      unawaited(
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ResultPage(
+              score: score,
+              totalQuestions: state.questions.length,
+              questions: state.questions,
+              userAnswers: state.userAnswers,
+            ),
           ),
         ),
       );
@@ -104,20 +110,14 @@ class _ExamPageState extends ConsumerState<ExamPage> {
 
     if (state.isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: HalfColoredTitle(local.exam),
-          centerTitle: true,
-        ),
+        appBar: AppBar(title: HalfColoredTitle(local.exam), centerTitle: true),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
 
     if (state.errorMessage != null) {
       return Scaffold(
-        appBar: AppBar(
-          title: HalfColoredTitle(local.exam),
-          centerTitle: true,
-        ),
+        appBar: AppBar(title: HalfColoredTitle(local.exam), centerTitle: true),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -128,7 +128,7 @@ class _ExamPageState extends ConsumerState<ExamPage> {
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () =>
-                    ref.read(examProvider.notifier).loadQuestions(),
+                    unawaited(ref.read(examProvider.notifier).loadQuestions()),
                 child: const Text('Retry'),
               ),
             ],
@@ -139,19 +139,13 @@ class _ExamPageState extends ConsumerState<ExamPage> {
 
     if (state.questions.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: HalfColoredTitle(local.exam),
-          centerTitle: true,
-        ),
+        appBar: AppBar(title: HalfColoredTitle(local.exam), centerTitle: true),
         body: const Center(child: Text('No questions available.')),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: HalfColoredTitle(local.exam),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: HalfColoredTitle(local.exam), centerTitle: true),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -164,8 +158,7 @@ class _ExamPageState extends ConsumerState<ExamPage> {
             const SizedBox(height: 20),
             Text(
               '${local.question} ${state.currentIndex + 1}/${state.questions.length}',
-              style:
-                  const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             Card(

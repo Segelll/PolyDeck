@@ -1,8 +1,11 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:poly2/domain/models/exam_model.dart';
 import 'package:poly2/pages/decks_page.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
+
 class ResultPage extends StatelessWidget {
   final int score;
   final int totalQuestions;
@@ -37,9 +40,11 @@ class ResultPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => const DecksPage()),
-                  (Route<dynamic> route) => false,
+            unawaited(
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(builder: (_) => const DecksPage()),
+                (Route<dynamic> route) => false,
+              ),
             );
           },
         ),

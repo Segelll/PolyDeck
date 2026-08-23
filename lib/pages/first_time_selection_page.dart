@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/pages/app_shell.dart';
@@ -50,7 +52,7 @@ class _FirstTimeSelectionPageState
                 prefixIcon: const Icon(Icons.home),
                 border: const OutlineInputBorder(),
               ),
-              value: _selectedMotherLanguage,
+              initialValue: _selectedMotherLanguage,
               items: _displayLanguages.map((lang) {
                 return DropdownMenuItem<String>(
                   value: lang,
@@ -70,7 +72,7 @@ class _FirstTimeSelectionPageState
                 prefixIcon: const Icon(Icons.flag),
                 border: const OutlineInputBorder(),
               ),
-              value: _selectedTargetLanguage,
+              initialValue: _selectedTargetLanguage,
               items: _displayLanguages.map((lang) {
                 return DropdownMenuItem<String>(
                   value: lang,
@@ -88,23 +90,29 @@ class _FirstTimeSelectionPageState
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
               ),
-              onPressed: (_selectedMotherLanguage != null &&
+              onPressed:
+                  (_selectedMotherLanguage != null &&
                       _selectedTargetLanguage != null)
                   ? () async {
                       try {
-                        await ref.read(settingsProvider.notifier).saveLanguages(
+                        await ref
+                            .read(settingsProvider.notifier)
+                            .saveLanguages(
                               _selectedMotherLanguage!,
                               _selectedTargetLanguage!,
                             );
 
-                        if (!mounted) return;
+                        if (!context.mounted) return;
 
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const AppShell()),
+                        unawaited(
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => const AppShell(),
+                            ),
+                          ),
                         );
                       } catch (e) {
+                        if (!context.mounted) return;
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Error saving choices: $e')),
                         );

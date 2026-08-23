@@ -27,8 +27,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     try {
       final preferences = await ref
           .read(settingsProvider.future)
-          .timeout(const Duration(seconds: 8),
-              onTimeout: () => LanguagePreferences.defaultPreferences);
+          .timeout(
+            const Duration(seconds: 8),
+            onTimeout: () => LanguagePreferences.defaultPreferences,
+          );
       isFirstTime = preferences.isFirstTime;
     } catch (_) {
       // A broken or unavailable local database must not leave the app stuck
@@ -36,15 +38,17 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
     }
     if (!mounted) return;
 
-    unawaited(Navigator.of(context).pushReplacement(
-      PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 450),
-        pageBuilder: (_, __, ___) =>
-            isFirstTime ? const FirstTimeSelectionPage() : const AppShell(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) =>
-            FadeTransition(opacity: animation, child: child),
+    unawaited(
+      Navigator.of(context).pushReplacement(
+        PageRouteBuilder(
+          transitionDuration: const Duration(milliseconds: 450),
+          pageBuilder: (_, _, _) =>
+              isFirstTime ? const FirstTimeSelectionPage() : const AppShell(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+        ),
       ),
-    ));
+    );
   }
 
   @override

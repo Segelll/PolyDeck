@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
+import 'package:poly2/presentation/widgets/highlighted_sentence.dart';
 
 /// An animated card that flips on its horizontal or vertical axis
 /// to reveal the back side.
@@ -12,10 +15,7 @@ class CardFlipAnimation extends StatefulWidget {
   final String backText;
   final String frontSentence;
   final String backSentence;
-  final VoidCallback onFlipComplete;
-  final int cardNumber;
   final FlipDirection flipDirection;
-  final String level;
 
   const CardFlipAnimation({
     super.key,
@@ -26,10 +26,7 @@ class CardFlipAnimation extends StatefulWidget {
     required this.backText,
     required this.frontSentence,
     required this.backSentence,
-    required this.onFlipComplete,
-    required this.cardNumber,
     required this.flipDirection,
-    required this.level,
   });
 
   @override
@@ -40,7 +37,6 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _flipAnimation;
-  AnimationStatusListener? _statusListener;
 
   @override
   void initState() {
@@ -50,10 +46,7 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
       vsync: this,
     );
 
-    _flipAnimation = Tween(begin: 0.0, end: 1.0).animate(_controller)
-      ..addStatusListener((status) {
-        _statusListener?.call(status);
-      });
+    _flipAnimation = Tween(begin: 0.0, end: 1.0).animate(_controller);
 
     if (widget.isFlipped) {
       _controller.value = 1.0;
@@ -65,19 +58,11 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
     super.didUpdateWidget(oldWidget);
     if (widget.isFlipped != oldWidget.isFlipped) {
       if (widget.isFlipped) {
-        _controller.forward();
+        unawaited(_controller.forward());
       } else {
-        _controller.reverse();
+        unawaited(_controller.reverse());
       }
     }
-  }
-
-  void addStatusListener(AnimationStatusListener listener) {
-    _statusListener = listener;
-  }
-
-  void removeStatusListener() {
-    _statusListener = null;
   }
 
   @override
@@ -91,14 +76,22 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
     final isHorizontalFlip = widget.flipDirection != FlipDirection.topToBottom;
     final isReverse = widget.flipDirection == FlipDirection.rightToLeft;
 
-    // Static labels are lifted into the AnimatedBuilder's `child` so they
-    // aren't rebuilt on every animation tick.
-    final staticLabels = _buildStaticLabels();
+    final frontFace = _buildFace(
+      color: widget.frontCardColor,
+      text: widget.frontText,
+      sentence: widget.frontSentence,
+    );
+    final backFace = _buildFace(
+      color: widget.backCardColor,
+      text: widget.backText,
+      sentence: widget.backSentence,
+      textRotation: isHorizontalFlip ? (isReverse ? pi : -pi) : pi,
+    );
 
     return RepaintBoundary(
       child: AnimatedBuilder(
         animation: _flipAnimation,
-        child: staticLabels,
+        child: null,
         builder: (context, child) {
           final angle = _flipAnimation.value * pi;
           final transform = Matrix4.identity()..setEntry(3, 2, 0.001);
@@ -109,120 +102,74 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
             transform.rotateX(angle);
           }
 
-          return Transform(
-            transform: transform,
-            alignment: Alignment.center,
-            child: Container(
-              width: 250,
-              height: 350,
-              decoration: BoxDecoration(
-                color: widget.isFlipped
-                    ? widget.backCardColor
-                    : widget.frontCardColor,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 5,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: Stack(
-                children: [
-                  _buildFlipDependentContent(isHorizontalFlip, isReverse),
-                  if (child != null) child,
-                ],
-              ),
-            ),
-          );
+          // The text widgets are created once per parent build. Only the
+          // transform and the visible face change on animation ticks.
+          final face = _flipAnimation.value < 0.5 ? frontFace : backFace;
+          return Transform(transform: transform, child: face);
         },
       ),
     );
   }
 
-  /// Content that depends on the current flip angle (text + sentence swap).
-  Widget _buildFlipDependentContent(bool isHorizontalFlip, bool isReverse) {
-    final isUnder = _flipAnimation.value > 0.5;
-    final contentText = isUnder ? widget.backText : widget.frontText;
-    final contentSentence =
-        isUnder ? widget.backSentence : widget.frontSentence;
-
-    final textRotationAngle = isUnder
-        ? (isHorizontalFlip ? (isReverse ? pi : -pi) : pi)
-        : 0.0;
-
+  Widget _buildFace({
+    required Color color,
+    required String text,
+    required String sentence,
+    double textRotation = 0,
+  }) {
     Matrix4 buildTextTransform() {
       final m = Matrix4.identity()..setEntry(3, 2, 0.001);
-      if (isHorizontalFlip) {
-        m.rotateY(textRotationAngle);
-      } else {
-        m.rotateX(textRotationAngle);
+      if (textRotation != 0) {
+        if (widget.flipDirection == FlipDirection.topToBottom) {
+          m.rotateX(textRotation);
+        } else {
+          m.rotateY(textRotation);
+        }
       }
       return m;
     }
 
-    return Positioned.fill(
-      child: Center(
-        child: Transform(
-          alignment: Alignment.center,
-          transform: buildTextTransform(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    contentText,
-                    style: const TextStyle(color: Colors.white, fontSize: 28),
-                    textAlign: TextAlign.center,
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                  ),
+    final content = Center(
+      child: Transform(
+        alignment: Alignment.center,
+        transform: buildTextTransform(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                text,
+                style: const TextStyle(color: Colors.white, fontSize: 28),
+                textAlign: TextAlign.center,
+                maxLines: 3,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 10),
+              Flexible(
+                child: HighlightedSentence(
+                  sentence: sentence,
+                  word: text,
+                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 10),
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    contentSentence,
-                    style: const TextStyle(color: Colors.white, fontSize: 16),
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
     );
-  }
-
-  /// Labels that never change during the animation (level, card number).
-  Widget _buildStaticLabels() {
-    return Stack(
-      children: [
-        Positioned(
-          top: 8,
-          left: 8,
-          child: Text(
-            widget.level,
-            style: const TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-        ),
-        Positioned(
-          bottom: 8,
-          right: 8,
-          child: Text(
-            'Card ${widget.cardNumber}',
-            style: const TextStyle(color: Colors.white70, fontSize: 16),
-          ),
-        ),
-      ],
+    return Container(
+      width: 250,
+      height: 350,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 1)),
+        ],
+      ),
+      child: content,
     );
   }
-
 }

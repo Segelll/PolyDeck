@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
 import 'package:poly2/domain/enums/rating.dart';
+import 'package:poly2/domain/enums/review_input_mode.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/deck_repository_provider.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/pages/add_to_deck_sheet.dart';
 import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/pages/analysis_page.dart';
@@ -32,10 +36,6 @@ class CardFlipPage extends ConsumerStatefulWidget {
 class _CardFlipPageState extends ConsumerState<CardFlipPage>
     with TickerProviderStateMixin {
   FlipDirection _flipDirection = FlipDirection.leftToRight;
-  bool _isFlippedLocally = false;
-  final GlobalKey<CardFlipAnimationState> _cardKey =
-      GlobalKey<CardFlipAnimationState>();
-
   AnimationController? _drawCardController;
   Animation<Offset>? _drawCardAnimation;
 
@@ -46,12 +46,13 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
   void initState() {
     super.initState();
     // Schedule after first frame to avoid modifying provider during build
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadDeck());
+    WidgetsBinding.instance.addPostFrameCallback((_) => unawaited(_loadDeck()));
   }
 
   Future<void> _loadDeck() async {
     final notifier = ref.read(deckProvider.notifier);
     await notifier.loadDeck(widget.levels, deckId: widget.deckId);
+    if (!mounted) return;
     _initDrawCardAnimation();
   }
 
@@ -61,13 +62,14 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
       duration: const Duration(milliseconds: 500),
       vsync: this,
     );
-    _drawCardAnimation = Tween<Offset>(
-      begin: const Offset(0, -2.0),
-      end: const Offset(0, 0),
-    ).animate(
-      CurvedAnimation(parent: _drawCardController!, curve: Curves.easeOut),
-    );
-    _drawCardController!.forward();
+    _drawCardAnimation =
+        Tween<Offset>(
+          begin: const Offset(0, -2.0),
+          end: const Offset(0, 0),
+        ).animate(
+          CurvedAnimation(parent: _drawCardController!, curve: Curves.easeOut),
+        );
+    unawaited(_drawCardController!.forward());
   }
 
   Widget _buildRatingButton({
@@ -95,24 +97,10 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     );
   }
 
-  Color _colorForFeedback(int feedback) {
-    switch (feedback) {
-      case 1:
-        return AppTheme.ratingAgain;
-      case 2:
-        return AppTheme.ratingGood;
-      case 3:
-        return AppTheme.ratingHard;
-      default:
-        return AppTheme.cardDefault;
-    }
-  }
-
-  void _flipCard(Color color, FlipDirection direction) async {
-    final notifier = ref.read(deckProvider.notifier);
+  void _revealCard(FlipDirection direction) {
+    if (ref.read(deckProvider).isReviewing) return;
     setState(() => _flipDirection = direction);
-    await notifier.flipCard(color);
-    _animateIndicator(notifier.state.currentIndex);
+    ref.read(deckProvider.notifier).revealCard();
   }
 
   void _animateIndicator(int index) {
@@ -123,58 +111,75 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
       );
       _indicatorControllers.add(ctrl);
       _indicatorAnimations.add(
-        Tween<double>(begin: 0, end: 1).animate(
-          CurvedAnimation(parent: ctrl, curve: Curves.easeOut),
-        ),
+        Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(CurvedAnimation(parent: ctrl, curve: Curves.easeOut)),
       );
     }
-    _indicatorControllers[index].forward(from: 0);
+    unawaited(_indicatorControllers[index].forward(from: 0));
   }
 
   void _reflipCard() {
-    if (ref.read(deckProvider).isReviewing) return;
-    _isFlippedLocally = false;
-    _cardKey.currentState?.addStatusListener((status) {
-      if (status == AnimationStatus.dismissed) {
-        ref.read(deckProvider.notifier).reflipCard();
-        _cardKey.currentState?.removeStatusListener();
-      }
-    });
+    ref.read(deckProvider.notifier).reflipCard();
   }
 
-  void _nextCard() async {
-    final notifier = ref.read(deckProvider.notifier);
-    if (notifier.state.isLastCard) {
+  Future<void> _nextCard() async {
+    if (ref.read(deckProvider).isLastCard) {
       _showAnalysis();
     } else {
-      _isFlippedLocally = false;
-      await notifier.nextCard();
+      await ref.read(deckProvider.notifier).nextCard();
+      if (!mounted || _drawCardController == null) return;
       _drawCardController!.reset();
-      _drawCardController!.forward();
+      unawaited(_drawCardController!.forward());
     }
   }
 
   void _showAnalysis() {
     final st = ref.read(deckProvider);
     final local = AppLocalizations.of(context)!;
-    final deckLabel = local.deck(st.deckIndex);
+    final deckLabel = widget.deckName ?? local.deck(st.deckIndex);
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => AnalysisPage(
-          analysisResults: st.analysisResults,
-          previousDeckName: deckLabel,
-          deckIndex: st.deckIndex,
-          onNewDeck: _startNewDeck,
+    unawaited(
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => AnalysisPage(
+            analysisResults: st.analysisResults,
+            previousDeckName: deckLabel,
+            deckIndex: st.deckIndex,
+            onNewDeck: _startNewDeck,
+          ),
         ),
       ),
     );
   }
 
-  void _startNewDeck() {
+  Future<void> _startNewDeck() async {
     ref.read(deckProvider.notifier).startNewDeck();
-    _loadDeck();
+    await _loadDeck();
+  }
+
+  Future<void> _submitRating(Rating rating) async {
+    final currentState = ref.read(deckProvider);
+    if (currentState.lastRating != null || currentState.isReviewing) {
+      return;
+    }
+    await ref.read(deckProvider.notifier).reviewCard(rating);
+    if (!mounted) return;
+    _animateIndicator(ref.read(deckProvider).currentIndex);
+  }
+
+  Rating? _ratingForSwipe({double? horizontal, double? vertical}) {
+    if (horizontal != null) {
+      if (horizontal < 0) return Rating.again;
+      if (horizontal > 0) return Rating.good;
+    }
+    if (vertical != null) {
+      if (vertical < 0) return Rating.easy;
+      if (vertical > 0) return Rating.hard;
+    }
+    return null;
   }
 
   Future<void> _openAddToDeck() async {
@@ -199,25 +204,26 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     );
 
     if (addedDeckId != null && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Kart desteye eklendi')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Kart desteye eklendi')));
     }
   }
 
   void _showInstructions() {
     final local = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text(local.instructionsTitle),
-        content: Text(local.instructionsContent),
-        actions: [
-          TextButton(
-            child: Text(local.close),
-            onPressed: () => Navigator.pop(context),
-          ),
-        ],
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: Text(local.instructionsTitle),
+          content: Text(local.instructionsContent),
+          actions: [
+            TextButton(
+              child: Text(local.close),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -239,13 +245,19 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     final isEmpty = ref.watch(deckProvider.select((s) => s.isEmpty));
     final errorMessage = ref.watch(deckProvider.select((s) => s.errorMessage));
     final isFlipped = ref.watch(deckProvider.select((s) => s.isFlipped));
-    final currentCard = ref.watch(deckProvider.select((s) =>
-        s.isEmpty ? null : s.currentCard));
+    final currentCard = ref.watch(
+      deckProvider.select((s) => s.isEmpty ? null : s.currentCard),
+    );
     final currentIndex = ref.watch(deckProvider.select((s) => s.currentIndex));
     final isReviewing = ref.watch(deckProvider.select((s) => s.isReviewing));
-    final isLast = ref.watch(deckProvider.select((s) => s.isLastCard));
+    final lastRating = ref.watch(deckProvider.select((s) => s.lastRating));
     final colorTracker = ref.watch(deckProvider.select((s) => s.colorTracker));
-    final deckIndex = ref.watch(deckProvider.select((s) => s.deckIndex));
+    final reviewInputMode = ref.watch(
+      settingsProvider.select(
+        (state) =>
+            state.valueOrNull?.reviewInputMode ?? ReviewInputMode.buttons,
+      ),
+    );
     final backColor = isFlipped && currentIndex < colorTracker.length
         ? colorTracker[currentIndex]
         : Colors.grey;
@@ -265,7 +277,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
               Text(errorMessage, textAlign: TextAlign.center),
               const SizedBox(height: 16),
               ElevatedButton(
-                onPressed: _loadDeck,
+                onPressed: () => unawaited(_loadDeck()),
                 child: const Text('Retry'),
               ),
             ],
@@ -294,7 +306,11 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.check_circle_outline, size: 64, color: Colors.green),
+              const Icon(
+                Icons.check_circle_outline,
+                size: 64,
+                color: Colors.green,
+              ),
               const SizedBox(height: 16),
               const Text(
                 'Tebrikler! Bu destede çalışılacak kelime kalmadı.',
@@ -322,13 +338,15 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
           IconButton(
             tooltip: 'Desteye ekle',
             icon: const Icon(Icons.add),
-            onPressed: isReviewing ? null : _openAddToDeck,
+            onPressed: isReviewing ? null : () => unawaited(_openAddToDeck()),
           ),
           IconButton(
             icon: const Icon(Icons.settings),
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => const SettingsPage()),
+            onPressed: () => unawaited(
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsPage()),
+              ),
             ),
           ),
         ],
@@ -346,12 +364,6 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                Text(
-                  local.deck(deckIndex),
-                  style: const TextStyle(fontSize: 24),
-                ),
-                const SizedBox(height: 20),
-
                 // Color indicator dots
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -361,7 +373,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                         animation: i < _indicatorAnimations.length
                             ? _indicatorAnimations[i]
                             : const AlwaysStoppedAnimation(0),
-                        builder: (_, __) {
+                        builder: (_, _) {
                           final val = i < _indicatorAnimations.length
                               ? _indicatorAnimations[i].value
                               : 0.0;
@@ -373,8 +385,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                             child: Container(
                               width: 24,
                               height: 35,
-                              margin:
-                                  const EdgeInsets.symmetric(horizontal: 2),
+                              margin: const EdgeInsets.symmetric(horizontal: 2),
                               decoration: BoxDecoration(
                                 color: colorTracker[i],
                                 borderRadius: BorderRadius.circular(6),
@@ -403,53 +414,46 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           child: Center(
                             child: GestureDetector(
                               // Tap to flip (no rating yet)
-                              onTap: !isFlipped
-                                  ? () => setState(() => _isFlippedLocally = true)
+                              onTap: !isFlipped && !isReviewing
+                                  ? () => _revealCard(_flipDirection)
                                   : null,
-                              // Swipe shortcuts for rating
-                              onHorizontalDragEnd: !isFlipped
+                              onHorizontalDragEnd:
+                                  reviewInputMode == ReviewInputMode.swipe &&
+                                      isFlipped &&
+                                      lastRating == null &&
+                                      !isReviewing
                                   ? (details) {
-                                      if (details.primaryVelocity! < 0) {
-                                        ref
-                                            .read(deckProvider.notifier)
-                                            .flipCard(AppTheme.ratingAgain);
-                                        setState(() => _isFlippedLocally = true);
-                                      } else if (details.primaryVelocity! > 0) {
-                                        ref
-                                            .read(deckProvider.notifier)
-                                            .flipCard(AppTheme.ratingGood);
-                                        setState(() => _isFlippedLocally = true);
+                                      final rating = _ratingForSwipe(
+                                        horizontal: details.primaryVelocity,
+                                      );
+                                      if (rating != null) {
+                                        unawaited(_submitRating(rating));
                                       }
                                     }
                                   : null,
-                              onVerticalDragEnd: !isFlipped
+                              onVerticalDragEnd:
+                                  reviewInputMode == ReviewInputMode.swipe &&
+                                      isFlipped &&
+                                      lastRating == null &&
+                                      !isReviewing
                                   ? (details) {
-                                      if (details.primaryVelocity! < 0) {
-                                        ref
-                                            .read(deckProvider.notifier)
-                                            .flipCard(AppTheme.ratingEasy);
-                                        setState(() => _isFlippedLocally = true);
-                                      } else if (details.primaryVelocity! > 0) {
-                                        ref
-                                            .read(deckProvider.notifier)
-                                            .flipCard(AppTheme.ratingHard);
-                                        setState(() => _isFlippedLocally = true);
+                                      final rating = _ratingForSwipe(
+                                        vertical: details.primaryVelocity,
+                                      );
+                                      if (rating != null) {
+                                        unawaited(_submitRating(rating));
                                       }
                                     }
                                   : null,
                               child: CardFlipAnimation(
-                                key: _cardKey,
-                                isFlipped: isFlipped || _isFlippedLocally,
+                                isFlipped: isFlipped,
                                 frontCardColor: Colors.blue.shade200,
                                 backCardColor: backColor,
                                 frontText: currentCard.frontText,
                                 backText: currentCard.backText,
                                 frontSentence: currentCard.frontSentence,
                                 backSentence: currentCard.backSentence,
-                                onFlipComplete: _reflipCard,
-                                cardNumber: currentIndex + 1,
                                 flipDirection: _flipDirection,
-                                level: currentCard.level,
                               ),
                             ),
                           ),
@@ -460,7 +464,9 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 const SizedBox(height: 10),
 
                 // 4-button FSRS rating (visible after flip)
-                if (isFlipped || _isFlippedLocally)
+                if (reviewInputMode == ReviewInputMode.buttons &&
+                    isFlipped &&
+                    lastRating == null)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Row(
@@ -472,12 +478,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           icon: Icons.replay,
                           onPressed: isReviewing
                               ? null
-                              : () {
-                                  ref
-                                      .read(deckProvider.notifier)
-                                      .reviewCard(Rating.again);
-                                  setState(() => _isFlippedLocally = false);
-                                },
+                              : () => _submitRating(Rating.again),
                         ),
                         _buildRatingButton(
                           label: local.hard,
@@ -485,12 +486,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           icon: Icons.trending_down,
                           onPressed: isReviewing
                               ? null
-                              : () {
-                                  ref
-                                      .read(deckProvider.notifier)
-                                      .reviewCard(Rating.hard);
-                                  setState(() => _isFlippedLocally = false);
-                                },
+                              : () => _submitRating(Rating.hard),
                         ),
                         _buildRatingButton(
                           label: local.good,
@@ -498,12 +494,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           icon: Icons.check,
                           onPressed: isReviewing
                               ? null
-                              : () {
-                                  ref
-                                      .read(deckProvider.notifier)
-                                      .reviewCard(Rating.good);
-                                  setState(() => _isFlippedLocally = false);
-                                },
+                              : () => _submitRating(Rating.good),
                         ),
                         _buildRatingButton(
                           label: local.easy,
@@ -511,12 +502,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                           icon: Icons.thumb_up,
                           onPressed: isReviewing
                               ? null
-                              : () {
-                                  ref
-                                      .read(deckProvider.notifier)
-                                      .reviewCard(Rating.easy);
-                                  setState(() => _isFlippedLocally = false);
-                                },
+                              : () => _submitRating(Rating.easy),
                         ),
                       ],
                     ),
@@ -532,19 +518,23 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 ),
                 const SizedBox(height: 10),
 
-                if (isFlipped || _isFlippedLocally)
+                if (isFlipped)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.refresh),
-                        onPressed: isReviewing ? null : _reflipCard,
-                        label: Text(local.reflip),
-                      ),
+                      if (lastRating == null)
+                        ElevatedButton.icon(
+                          icon: const Icon(Icons.refresh),
+                          onPressed: isReviewing ? null : _reflipCard,
+                          label: Text(local.reflip),
+                        ),
+                      if (lastRating == null) const SizedBox(width: 10),
                       const SizedBox(width: 10),
                       ElevatedButton.icon(
                         icon: const Icon(Icons.skip_next),
-                        onPressed: isReviewing ? null : _nextCard,
+                        onPressed: isReviewing
+                            ? null
+                            : () => unawaited(_nextCard()),
                         label: Text(local.newCard),
                       ),
                     ],

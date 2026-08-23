@@ -14,6 +14,7 @@ import 'package:poly2/domain/state/deck_state.dart';
 import 'package:poly2/services/fsrs_service.dart';
 import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/deck_repository_provider.dart';
+import 'package:poly2/presentation/providers/study_activity_provider.dart';
 import 'package:poly2/core/constants/app_constants.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_theme.dart';
@@ -28,39 +29,55 @@ class DeckNotifier extends StateNotifier<DeckState> {
   final DeckRepository _deckRepo;
   final FsrsService _fsrs;
 
-  DeckNotifier(this._wordRepo, this._userRepo, this._deckRepo, this._fsrs)
-      : super(const DeckState());
+  DeckNotifier(
+    this._wordRepo,
+    this._userRepo,
+    this._deckRepo,
+    this._fsrs,
+    this._onStudyActivityChanged,
+  ) : super(const DeckState());
+
+  final void Function() _onStudyActivityChanged;
+  int _loadRequestId = 0;
 
   Future<void> loadDeck(String level, {int? deckId}) async {
+    final requestId = ++_loadRequestId;
     state = state.copyWith(isLoading: true, clearError: true);
 
     await PerfTrace.timeAsync('deck.load', () async {
       try {
         final userSettings = await _userRepo.getUserChoices();
-        final targetLang =
-            LanguageCodes.tableNameFor(userSettings?['targetLanguage'] ?? 'tr');
-        final motherLang =
-            LanguageCodes.tableNameFor(userSettings?['mainLanguage'] ?? 'en');
+        final targetLang = LanguageCodes.tableNameFor(
+          userSettings?['targetLanguage'] ?? 'tr',
+        );
+        final motherLang = LanguageCodes.tableNameFor(
+          userSettings?['mainLanguage'] ?? 'en',
+        );
 
-        final requestedDeckId = deckId ??
+        final requestedDeckId =
+            deckId ??
             (level == 'fav' ? await _deckRepo.ensureFavoritesDeck() : null);
         List<CardModel> allCards;
 
         if (requestedDeckId != null) {
           final entries = await _deckRepo.fetchDeckWords(
-              requestedDeckId, AppConstants.cardsPerDeck);
+            requestedDeckId,
+            AppConstants.cardsPerDeck,
+          );
           allCards = entries
-              .map((entry) => CardModel(
-                    entry.word.id,
-                    entry.word.word,
-                    entry.word.sentence,
-                    entry.sourceWord ?? '',
-                    entry.sourceSentence ?? '',
-                    entry.word.level,
-                    entry.targetLanguage,
-                    sourceLanguageCode: entry.sourceLanguage,
-                    targetLanguageCode: entry.targetLanguage,
-                  ))
+              .map(
+                (entry) => CardModel(
+                  entry.word.id,
+                  entry.word.word,
+                  entry.word.sentence,
+                  entry.sourceWord ?? '',
+                  entry.sourceSentence ?? '',
+                  entry.word.level,
+                  entry.targetLanguage,
+                  sourceLanguageCode: entry.sourceLanguage,
+                  targetLanguageCode: entry.targetLanguage,
+                ),
+              )
               .toList();
         } else {
           List<Word> allWords;
@@ -73,8 +90,10 @@ class DeckNotifier extends StateNotifier<DeckState> {
           final todayCounts = results[1] as ({int newCount, int reviewCount});
 
           final remainingNew =
-              ((config['maxNewPerDay'] as int) - todayCounts.newCount)
-                  .clamp(0, 999);
+              ((config['maxNewPerDay'] as int) - todayCounts.newCount).clamp(
+                0,
+                999,
+              );
           final remainingReviews =
               ((config['maxReviewsPerDay'] as int) - todayCounts.reviewCount)
                   .clamp(0, 999);
@@ -82,44 +101,57 @@ class DeckNotifier extends StateNotifier<DeckState> {
           // Parallel: due + new card queries are independent.
           final cardResults = await Future.wait([
             PerfTrace.timeAsync(
-                'deck.fetchDue',
-                () => _wordRepo.fetchDueCards(
-                    targetLang, level, remainingReviews)),
-            PerfTrace.timeAsync('deck.fetchNew',
-                () => _wordRepo.fetchNewCards(targetLang, level, remainingNew)),
+              'deck.fetchDue',
+              () =>
+                  _wordRepo.fetchDueCards(targetLang, level, remainingReviews),
+            ),
+            PerfTrace.timeAsync(
+              'deck.fetchNew',
+              () => _wordRepo.fetchNewCards(targetLang, level, remainingNew),
+            ),
           ]);
-          final dueWords = cardResults[0]!;
-          final newWords = cardResults[1]!;
+          final dueWords = cardResults[0];
+          final newWords = cardResults[1];
 
-          allWords = [...dueWords, ...newWords];
-
-          final missing = AppConstants.cardsPerDeck - allWords.length;
-          if (missing > 0) {
-            final fillers = await _wordRepo.fetchWordsByIsSeen(
-                targetLang, level, 0, missing);
-            allWords.addAll(fillers);
+          final uniqueWords = <int, Word>{};
+          for (final word in [...dueWords, ...newWords]) {
+            uniqueWords[word.id] = word;
           }
+
+          // Do not fill with arbitrary unseen words here. That would bypass
+          // the FSRS daily new-card limit after the due/new queues are empty.
+          allWords = uniqueWords.values.toList();
           // Build CardModel list with mother-language translations (batch)
           final motherWordIds = allWords.map((Word w) => w.id).toList();
-          final motherWords = await PerfTrace.timeAsync('deck.fetchTranslations',
-              () => _wordRepo.fetchWordsByIds(motherLang, motherWordIds));
-          final motherMap = <int, String>{};
+          final motherWords = await PerfTrace.timeAsync(
+            'deck.fetchTranslations',
+            () => _wordRepo.fetchWordsByIds(motherLang, motherWordIds),
+          );
+          final motherMap = <int, Word>{};
           for (final mw in motherWords) {
-            motherMap[mw.id] = mw.word;
+            motherMap[mw.id] = mw;
           }
 
           allCards = allWords
-              .map((Word w) => CardModel(
-                    w.id, w.word, w.sentence,
-                    motherMap[w.id] ?? '',
-                    '',
-                    w.level,
-                    targetLang,
-                    sourceLanguageCode: motherLang,
-                    targetLanguageCode: targetLang,
-                  ))
+              .map(
+                (Word w) => CardModel(
+                  w.id,
+                  w.word,
+                  w.sentence,
+                  motherMap[w.id]?.word ?? '',
+                  motherMap[w.id]?.sentence ?? '',
+                  w.level,
+                  targetLang,
+                  sourceLanguageCode: motherLang,
+                  targetLanguageCode: targetLang,
+                ),
+              )
               .toList();
         }
+
+        // A retry or a new-deck action may have started while the database
+        // was loading. Only the newest request may publish or mark cards.
+        if (requestId != _loadRequestId) return;
 
         allCards.shuffle(Random());
         final selected = allCards.take(AppConstants.cardsPerDeck).toList();
@@ -127,37 +159,59 @@ class DeckNotifier extends StateNotifier<DeckState> {
         if (selected.isNotEmpty) {
           final idsByLanguage = <String, List<int>>{};
           for (final card in selected) {
-            idsByLanguage.putIfAbsent(card.targetLanguageCode, () => [])
+            idsByLanguage
+                .putIfAbsent(card.targetLanguageCode, () => [])
                 .add(card.id);
           }
-          await Future.wait(idsByLanguage.entries.map((entry) =>
-              PerfTrace.timeAsync('deck.markSeen', () =>
-                  _wordRepo.markMultipleAsSeen(entry.key, entry.value,
-                      formatDate(DateTime.now())))));
+          await Future.wait(
+            idsByLanguage.entries.map(
+              (entry) => PerfTrace.timeAsync(
+                'deck.markSeen',
+                () => _wordRepo.markMultipleAsSeen(
+                  entry.key,
+                  entry.value,
+                  formatDate(DateTime.now()),
+                ),
+              ),
+            ),
+          );
+          _onStudyActivityChanged();
         }
+
+        if (requestId != _loadRequestId) return;
 
         state = state.copyWith(
           cards: selected,
           currentIndex: 0,
           isFlipped: false,
           isLoading: false,
-          colorTracker:
-              List.generate(selected.length, (_) => AppTheme.cardDefault),
+          colorTracker: List.generate(
+            selected.length,
+            (_) => AppTheme.cardDefault,
+          ),
           analysisResults: [],
           targetLang: targetLang,
           motherLang: motherLang,
-          isFavorite: false,
+          clearLastRating: true,
         );
       } catch (e) {
         if (kDebugMode) print('DeckNotifier.loadDeck error: $e');
+        if (requestId != _loadRequestId) return;
         state = state.copyWith(
-            isLoading: false, errorMessage: 'Failed to load deck: $e');
+          isLoading: false,
+          errorMessage: 'Failed to load deck: $e',
+        );
       }
     }); // end deck.load trace
   }
 
   Future<void> reviewCard(Rating rating) async {
-    if (state.isEmpty || !state.isFlipped || state.isReviewing) return;
+    if (state.isEmpty ||
+        !state.isFlipped ||
+        state.isReviewing ||
+        state.lastRating != null) {
+      return;
+    }
     state = state.copyWith(isReviewing: true);
     final card = state.currentCard;
     final reviewIndex = state.currentIndex;
@@ -196,8 +250,11 @@ class DeckNotifier extends StateNotifier<DeckState> {
         wJson: deckConfig['w'] as String?,
       );
 
-      final legacyFeedback =
-          rating == Rating.again ? 1 : rating == Rating.hard ? 3 : 2;
+      final feedbackValue = rating == Rating.again
+          ? 1
+          : rating == Rating.hard
+          ? 3
+          : 2;
 
       // Use transactional review with optimistic guard against double-writes.
       // The guard checks that last_review still matches the value we read
@@ -211,13 +268,14 @@ class DeckNotifier extends StateNotifier<DeckState> {
           cardState: result.cardState.value,
           stability: result.stability,
           difficulty: result.difficulty,
+          reviewState: word.cardState,
           due: result.due,
           elapsedDays: 0,
           scheduledDays: result.scheduledDays,
           reps: word.reps + 1,
           lapses: rating == Rating.again ? word.lapses + 1 : word.lapses,
           lastReview: result.lastReview,
-          legacyFeedback: legacyFeedback,
+          feedbackValue: feedbackValue,
           reviewDate: result.lastReview,
           guardLastReview: word.lastReview,
         );
@@ -244,14 +302,21 @@ class DeckNotifier extends StateNotifier<DeckState> {
       final newColors = List<Color>.from(state.colorTracker)
         ..[reviewIndex] = color;
       final newAnalysis = List<AnalysisResult>.from(state.analysisResults)
-        ..add(AnalysisResult(
-            word: card.frontText, meaning: card.backText, color: color));
+        ..add(
+          AnalysisResult(
+            word: card.frontText,
+            meaning: card.backText,
+            color: color,
+          ),
+        );
 
       state = state.copyWith(
-          colorTracker: newColors,
-          analysisResults: newAnalysis,
-          lastRating: rating,
-          isReviewing: false);
+        colorTracker: newColors,
+        analysisResults: newAnalysis,
+        lastRating: rating,
+        isReviewing: false,
+      );
+      _onStudyActivityChanged();
     } catch (e) {
       if (kDebugMode) print('DeckNotifier.reviewCard error: $e');
       state = state.copyWith(isReviewing: false);
@@ -259,28 +324,15 @@ class DeckNotifier extends StateNotifier<DeckState> {
   }
 
   Color _colorForRating(Rating rating) => switch (rating) {
-        Rating.again => AppTheme.ratingAgain,
-        Rating.hard => AppTheme.ratingHard,
-        Rating.good => AppTheme.ratingGood,
-        Rating.easy => AppTheme.ratingEasy,
-      };
+    Rating.again => AppTheme.ratingAgain,
+    Rating.hard => AppTheme.ratingHard,
+    Rating.good => AppTheme.ratingGood,
+    Rating.easy => AppTheme.ratingEasy,
+  };
 
-  Future<void> flipCard(Color color) async {
+  void revealCard() {
     if (state.isEmpty || state.isFlipped || state.isReviewing) return;
-    Rating rating;
-    if (color == AppTheme.cardRed || color == Colors.red.shade200) {
-      rating = Rating.again;
-    } else if (color == AppTheme.cardGreen || color == Colors.green.shade200) {
-      rating = Rating.good;
-    } else if (color == AppTheme.cardYellow) {
-      rating = Rating.hard;
-    } else {
-      rating = Rating.good;
-    }
-    final newColors = List<Color>.from(state.colorTracker)
-      ..[state.currentIndex] = color;
-    state = state.copyWith(isFlipped: true, colorTracker: newColors);
-    await reviewCard(rating);
+    state = state.copyWith(isFlipped: true, clearLastRating: true);
   }
 
   void reflipCard() {
@@ -288,58 +340,46 @@ class DeckNotifier extends StateNotifier<DeckState> {
     final newColors = List<Color>.from(state.colorTracker)
       ..[state.currentIndex] = AppTheme.cardDefault;
     state = state.copyWith(
-        isFlipped: false,
-        colorTracker: newColors,
-        analysisResults: state.analysisResults
-            .where((r) => r.word != state.currentCard.frontText)
-            .toList());
+      isFlipped: false,
+      colorTracker: newColors,
+      clearLastRating: true,
+      analysisResults: state.analysisResults
+          .where((r) => r.word != state.currentCard.frontText)
+          .toList(),
+    );
   }
 
   Future<void> nextCard() async {
     if (state.isLastCard || state.isReviewing) return;
     state = state.copyWith(
-        currentIndex: state.currentIndex + 1,
-        isFlipped: false,
-        isFavorite: false,
-        lastRating: null);
-    final fav = await _wordRepo.isFavorite(state.currentCard.frontText);
-    state = state.copyWith(isFavorite: fav);
+      currentIndex: state.currentIndex + 1,
+      isFlipped: false,
+      clearLastRating: true,
+    );
   }
 
   void startNewDeck() => state = DeckState(
-        isLoading: true,
-        deckIndex: state.deckIndex + 1,
-        colorTracker:
-            List.generate(AppConstants.cardsPerDeck, (_) => AppTheme.cardDefault),
-      );
-
-  Future<void> toggleFavorite() async {
-    final card = state.currentCard;
-    try {
-      if (state.isFavorite) {
-        await _wordRepo.removeFromFavorites(card.frontText);
-        state = state.copyWith(isFavorite: false);
-      } else {
-        await _wordRepo.addToFavorites(
-          word: card.frontText,
-          sentence: card.frontSentence,
-          level: card.level,
-          backWord: card.backText,
-          backSentence: card.backSentence,
-        );
-        state = state.copyWith(isFavorite: true);
-      }
-    } catch (e) {
-      if (kDebugMode) print('DeckNotifier.toggleFavorite error: $e');
-    }
-  }
+    isLoading: true,
+    deckIndex: state.deckIndex + 1,
+    colorTracker: List.generate(
+      AppConstants.cardsPerDeck,
+      (_) => AppTheme.cardDefault,
+    ),
+  );
 }
 
-final deckProvider =
-    StateNotifierProvider.autoDispose<DeckNotifier, DeckState>((ref) {
-  final wordRepo = ref.read(wordRepositoryProvider);
-  final userRepo = ref.read(userRepositoryProvider);
-  final deckRepo = ref.read(deckRepositoryProvider);
-  final fsrs = ref.read(fsrsServiceProvider);
-  return DeckNotifier(wordRepo, userRepo, deckRepo, fsrs);
-});
+final deckProvider = StateNotifierProvider.autoDispose<DeckNotifier, DeckState>(
+  (ref) {
+    final wordRepo = ref.read(wordRepositoryProvider);
+    final userRepo = ref.read(userRepositoryProvider);
+    final deckRepo = ref.read(deckRepositoryProvider);
+    final fsrs = ref.read(fsrsServiceProvider);
+    return DeckNotifier(
+      wordRepo,
+      userRepo,
+      deckRepo,
+      fsrs,
+      () => ref.read(studyActivityProvider.notifier).state++,
+    );
+  },
+);

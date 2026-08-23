@@ -91,13 +91,16 @@ class FsrsService {
     required String? due,
   }) {
     final now = DateTime.now().toUtc();
+    final parsedDue = due == null ? null : DateTime.tryParse(due);
+    final parsedLastReview =
+        lastReview == null ? null : DateTime.tryParse(lastReview);
     return fsrs.Card(
       cardId: cardId,
       state: _toFsrsState(CardState.fromValue(cardStateValue)),
       stability: stability > 0 ? stability : null,
       difficulty: difficulty > 0 ? difficulty : null,
-      due: due != null ? DateTime.parse(due) : now,
-      lastReview: lastReview != null ? DateTime.parse(lastReview) : null,
+      due: parsedDue ?? now,
+      lastReview: parsedLastReview,
     );
   }
 
@@ -141,21 +144,18 @@ class FsrsService {
         reviewDateTime: nowDt);
 
     final newCard = result.card;
+    final scheduledDue = newCard.due;
 
     return FsrsReviewResult(
       cardState: _fromFsrsState(newCard.state),
       stability: newCard.stability ?? 0.0,
       difficulty: newCard.difficulty ?? 0.0,
-      due: newCard.due != null
-          ? '${newCard.due!.year}-${newCard.due!.month.toString().padLeft(2, '0')}-${newCard.due!.day.toString().padLeft(2, '0')}'
-          : null,
-      scheduledDays: newCard.due != null
-          ? newCard.due!.difference(nowDt).inDays.clamp(0, 36500)
-          : 0,
+      due:
+          '${scheduledDue.year}-${scheduledDue.month.toString().padLeft(2, '0')}-${scheduledDue.day.toString().padLeft(2, '0')}',
+      scheduledDays: scheduledDue.difference(nowDt).inDays.clamp(0, 36500),
       lastReview: nowDt.toIso8601String(),
-      retrievability: card.lastReview != null
-          ? scheduler.getCardRetrievability(card, currentDateTime: nowDt)
-          : 0.0,
+      retrievability:
+          scheduler.getCardRetrievability(card, currentDateTime: nowDt),
     );
   }
 

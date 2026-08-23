@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/data/repositories/progress_repository.dart';
-import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/core/utils/date_utils.dart';
 
@@ -27,9 +26,13 @@ final weeklyProgressProvider =
   if (earliestDate == null) {
     return const WeeklyProgressState(isLoading: false);
   }
-  final weekDates = generateWeekDates(DateTime.parse(earliestDate));
-  final dateCounts = await repo.fetchDateCounts(language,
-      dateStart: weekDates.first);
+  final parsedEarliestDate = DateTime.tryParse(earliestDate);
+  if (parsedEarliestDate == null) {
+    return const WeeklyProgressState(isLoading: false);
+  }
+  final weekDates = generateWeekDates(parsedEarliestDate);
+  final dateCounts =
+      await repo.fetchDateCounts(language, dateStart: weekDates.first);
   final data = weekDates.map((d) => dateCounts[d] ?? 0).toList();
   return WeeklyProgressState(data: data, dates: weekDates, isLoading: false);
 });
@@ -39,7 +42,9 @@ class MonthlyProgressState {
   final List<String> monthLabels;
   final bool isLoading;
   const MonthlyProgressState(
-      {this.data = const [], this.monthLabels = const [], this.isLoading = true});
+      {this.data = const [],
+      this.monthLabels = const [],
+      this.isLoading = true});
 }
 
 final monthlyProgressProvider =
@@ -53,7 +58,10 @@ final monthlyProgressProvider =
   if (earliestDateStr == null) {
     return const MonthlyProgressState(isLoading: false);
   }
-  final earliestDate = DateTime.parse(earliestDateStr);
+  final earliestDate = DateTime.tryParse(earliestDateStr);
+  if (earliestDate == null) {
+    return const MonthlyProgressState(isLoading: false);
+  }
   final data = await repo.fetchMonthlyCounts(earliestDate, language);
   final labels = generateMonthLabels(earliestDate);
   return MonthlyProgressState(

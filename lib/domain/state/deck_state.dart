@@ -14,7 +14,6 @@ class DeckState {
   final int deckIndex;
   final String? targetLang;
   final String? motherLang;
-  final bool isFavorite;
   final bool isReviewing;
   final String? errorMessage;
   final Rating? lastRating;
@@ -29,7 +28,6 @@ class DeckState {
     this.deckIndex = 1,
     this.targetLang,
     this.motherLang,
-    this.isFavorite = false,
     this.isReviewing = false,
     this.errorMessage,
     this.lastRating,
@@ -45,11 +43,11 @@ class DeckState {
     int? deckIndex,
     String? targetLang,
     String? motherLang,
-    bool? isFavorite,
     bool? isReviewing,
     String? errorMessage,
     bool clearError = false,
     Rating? lastRating,
+    bool clearLastRating = false,
   }) {
     return DeckState(
       cards: cards ?? this.cards,
@@ -61,10 +59,9 @@ class DeckState {
       deckIndex: deckIndex ?? this.deckIndex,
       targetLang: targetLang ?? this.targetLang,
       motherLang: motherLang ?? this.motherLang,
-      isFavorite: isFavorite ?? this.isFavorite,
       isReviewing: isReviewing ?? this.isReviewing,
       errorMessage: clearError ? null : (errorMessage ?? this.errorMessage),
-      lastRating: lastRating ?? this.lastRating,
+      lastRating: clearLastRating ? null : (lastRating ?? this.lastRating),
     );
   }
 

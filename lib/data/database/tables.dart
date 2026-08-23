@@ -9,23 +9,24 @@ class Words extends Table {
   TextColumn get sentence => text()();
   TextColumn get level => text()();
   TextColumn get languageCode => text().named('language_code')();
-  IntColumn get isSeen => integer().named('isSeen').withDefault(const Constant(0))();
-  IntColumn get feedback => integer().named('feedback').withDefault(const Constant(0))();
+  IntColumn get isSeen =>
+      integer().named('isSeen').withDefault(const Constant(0))();
+  IntColumn get feedback =>
+      integer().named('feedback').withDefault(const Constant(0))();
   TextColumn get date => text().nullable()();
   // FSRS
-  IntColumn get cardState => integer().named('card_state').withDefault(const Constant(0))();
+  IntColumn get cardState =>
+      integer().named('card_state').withDefault(const Constant(0))();
   RealColumn get stability => real().withDefault(const Constant(0.0))();
   RealColumn get difficulty => real().withDefault(const Constant(0.0))();
   TextColumn get due => text().nullable()();
-  IntColumn get elapsedDays => integer().named('elapsed_days').withDefault(const Constant(0))();
-  IntColumn get scheduledDays => integer().named('scheduled_days').withDefault(const Constant(0))();
+  IntColumn get elapsedDays =>
+      integer().named('elapsed_days').withDefault(const Constant(0))();
+  IntColumn get scheduledDays =>
+      integer().named('scheduled_days').withDefault(const Constant(0))();
   IntColumn get reps => integer().withDefault(const Constant(0))();
   IntColumn get lapses => integer().withDefault(const Constant(0))();
   TextColumn get lastReview => text().named('last_review').nullable()();
-  // Fav-specific
-  TextColumn get backword => text().nullable()();
-  TextColumn get backsentence => text().nullable()();
-
   @override
   Set<Column> get primaryKey => {languageCode, id};
 }
@@ -41,7 +42,8 @@ class RevlogEntries extends Table {
   RealColumn get stability => real()();
   RealColumn get difficulty => real()();
   IntColumn get elapsedDays => integer().named('elapsed_days')();
-  IntColumn get lastElapsedDays => integer().named('last_elapsed_days').withDefault(const Constant(0))();
+  IntColumn get lastElapsedDays =>
+      integer().named('last_elapsed_days').withDefault(const Constant(0))();
   IntColumn get scheduledDays => integer().named('scheduled_days')();
   TextColumn get reviewDate => text().named('review_date')();
 
@@ -52,11 +54,16 @@ class RevlogEntries extends Table {
 /// Per-level SRS config.
 class DeckConfigs extends Table {
   TextColumn get level => text()();
-  IntColumn get maxNewPerDay => integer().named('max_new_per_day').withDefault(const Constant(10))();
-  IntColumn get maxReviewsPerDay => integer().named('max_reviews_per_day').withDefault(const Constant(20))();
-  TextColumn get learningSteps => text().named('learning_steps').withDefault(const Constant('[1,10]'))();
-  IntColumn get enableFuzz => integer().named('enable_fuzz').withDefault(const Constant(1))();
-  RealColumn get requestRetention => real().named('request_retention').withDefault(const Constant(0.9))();
+  IntColumn get maxNewPerDay =>
+      integer().named('max_new_per_day').withDefault(const Constant(10))();
+  IntColumn get maxReviewsPerDay =>
+      integer().named('max_reviews_per_day').withDefault(const Constant(20))();
+  TextColumn get learningSteps =>
+      text().named('learning_steps').withDefault(const Constant('[1,10]'))();
+  IntColumn get enableFuzz =>
+      integer().named('enable_fuzz').withDefault(const Constant(1))();
+  RealColumn get requestRetention =>
+      real().named('request_retention').withDefault(const Constant(0.9))();
   TextColumn get w => text().nullable()();
 
   @override
@@ -71,6 +78,8 @@ class UserSettings extends Table {
   TextColumn get mainLanguage => text().named('mainLanguage')();
   TextColumn get targetLanguage => text().named('targetLanguage')();
   TextColumn get firstTime => text().named('firstTime')();
+  TextColumn get reviewMode =>
+      text().named('review_mode').withDefault(const Constant('buttons'))();
 
   @override
   String get tableName => 'user';
@@ -100,9 +109,9 @@ class DeckCards extends Table {
 
   @override
   Set<Column> get primaryKey => {
-        deckId,
-        wordId,
-        sourceLanguage,
-        targetLanguage,
-      };
+    deckId,
+    wordId,
+    sourceLanguage,
+    targetLanguage,
+  };
 }

@@ -24,7 +24,8 @@ class ProgressRepository {
       {String? dateStart}) async {
     try {
       String sql = 'SELECT date, COUNT(*) as count FROM words '
-          'WHERE language_code = ? AND date IS NOT NULL AND date != "0"';
+          'WHERE language_code = ? AND date IS NOT NULL '
+          'AND date != "" AND date != "0"';
       final vars = <Variable>[Variable.withString(language)];
       if (dateStart != null) {
         sql += ' AND date >= ?';
@@ -50,7 +51,8 @@ class ProgressRepository {
   /// Fetches word counts for 4 consecutive months starting at [startDate].
   /// Uses a single SQL query with month-range bucketing instead of 4 separate
   /// queries.
-  Future<List<int>> fetchMonthlyCounts(DateTime startDate, String language) async {
+  Future<List<int>> fetchMonthlyCounts(
+      DateTime startDate, String language) async {
     try {
       final counts = <int>[0, 0, 0, 0];
       await PerfTrace.timeAsync('progress.monthly', () async {
@@ -74,10 +76,12 @@ class ProgressRepository {
             ..add(Variable.withString(mStart))
             ..add(Variable.withString(mEnd));
         }
-        final rows = await _db.customSelect(
-          parts.join(' UNION ALL '),
-          variables: vars,
-        ).get();
+        final rows = await _db
+            .customSelect(
+              parts.join(' UNION ALL '),
+              variables: vars,
+            )
+            .get();
         for (final row in rows) {
           final m = row.read<int>('m');
           final cnt = row.read<int>('cnt');

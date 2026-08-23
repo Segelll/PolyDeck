@@ -43,18 +43,19 @@ class DeckWordEntry {
 }
 
 @DriftDatabase(
-    tables: [Words, RevlogEntries, DeckConfigs, UserSettings, Decks, DeckCards])
+  tables: [Words, RevlogEntries, DeckConfigs, UserSettings, Decks, DeckCards],
+)
 class AppDatabase extends _$AppDatabase {
   final bool _validatePreloadedData;
 
   AppDatabase()
-      : _validatePreloadedData = true,
-        super(DatabaseConnection.delayed(_connect()));
+    : _validatePreloadedData = true,
+      super(DatabaseConnection.delayed(_connect()));
 
   /// In-memory constructor for repository/database tests.
   AppDatabase.forTesting(QueryExecutor executor)
-      : _validatePreloadedData = false,
-        super(DatabaseConnection(executor));
+    : _validatePreloadedData = false,
+      super(DatabaseConnection(executor));
 
   static Future<DatabaseConnection> _connect() async {
     final appDir = await getApplicationDocumentsDirectory();
@@ -64,8 +65,10 @@ class AppDatabase extends _$AppDatabase {
       await PerfTrace.timeAsync('db.copyAsset', () async {
         try {
           final data = await rootBundle.load('assets/polydesk.db');
-          final bytes =
-              data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+          final bytes = data.buffer.asUint8List(
+            data.offsetInBytes,
+            data.lengthInBytes,
+          );
           await File(dbPath).writeAsBytes(bytes, flush: true);
         } catch (e) {
           if (kDebugMode) print('DB copy failed: $e');
@@ -77,7 +80,7 @@ class AppDatabase extends _$AppDatabase {
       // Open the database on a background isolate so SQLite IO never blocks
       // the UI thread. The setup callback configures WAL, cache, and PRAGMAs.
       return DatabaseConnection(
-        await NativeDatabase.createInBackground(
+        NativeDatabase.createInBackground(
           File(dbPath),
           setup: (rawDb) {
             rawDb.execute('PRAGMA journal_mode=WAL');
@@ -92,64 +95,36 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
-  /// Schema version for the pre-populated asset DB.
-  /// Must match the user_version PRAGMA stored in assets/polydesk.db.
-  /// Bump when the asset DB structure changes and a migration is needed.
+  // Drift requires a positive schema identifier. This app ships one schema
+  // and intentionally has no upgrade path; reset the local database when the
+  // schema changes before production.
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 1;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (m, from, to) async {
-          if (from < 3) {
-            await m.createTable(decks);
-            await m.createTable(deckCards);
-          }
-        },
-        beforeOpen: (details) async {
-          // Fresh install — the DB was just copied from assets.
-          // Ensure indices and validate integrity.
-          await _ensureDeckTables();
-          await _ensureIndices();
-          await _ensureFavoritesDeck();
-          if (_validatePreloadedData) await _validateDatabase();
-        },
-      );
-
-  Future<void> _ensureDeckTables() async {
-    await customStatement('''
-      CREATE TABLE IF NOT EXISTS decks (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        deck_type TEXT NOT NULL,
-        system_key TEXT,
-        created_at TEXT NOT NULL
-      )
-    ''');
-    await customStatement('''
-      CREATE TABLE IF NOT EXISTS deck_cards (
-        deck_id INTEGER NOT NULL,
-        word_id INTEGER NOT NULL,
-        source_language TEXT NOT NULL,
-        target_language TEXT NOT NULL,
-        added_at TEXT NOT NULL,
-        PRIMARY KEY (deck_id, word_id, source_language, target_language)
-      )
-    ''');
-  }
+    onCreate: (m) => m.createAll(),
+    beforeOpen: (details) async {
+      await _ensureIndices();
+      await _ensureFavoritesDeck();
+      if (_validatePreloadedData) await _validateDatabase();
+    },
+  );
 
   Future<void> _ensureFavoritesDeck() async {
-    final existing = await (select(decks)
-          ..where((d) => d.systemKey.equals('favorites')))
-        .getSingleOrNull();
+    final existing = await (select(
+      decks,
+    )..where((d) => d.systemKey.equals('favorites'))).getSingleOrNull();
     if (existing != null) return;
 
-    await into(decks).insert(DecksCompanion.insert(
-          name: 'Favoriler',
-          deckType: 'system',
-          systemKey: const Value('favorites'),
-          createdAt: DateTime.now().toUtc().toIso8601String(),
-        ));
+    await into(decks).insert(
+      DecksCompanion.insert(
+        name: 'Favoriler',
+        deckType: 'system',
+        systemKey: const Value('favorites'),
+        createdAt: DateTime.now().toUtc().toIso8601String(),
+      ),
+    );
   }
 
   /// Runs a lightweight integrity check after DB open.
@@ -167,8 +142,9 @@ class AppDatabase extends _$AppDatabase {
         .map((r) => r.read<int>(words.id.count()))
         .getSingle();
     if (rowCount == 0) {
-      throw DatabaseIntegrityException(
-          'Database is empty. Please reinstall the app.');
+      throw const DatabaseIntegrityException(
+        'Database is empty. Please reinstall the app.',
+      );
     }
 
     // 2) Expected language codes must be present.
@@ -180,21 +156,24 @@ class AppDatabase extends _$AppDatabase {
     for (final lang in expectedLangs) {
       if (!langs.contains(lang)) {
         throw DatabaseIntegrityException(
-            'Missing language data for "$lang". Please reinstall the app.');
+          'Missing language data for "$lang". Please reinstall the app.',
+        );
       }
     }
 
     // 3) All five CEFR levels must be present for at least one language.
     const expectedLevels = ['A1', 'A2', 'B1', 'B2', 'C1'];
     for (final level in expectedLevels) {
-      final cnt = await (selectOnly(words)
-            ..addColumns([words.id.count()])
-            ..where(words.level.equals(level)))
-          .map((r) => r.read<int>(words.id.count()))
-          .getSingle();
+      final cnt =
+          await (selectOnly(words)
+                ..addColumns([words.id.count()])
+                ..where(words.level.equals(level)))
+              .map((r) => r.read<int>(words.id.count()))
+              .getSingle();
       if (cnt == 0) {
         throw DatabaseIntegrityException(
-            'Missing CEFR level "$level". Please reinstall the app.');
+          'Missing CEFR level "$level". Please reinstall the app.',
+        );
       }
     }
   }
@@ -209,8 +188,6 @@ class AppDatabase extends _$AppDatabase {
       'CREATE INDEX IF NOT EXISTS idx_words_new_queue ON words (language_code, level, card_state, isSeen, id)',
       // Progress: optimize GROUP BY date and date-range filters.
       'CREATE INDEX IF NOT EXISTS idx_words_progress_date ON words (language_code, date)',
-      // Favorites: word lookup within the fav partition.
-      'CREATE INDEX IF NOT EXISTS idx_words_fav_word ON words (language_code, word)',
       // Today's review counts.
       'CREATE INDEX IF NOT EXISTS idx_revlog_today_counts ON revlog (deck_table, review_date, state)',
       // Supporting indexes.
@@ -237,34 +214,45 @@ class AppDatabase extends _$AppDatabase {
   /// The same `id` exists across all 7 languages, so the language filter
   /// is required to avoid returning the wrong language's row.
   Future<Word?> fetchWordById(String languageCode, int id) =>
-      (select(words)
-            ..where((w) =>
-                w.languageCode.equals(languageCode) & w.id.equals(id)))
+      (select(words)..where(
+            (w) => w.languageCode.equals(languageCode) & w.id.equals(id),
+          ))
           .getSingleOrNull();
 
   Future<List<Word>> fetchWordsByIds(String language, List<int> ids) {
     if (ids.isEmpty) return Future.value([]);
-    return (select(words)..where((w) => w.languageCode.equals(language) & w.id.isIn(ids))).get();
+    return (select(
+      words,
+    )..where((w) => w.languageCode.equals(language) & w.id.isIn(ids))).get();
   }
 
   Future<List<Word>> fetchDueCards(
-      String language, String? level, String date, int limit) {
+    String language,
+    String? level,
+    String date,
+    int limit,
+  ) {
+    if (limit <= 0) return Future.value([]);
     // Build the query once with a conditional level predicate.
     // The old code overwrote q when level was set — this is cleaner.
     final q = select(words);
     if (level != null && level != 'fav') {
-      q.where((w) =>
-          w.languageCode.equals(language) &
-          w.level.equals(level) &
-          w.due.isNotNull() &
-          w.due.isSmallerOrEqualValue(date) &
-          w.cardState.isIn([1, 2, 3]));
+      q.where(
+        (w) =>
+            w.languageCode.equals(language) &
+            w.level.equals(level) &
+            w.due.isNotNull() &
+            w.due.isSmallerOrEqualValue(date) &
+            w.cardState.isIn([1, 2, 3]),
+      );
     } else {
-      q.where((w) =>
-          w.languageCode.equals(language) &
-          w.due.isNotNull() &
-          w.due.isSmallerOrEqualValue(date) &
-          w.cardState.isIn([1, 2, 3]));
+      q.where(
+        (w) =>
+            w.languageCode.equals(language) &
+            w.due.isNotNull() &
+            w.due.isSmallerOrEqualValue(date) &
+            w.cardState.isIn([1, 2, 3]),
+      );
     }
     q
       ..orderBy([(u) => OrderingTerm.asc(u.due)])
@@ -279,7 +267,11 @@ class AppDatabase extends _$AppDatabase {
   /// a deterministic slice ordered by id; the deck provider shuffles the
   /// combined deck in Dart so the user still sees variety.
   Future<List<Word>> fetchNewCards(
-      String language, String? level, int limit) async {
+    String language,
+    String? level,
+    int limit,
+  ) async {
+    if (limit <= 0) return [];
     // ── Shared WHERE clause ──
     final conditions = StringBuffer(
       'language_code = ? AND card_state = 0 AND isSeen = 0',
@@ -303,11 +295,11 @@ class AppDatabase extends _$AppDatabase {
     // ── Pick a random start id ──
     final rng = Random();
     final idRange = maxId - minId + 1;
-    final startId = minId +
-        (idRange > limit ? rng.nextInt(idRange - limit) : 0);
+    final startId =
+        minId + (idRange > limit ? rng.nextInt(idRange - limit + 1) : 0);
 
-    // ── Fetch contiguous window starting from startId ──
-    final fetchVars = [
+    // ── Fetch a window starting from startId ──
+    final fetchVars = <Variable<Object>>[
       ...vars,
       Variable.withInt(startId),
       Variable.withInt(limit),
@@ -319,6 +311,23 @@ class AppDatabase extends _$AppDatabase {
       readsFrom: {words},
     ).get();
 
+    // IDs can have gaps after an import or a data reset. Wrap around to the
+    // beginning so sparse IDs do not make a deck appear shorter than it is.
+    if (rows.length < limit) {
+      final remaining = limit - rows.length;
+      final wrappedRows = await customSelect(
+        'SELECT * FROM words WHERE $whereSql AND id < ? '
+        'ORDER BY id LIMIT ?',
+        variables: [
+          ...vars,
+          Variable.withInt(startId),
+          Variable.withInt(remaining),
+        ],
+        readsFrom: {words},
+      ).get();
+      rows.addAll(wrappedRows);
+    }
+
     final result = <Word>[];
     for (final row in rows) {
       result.add(await words.mapFromRow(row));
@@ -327,78 +336,106 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<List<Word>> fetchWordsByIsSeen(
-      String language, String? level, int isSeen, int limit) {
-    var q = select(words)
-      ..where((w) =>
-          w.languageCode.equals(language) & w.isSeen.equals(isSeen))
-      ..limit(limit);
-    if (level != null && level != 'fav') {
-      q = select(words)
-        ..where((w) =>
-            w.languageCode.equals(language) &
-            w.level.equals(level) &
-            w.isSeen.equals(isSeen))
-        ..limit(limit);
-    }
-    return q.get();
+    String language,
+    String? level,
+    int isSeen,
+    int limit, {
+    List<int> excludeIds = const [],
+  }) {
+    if (limit <= 0) return Future.value([]);
+
+    return (select(words)
+          ..where((w) {
+            Expression<bool> condition =
+                w.languageCode.equals(language) & w.isSeen.equals(isSeen);
+            if (level != null && level != 'fav') {
+              condition = condition & w.level.equals(level);
+            }
+            if (excludeIds.isNotEmpty) {
+              condition = condition & w.id.isNotIn(excludeIds);
+            }
+            return condition;
+          })
+          ..limit(limit))
+        .get();
   }
 
   Future<List<Word>> fetchWordsByFeedback(
-      String language, String? level, int feedback, int limit) {
+    String language,
+    String? level,
+    int feedback,
+    int limit,
+  ) {
     var q = select(words)
-      ..where((w) => w.languageCode.equals(language) & w.feedback.equals(feedback))
+      ..where(
+        (w) => w.languageCode.equals(language) & w.feedback.equals(feedback),
+      )
       ..limit(limit);
     if (level != null && level != 'fav') {
       q = select(words)
-        ..where((w) =>
-            w.languageCode.equals(language) &
-            w.level.equals(level) &
-            w.feedback.equals(feedback))
+        ..where(
+          (w) =>
+              w.languageCode.equals(language) &
+              w.level.equals(level) &
+              w.feedback.equals(feedback),
+        )
         ..limit(limit);
     }
     return q.get();
   }
 
   Future<List<int>> fetchAllIsSeenId(String language) async {
-    final rows = await (selectOnly(words)
-          ..addColumns([words.id])
-          ..where(words.languageCode.equals(language) & words.isSeen.equals(1)))
-        .get();
+    final rows =
+        await (selectOnly(words)
+              ..addColumns([words.id])
+              ..where(
+                words.languageCode.equals(language) & words.isSeen.equals(1),
+              ))
+            .get();
     return rows.map((r) => r.read(words.id)!).toList();
   }
 
   Future<String?> getEarliestDate(String language) async {
-    final row = await (selectOnly(words)
-          ..addColumns([words.date])
-          ..where(words.languageCode.equals(language) & words.date.isNotNull())
-          ..orderBy([OrderingTerm.asc(words.date)])
-          ..limit(1))
-        .getSingleOrNull();
-    return row?.read(words.date);
+    final rows = await customSelect(
+      'SELECT date FROM words '
+      'WHERE language_code = ? AND date IS NOT NULL '
+      'AND date != ? AND date != ? ORDER BY date ASC LIMIT 1',
+      variables: [
+        Variable.withString(language),
+        Variable.withString(''),
+        Variable.withString('0'),
+      ],
+      readsFrom: {words},
+    ).get();
+    return rows.firstOrNull?.readNullable<String>('date');
   }
 
   /// Fetches all word IDs for [language] + [level], ordered by id.
   /// Used by exam generation to sample questions without hardcoded ranges.
-  Future<List<int>> fetchWordIds(
-      {required String language, required String level}) async {
-    final rows = await (selectOnly(words)
-          ..addColumns([words.id])
-          ..where(words.languageCode.equals(language) & words.level.equals(level))
-          ..orderBy([OrderingTerm.asc(words.id)]))
-        .get();
+  Future<List<int>> fetchWordIds({
+    required String language,
+    required String level,
+  }) async {
+    final rows =
+        await (selectOnly(words)
+              ..addColumns([words.id])
+              ..where(
+                words.languageCode.equals(language) & words.level.equals(level),
+              )
+              ..orderBy([OrderingTerm.asc(words.id)]))
+            .get();
     return rows.map((r) => r.read<int>(words.id)!).toList();
   }
 
-  Future<List<Word>> fetchExamWords(String language, int id) =>
-      (select(words)
-            ..where((w) => w.languageCode.equals(language) & w.id.equals(id)))
-          .get();
+  Future<List<Word>> fetchExamWords(String language, int id) => (select(
+    words,
+  )..where((w) => w.languageCode.equals(language) & w.id.equals(id))).get();
 
   Future<List<Word>> fetchExamOptions(String language, List<int> ids) {
     if (ids.isEmpty) return Future.value([]);
-    return (select(words)
-          ..where((w) => w.languageCode.equals(language) & w.id.isIn(ids)))
-        .get();
+    return (select(
+      words,
+    )..where((w) => w.languageCode.equals(language) & w.id.isIn(ids))).get();
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -424,13 +461,14 @@ class AppDatabase extends _$AppDatabase {
     required int cardState,
     required double stability,
     required double difficulty,
+    required int reviewState,
     String? due,
     required int elapsedDays,
     required int scheduledDays,
     required int reps,
     required int lapses,
     String? lastReview,
-    int? legacyFeedback,
+    int? feedbackValue,
     required String reviewDate,
     String? guardLastReview,
   }) async {
@@ -439,10 +477,11 @@ class AppDatabase extends _$AppDatabase {
       // Always re-fetch the current row by its full PK to detect duplicate
       // reviews. Works for both new cards (guardLastReview == null) and
       // reviewed cards.
-      final currentWord = await (select(words)
-            ..where((w) =>
-                w.languageCode.equals(deckTable) & w.id.equals(wordId)))
-          .getSingleOrNull();
+      final currentWord =
+          await (select(words)..where(
+                (w) => w.languageCode.equals(deckTable) & w.id.equals(wordId),
+              ))
+              .getSingleOrNull();
       if (currentWord == null) return false;
       if (currentWord.lastReview != guardLastReview) return false;
 
@@ -457,45 +496,52 @@ class AppDatabase extends _$AppDatabase {
         reps: Value(reps),
         lapses: Value(lapses),
         lastReview: Value(lastReview),
-        feedback: legacyFeedback != null
-            ? Value(legacyFeedback)
+        feedback: feedbackValue != null
+            ? Value(feedbackValue)
             : const Value.absent(),
       );
-      await (update(words)
-            ..where((w) =>
-                w.languageCode.equals(deckTable) & w.id.equals(wordId)))
+      await (update(words)..where(
+            (w) => w.languageCode.equals(deckTable) & w.id.equals(wordId),
+          ))
           .write(values);
 
       // ── Insert revlog entry ──
-      await into(revlogEntries).insert(RevlogEntriesCompanion.insert(
-            cardId: wordId,
-            deckTable: deckTable,
-            rating: rating,
-            state: cardState,
-            due: due ?? '',
-            stability: stability,
-            difficulty: difficulty,
-            elapsedDays: elapsedDays,
-            lastElapsedDays: Value(elapsedDays),
-            scheduledDays: scheduledDays,
-            reviewDate: reviewDate,
-          ));
+      await into(revlogEntries).insert(
+        RevlogEntriesCompanion.insert(
+          cardId: wordId,
+          deckTable: deckTable,
+          rating: rating,
+          // Revlog state is the state before the review. The word row stores
+          // the resulting state used by the next FSRS review.
+          state: reviewState,
+          due: due ?? '',
+          stability: stability,
+          difficulty: difficulty,
+          elapsedDays: elapsedDays,
+          lastElapsedDays: Value(elapsedDays),
+          scheduledDays: scheduledDays,
+          reviewDate: reviewDate,
+        ),
+      );
 
       return true;
     });
   }
 
-  Future<void> updateSrsState(String languageCode, int id,
-      {required int cardState,
-      required double stability,
-      required double difficulty,
-      String? due,
-      required int elapsedDays,
-      required int scheduledDays,
-      required int reps,
-      required int lapses,
-      String? lastReview,
-      int? legacyFeedback}) async {
+  Future<void> updateSrsState(
+    String languageCode,
+    int id, {
+    required int cardState,
+    required double stability,
+    required double difficulty,
+    String? due,
+    required int elapsedDays,
+    required int scheduledDays,
+    required int reps,
+    required int lapses,
+    String? lastReview,
+    int? feedbackValue,
+  }) async {
     final values = WordsCompanion(
       cardState: Value(cardState),
       stability: Value(stability),
@@ -506,29 +552,34 @@ class AppDatabase extends _$AppDatabase {
       reps: Value(reps),
       lapses: Value(lapses),
       lastReview: Value(lastReview),
-      feedback: legacyFeedback != null ? Value(legacyFeedback) : const Value.absent(),
+      feedback: feedbackValue != null
+          ? Value(feedbackValue)
+          : const Value.absent(),
     );
     await (update(words)
-          ..where((w) =>
-              w.languageCode.equals(languageCode) & w.id.equals(id)))
+          ..where((w) => w.languageCode.equals(languageCode) & w.id.equals(id)))
         .write(values);
   }
 
   Future<void> markAsSeen(String languageCode, int id, String date) =>
-      (update(words)
-            ..where((w) =>
-                w.languageCode.equals(languageCode) & w.id.equals(id)))
+      (update(words)..where(
+            (w) => w.languageCode.equals(languageCode) & w.id.equals(id),
+          ))
           .write(WordsCompanion(isSeen: const Value(1), date: Value(date)));
 
   Future<void> markMultipleAsSeen(
-      String languageCode, List<int> ids, String date) async {
+    String languageCode,
+    List<int> ids,
+    String date,
+  ) async {
     if (ids.isEmpty) return;
     // Build parameterized IN clause: language_code = ? AND id IN (?, ?, ...)
     final placeholders = ids.map((_) => '?').join(',');
     await customStatement(
-        'UPDATE words SET isSeen = 1, date = ? '
-        'WHERE language_code = ? AND id IN ($placeholders)',
-        [date, languageCode, ...ids]);
+      'UPDATE words SET isSeen = 1, date = ? '
+      'WHERE language_code = ? AND id IN ($placeholders)',
+      [date, languageCode, ...ids],
+    );
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -537,9 +588,9 @@ class AppDatabase extends _$AppDatabase {
 
   Future<int> ensureFavoritesDeck() async {
     await _ensureFavoritesDeck();
-    final row = await (select(decks)
-          ..where((d) => d.systemKey.equals('favorites')))
-        .getSingle();
+    final row = await (select(
+      decks,
+    )..where((d) => d.systemKey.equals('favorites'))).getSingle();
     return row.id;
   }
 
@@ -557,13 +608,15 @@ class AppDatabase extends _$AppDatabase {
     ''').get();
 
     return rows
-        .map((row) => DeckSummary(
-              id: row.read<int>('id'),
-              name: row.read<String>('name'),
-              deckType: row.read<String>('deck_type'),
-              systemKey: row.readNullable<String>('system_key'),
-              cardCount: row.read<int>('card_count'),
-            ))
+        .map(
+          (row) => DeckSummary(
+            id: row.read<int>('id'),
+            name: row.read<String>('name'),
+            deckType: row.read<String>('deck_type'),
+            systemKey: row.readNullable<String>('system_key'),
+            cardCount: row.read<int>('card_count'),
+          ),
+        )
         .toList();
   }
 
@@ -574,19 +627,21 @@ class AppDatabase extends _$AppDatabase {
       throw ArgumentError('Deck name cannot exceed 60 characters');
     }
 
-    return into(decks).insert(DecksCompanion.insert(
-          name: trimmed,
-          deckType: 'custom',
-          createdAt: DateTime.now().toUtc().toIso8601String(),
-        ));
+    return into(decks).insert(
+      DecksCompanion.insert(
+        name: trimmed,
+        deckType: 'custom',
+        createdAt: DateTime.now().toUtc().toIso8601String(),
+      ),
+    );
   }
 
   Future<void> deleteCustomDeck(int deckId) async {
     await transaction(() async {
       await (delete(deckCards)..where((c) => c.deckId.equals(deckId))).go();
-      await (delete(decks)
-            ..where((d) => d.id.equals(deckId) & d.deckType.equals('custom')))
-          .go();
+      await (delete(
+        decks,
+      )..where((d) => d.id.equals(deckId) & d.deckType.equals('custom'))).go();
     });
   }
 
@@ -596,13 +651,15 @@ class AppDatabase extends _$AppDatabase {
     required String sourceLanguage,
     required String targetLanguage,
   }) async {
-    await into(deckCards).insertOnConflictUpdate(DeckCardsCompanion.insert(
-          deckId: deckId,
-          wordId: wordId,
-          sourceLanguage: sourceLanguage,
-          targetLanguage: targetLanguage,
-          addedAt: DateTime.now().toUtc().toIso8601String(),
-        ));
+    await into(deckCards).insertOnConflictUpdate(
+      DeckCardsCompanion.insert(
+        deckId: deckId,
+        wordId: wordId,
+        sourceLanguage: sourceLanguage,
+        targetLanguage: targetLanguage,
+        addedAt: DateTime.now().toUtc().toIso8601String(),
+      ),
+    );
   }
 
   Future<bool> isWordInDeck({
@@ -611,12 +668,15 @@ class AppDatabase extends _$AppDatabase {
     required String sourceLanguage,
     required String targetLanguage,
   }) async {
-    final row = await (select(deckCards)..where((c) =>
-          c.deckId.equals(deckId) &
-          c.wordId.equals(wordId) &
-          c.sourceLanguage.equals(sourceLanguage) &
-          c.targetLanguage.equals(targetLanguage)))
-        .getSingleOrNull();
+    final row =
+        await (select(deckCards)..where(
+              (c) =>
+                  c.deckId.equals(deckId) &
+                  c.wordId.equals(wordId) &
+                  c.sourceLanguage.equals(sourceLanguage) &
+                  c.targetLanguage.equals(targetLanguage),
+            ))
+            .getSingleOrNull();
     return row != null;
   }
 
@@ -626,7 +686,8 @@ class AppDatabase extends _$AppDatabase {
     final today =
         '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 
-    final rows = await customSelect('''
+    final rows = await customSelect(
+      '''
       SELECT w.*,
              dc.source_language AS deck_source_language,
              dc.target_language AS deck_target_language,
@@ -646,21 +707,26 @@ class AppDatabase extends _$AppDatabase {
                END,
                COALESCE(w.due, '9999-12-31'), dc.added_at
       LIMIT ?
-    ''', variables: [
-      Variable.withInt(deckId),
-      Variable.withString(today),
-      Variable.withInt(limit),
-    ], readsFrom: {words, deckCards}).get();
+    ''',
+      variables: [
+        Variable.withInt(deckId),
+        Variable.withString(today),
+        Variable.withInt(limit),
+      ],
+      readsFrom: {words, deckCards},
+    ).get();
 
     final entries = <DeckWordEntry>[];
     for (final row in rows) {
-      entries.add(DeckWordEntry(
-        word: await words.mapFromRow(row),
-        sourceLanguage: row.read<String>('deck_source_language'),
-        targetLanguage: row.read<String>('deck_target_language'),
-        sourceWord: row.readNullable<String>('source_word'),
-        sourceSentence: row.readNullable<String>('source_sentence'),
-      ));
+      entries.add(
+        DeckWordEntry(
+          word: await words.mapFromRow(row),
+          sourceLanguage: row.read<String>('deck_source_language'),
+          targetLanguage: row.read<String>('deck_target_language'),
+          sourceWord: row.readNullable<String>('source_word'),
+          sourceSentence: row.readNullable<String>('source_sentence'),
+        ),
+      );
     }
     return entries;
   }
@@ -678,9 +744,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   Future<Word?> fetchWordByText(String language, String text) =>
-      (select(words)
-            ..where((w) =>
-                w.languageCode.equals(language) & w.word.equals(text)))
+      (select(words)..where(
+            (w) => w.languageCode.equals(language) & w.word.equals(text),
+          ))
           .getSingleOrNull();
 
   Future<List<Map<String, dynamic>>> fetchAllDeckCardsForExport() async {
@@ -689,88 +755,16 @@ class AppDatabase extends _$AppDatabase {
       FROM deck_cards ORDER BY deck_id, added_at
     ''').get();
     return rows
-        .map((row) => {
-              'deck_id': row.read<int>('deck_id'),
-              'word_id': row.read<int>('word_id'),
-              'source_language': row.read<String>('source_language'),
-              'target_language': row.read<String>('target_language'),
-              'added_at': row.read<String>('added_at'),
-            })
+        .map(
+          (row) => {
+            'deck_id': row.read<int>('deck_id'),
+            'word_id': row.read<int>('word_id'),
+            'source_language': row.read<String>('source_language'),
+            'target_language': row.read<String>('target_language'),
+            'added_at': row.read<String>('added_at'),
+          },
+        )
         .toList();
-  }
-
-  // ═══════════════════════════════════════════════════════════════
-  //  Legacy favorite helpers
-  // ═══════════════════════════════════════════════════════════════
-
-  /// Fetches a bounded, deterministic-random window of favorite cards.
-  ///
-  /// The count keeps the result bounded in memory while the random offset
-  /// preserves variety without sorting the whole favorites table with
-  /// `ORDER BY RANDOM()`.
-  Future<List<Word>> fetchFavoriteDeckWords(int limit) async {
-    if (limit <= 0) return [];
-
-    final countRow = await customSelect(
-      'SELECT COUNT(*) AS favorite_count '
-      'FROM words WHERE language_code = ?',
-      variables: [Variable.withString('fav')],
-    ).getSingle();
-    final count = countRow.read<int>('favorite_count');
-    if (count == 0) return [];
-
-    final windowSize = min(limit, count);
-    final offset =
-        count > windowSize ? Random().nextInt(count - windowSize + 1) : 0;
-
-    return (select(words)
-          ..where((w) => w.languageCode.equals('fav'))
-          ..orderBy([(w) => OrderingTerm.asc(w.id)])
-          ..limit(windowSize, offset: offset))
-        .get();
-  }
-
-  /// Fetches all favorites for export and backup operations.
-  Future<List<Word>> fetchAllFavorites() =>
-      (select(words)..where((w) => w.languageCode.equals('fav'))).get();
-
-  Future<bool> isFavorite(String word) async {
-    final cnt = await (selectOnly(words)
-          ..addColumns([words.id])
-          ..where(words.word.equals(word) & words.languageCode.equals('fav')))
-        .map((r) => r.read(words.id))
-        .get();
-    return cnt.isNotEmpty;
-  }
-
-  Future<void> removeFromFav(String word) async {
-    await (delete(words)
-          ..where((w) => w.word.equals(word) & w.languageCode.equals('fav')))
-        .go();
-  }
-
-  Future<void> addToFav(
-      {required String word,
-      required String sentence,
-      required String level,
-      String? backWord,
-      String? backSentence}) async {
-    // Keep favorite insertion idempotent. This also protects callers whose
-    // cached favorite state has not been initialized yet.
-    if (await isFavorite(word)) return;
-
-    final maxIdRow = await customSelect(
-        'SELECT MAX(id) as max_id FROM words WHERE language_code = "fav"').getSingle();
-    final nextId = (maxIdRow.readNullable<int>('max_id') ?? 0) + 1;
-    await into(words).insert(WordsCompanion.insert(
-          id: nextId,
-          word: word,
-          sentence: sentence,
-          level: level,
-          languageCode: 'fav',
-          backword: Value(backWord ?? ''),
-          backsentence: Value(backSentence ?? ''),
-        ));
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -785,74 +779,105 @@ class AppDatabase extends _$AppDatabase {
       'mainLanguage': r.mainLanguage,
       'targetLanguage': r.targetLanguage,
       'firstTime': r.firstTime,
+      'reviewMode': r.reviewMode,
     };
   }
 
   Future<void> saveUserChoices(
-          String mainLanguage, String targetLanguage) async =>
-      into(userSettings).insertOnConflictUpdate(
-          UserSettingsCompanion.insert(
-              mainLanguage: mainLanguage,
-              targetLanguage: targetLanguage,
-              firstTime: 'true'));
+    String mainLanguage,
+    String targetLanguage, {
+    String reviewMode = 'buttons',
+  }) async {
+    final normalizedMode = reviewMode == 'swipe' ? 'swipe' : 'buttons';
+    await transaction(() async {
+      // The preferences table intentionally stores one row and has no primary
+      // key, so replacing the row is clearer than using an invalid upsert.
+      await delete(userSettings).go();
+      await into(userSettings).insert(
+        UserSettingsCompanion.insert(
+          mainLanguage: mainLanguage,
+          targetLanguage: targetLanguage,
+          firstTime: 'false',
+          reviewMode: Value(normalizedMode),
+        ),
+      );
+    });
+  }
 
   // ═══════════════════════════════════════════════════════════════
   //  Revlog
   // ═══════════════════════════════════════════════════════════════
 
-  Future<void> insertRevlogEntry(
-          {required int cardId,
-          required String deckTable,
-          required int rating,
-          required int state,
-          required String due,
-          required double stability,
-          required double difficulty,
-          required int elapsedDays,
-          required int lastElapsedDays,
-          required int scheduledDays,
-          required String reviewDate}) async =>
-      into(revlogEntries).insert(RevlogEntriesCompanion.insert(
-            cardId: cardId,
-            deckTable: deckTable,
-            rating: rating,
-            state: state,
-            due: due,
-            stability: stability,
-            difficulty: difficulty,
-            elapsedDays: elapsedDays,
-            lastElapsedDays: Value(lastElapsedDays),
-            scheduledDays: scheduledDays,
-            reviewDate: reviewDate,
-          ));
+  Future<void> insertRevlogEntry({
+    required int cardId,
+    required String deckTable,
+    required int rating,
+    required int state,
+    required String due,
+    required double stability,
+    required double difficulty,
+    required int elapsedDays,
+    required int lastElapsedDays,
+    required int scheduledDays,
+    required String reviewDate,
+  }) async => into(revlogEntries).insert(
+    RevlogEntriesCompanion.insert(
+      cardId: cardId,
+      deckTable: deckTable,
+      rating: rating,
+      state: state,
+      due: due,
+      stability: stability,
+      difficulty: difficulty,
+      elapsedDays: elapsedDays,
+      lastElapsedDays: Value(lastElapsedDays),
+      scheduledDays: scheduledDays,
+      reviewDate: reviewDate,
+    ),
+  );
 
   /// Counts today's new and review cards for [language].
   ///
   /// Date storage strategy (see plan §1.6):
   /// - Day-level fields (`date`, `due`): `YYYY-MM-DD` string
   /// - Timestamps (`last_review`, `review_date`): UTC ISO-8601
-  /// - This query uses ISO-8601 prefix comparison (lexicographic) to
-  ///   select today's revlog entries regardless of time-of-day or timezone.
-  Future<({int newCount, int reviewCount})> getTodayCounts(String language,
-      [String? level]) async {
-    final nowUtc = DateTime.now().toUtc();
-    // Start of today UTC, as an ISO-8601 date-only prefix.
-    final todayPrefix =
-        '${nowUtc.year}-${nowUtc.month.toString().padLeft(2, '0')}-${nowUtc.day.toString().padLeft(2, '0')}';
-    final tomorrow = nowUtc.add(const Duration(days: 1));
-    final tomorrowPrefix =
-        '${tomorrow.year}-${tomorrow.month.toString().padLeft(2, '0')}-${tomorrow.day.toString().padLeft(2, '0')}';
+  /// - The local calendar day is converted to a UTC range before querying so
+  ///   the daily limit matches the local "today" counter.
+  Future<({int newCount, int reviewCount})> getTodayCounts(
+    String language, [
+    String? level,
+  ]) async {
+    final nowLocal = DateTime.now();
+    final localStart = DateTime(
+      nowLocal.year,
+      nowLocal.month,
+      nowLocal.day,
+    ).toUtc();
+    final localEnd = localStart.add(const Duration(days: 1));
+    final startIso = localStart.toIso8601String();
+    final endIso = localEnd.toIso8601String();
+
+    var sql = '''SELECT
+          SUM(CASE WHEN r.state = 0 THEN 1 ELSE 0 END) as new_cnt,
+          SUM(CASE WHEN r.state IN (2,3) THEN 1 ELSE 0 END) as review_cnt
+        FROM revlog r
+        LEFT JOIN words w
+          ON w.language_code = r.deck_table AND w.id = r.card_id
+        WHERE r.deck_table = ? AND r.review_date >= ? AND r.review_date < ?''';
+    final variables = <Variable<Object>>[
+      Variable.withString(language),
+      Variable.withString(startIso),
+      Variable.withString(endIso),
+    ];
+    if (level != null && level != 'fav') {
+      sql += ' AND w.level = ?';
+      variables.add(Variable.withString(level));
+    }
 
     final rows = await customSelect(
-      '''SELECT
-        SUM(CASE WHEN state = 0 THEN 1 ELSE 0 END) as new_cnt,
-        SUM(CASE WHEN state IN (2,3) THEN 1 ELSE 0 END) as review_cnt
-      FROM revlog WHERE deck_table = ? AND review_date >= ? AND review_date < ?''',
-      variables: [
-        Variable.withString(language),
-        Variable.withString(todayPrefix),
-        Variable.withString(tomorrowPrefix),
-      ],
+      sql,
+      variables: variables,
+      readsFrom: {revlogEntries, words},
     ).get();
     return (
       newCount: rows.firstOrNull?.readNullable<int>('new_cnt') ?? 0,
@@ -865,30 +890,34 @@ class AppDatabase extends _$AppDatabase {
   // ═══════════════════════════════════════════════════════════════
 
   Future<DeckConfig?> getDeckConfig(String level) async {
-    final rows =
-        await (select(deckConfigs)..where((t) => t.level.equals(level))).get();
+    final rows = await (select(
+      deckConfigs,
+    )..where((t) => t.level.equals(level))).get();
     if (rows.isNotEmpty) return rows.first;
-    return (select(deckConfigs)..where((t) => t.level.equals('default')))
-        .getSingleOrNull();
+    return (select(
+      deckConfigs,
+    )..where((t) => t.level.equals('default'))).getSingleOrNull();
   }
 
-  Future<void> saveDeckConfigEntry(
-          {required String level,
-          required int maxNewPerDay,
-          required int maxReviewsPerDay,
-          required String learningSteps,
-          required bool enableFuzz,
-          required double requestRetention,
-          String? w}) async =>
-      into(deckConfigs).insertOnConflictUpdate(DeckConfigsCompanion.insert(
-            level: level,
-            maxNewPerDay: Value(maxNewPerDay),
-            maxReviewsPerDay: Value(maxReviewsPerDay),
-            learningSteps: Value(learningSteps),
-            enableFuzz: Value(enableFuzz ? 1 : 0),
-            requestRetention: Value(requestRetention),
-            w: Value(w),
-          ));
+  Future<void> saveDeckConfigEntry({
+    required String level,
+    required int maxNewPerDay,
+    required int maxReviewsPerDay,
+    required String learningSteps,
+    required bool enableFuzz,
+    required double requestRetention,
+    String? w,
+  }) async => into(deckConfigs).insertOnConflictUpdate(
+    DeckConfigsCompanion.insert(
+      level: level,
+      maxNewPerDay: Value(maxNewPerDay),
+      maxReviewsPerDay: Value(maxReviewsPerDay),
+      learningSteps: Value(learningSteps),
+      enableFuzz: Value(enableFuzz ? 1 : 0),
+      requestRetention: Value(requestRetention),
+      w: Value(w),
+    ),
+  );
 
   // ═══════════════════════════════════════════════════════════════
   //  Export helpers
@@ -898,19 +927,21 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Map<String, dynamic>>> fetchAllRevlog() async {
     final rows = await customSelect('SELECT * FROM revlog').get();
     return rows
-        .map((r) => {
-              'card_id': r.read<int>('card_id'),
-              'deck_table': r.read<String>('deck_table'),
-              'rating': r.read<int>('rating'),
-              'state': r.read<int>('state'),
-              'due': r.read<String>('due'),
-              'stability': r.read<double>('stability'),
-              'difficulty': r.read<double>('difficulty'),
-              'elapsed_days': r.read<int>('elapsed_days'),
-              'last_elapsed_days': r.read<int>('last_elapsed_days'),
-              'scheduled_days': r.read<int>('scheduled_days'),
-              'review_date': r.read<String>('review_date'),
-            })
+        .map(
+          (r) => {
+            'card_id': r.read<int>('card_id'),
+            'deck_table': r.read<String>('deck_table'),
+            'rating': r.read<int>('rating'),
+            'state': r.read<int>('state'),
+            'due': r.read<String>('due'),
+            'stability': r.read<double>('stability'),
+            'difficulty': r.read<double>('difficulty'),
+            'elapsed_days': r.read<int>('elapsed_days'),
+            'last_elapsed_days': r.read<int>('last_elapsed_days'),
+            'scheduled_days': r.read<int>('scheduled_days'),
+            'review_date': r.read<String>('review_date'),
+          },
+        )
         .toList();
   }
 
@@ -918,15 +949,17 @@ class AppDatabase extends _$AppDatabase {
   Future<List<Map<String, dynamic>>> fetchAllDeckConfigs() async {
     final rows = await customSelect('SELECT * FROM deck_config').get();
     return rows
-        .map((r) => {
-              'level': r.read<String>('level'),
-              'max_new_per_day': r.read<int>('max_new_per_day'),
-              'max_reviews_per_day': r.read<int>('max_reviews_per_day'),
-              'learning_steps': r.read<String>('learning_steps'),
-              'enable_fuzz': r.read<int>('enable_fuzz'),
-              'request_retention': r.read<double>('request_retention'),
-              'w': r.readNullable<String>('w'),
-            })
+        .map(
+          (r) => {
+            'level': r.read<String>('level'),
+            'max_new_per_day': r.read<int>('max_new_per_day'),
+            'max_reviews_per_day': r.read<int>('max_reviews_per_day'),
+            'learning_steps': r.read<String>('learning_steps'),
+            'enable_fuzz': r.read<int>('enable_fuzz'),
+            'request_retention': r.read<double>('request_retention'),
+            'w': r.readNullable<String>('w'),
+          },
+        )
         .toList();
   }
 
@@ -936,23 +969,25 @@ class AppDatabase extends _$AppDatabase {
       'SELECT * FROM words WHERE isSeen = 1 OR card_state != 0',
     ).get();
     return rows
-        .map((r) => {
-              'id': r.read<int>('id'),
-              'language_code': r.read<String>('language_code'),
-              'word': r.read<String>('word'),
-              'level': r.read<String>('level'),
-              'card_state': r.read<int>('card_state'),
-              'stability': r.read<double>('stability'),
-              'difficulty': r.read<double>('difficulty'),
-              'due': r.readNullable<String>('due'),
-              'elapsed_days': r.read<int>('elapsed_days'),
-              'scheduled_days': r.read<int>('scheduled_days'),
-              'reps': r.read<int>('reps'),
-              'lapses': r.read<int>('lapses'),
-              'last_review': r.readNullable<String>('last_review'),
-              'isSeen': r.read<int>('isSeen'),
-              'date': r.readNullable<String>('date'),
-            })
+        .map(
+          (r) => {
+            'id': r.read<int>('id'),
+            'language_code': r.read<String>('language_code'),
+            'word': r.read<String>('word'),
+            'level': r.read<String>('level'),
+            'card_state': r.read<int>('card_state'),
+            'stability': r.read<double>('stability'),
+            'difficulty': r.read<double>('difficulty'),
+            'due': r.readNullable<String>('due'),
+            'elapsed_days': r.read<int>('elapsed_days'),
+            'scheduled_days': r.read<int>('scheduled_days'),
+            'reps': r.read<int>('reps'),
+            'lapses': r.read<int>('lapses'),
+            'last_review': r.readNullable<String>('last_review'),
+            'isSeen': r.read<int>('isSeen'),
+            'date': r.readNullable<String>('date'),
+          },
+        )
         .toList();
   }
 
@@ -961,34 +996,38 @@ class AppDatabase extends _$AppDatabase {
   // ═══════════════════════════════════════════════════════════════
 
   Future<void> resetSrsState(String language) async {
-    await (update(words)
-          ..where((w) => w.languageCode.equals(language)))
-        .write(const WordsCompanion(
-          cardState: Value(0),
-          stability: Value(0.0),
-          difficulty: Value(0.0),
-          due: Value.absent(),
-          elapsedDays: Value(0),
-          scheduledDays: Value(0),
-          reps: Value(0),
-          lapses: Value(0),
-          lastReview: Value.absent(),
-        ));
+    await (update(words)..where((w) => w.languageCode.equals(language))).write(
+      const WordsCompanion(
+        cardState: Value(0),
+        stability: Value(0.0),
+        difficulty: Value(0.0),
+        due: Value(null),
+        elapsedDays: Value(0),
+        scheduledDays: Value(0),
+        reps: Value(0),
+        lapses: Value(0),
+        lastReview: Value(null),
+      ),
+    );
   }
 
   Future<void> resetAllProgress() async {
-    await (update(words)).write(const WordsCompanion(
-      isSeen: Value(0),
-      date: Value(''),
-      feedback: Value(0),
-      cardState: Value(0),
-      stability: Value(0.0),
-      difficulty: Value(0.0),
-      elapsedDays: Value(0),
-      scheduledDays: Value(0),
-      reps: Value(0),
-      lapses: Value(0),
-    ));
+    await (update(words)).write(
+      const WordsCompanion(
+        isSeen: Value(0),
+        date: Value(''),
+        feedback: Value(0),
+        cardState: Value(0),
+        stability: Value(0.0),
+        difficulty: Value(0.0),
+        due: Value(null),
+        elapsedDays: Value(0),
+        scheduledDays: Value(0),
+        reps: Value(0),
+        lapses: Value(0),
+        lastReview: Value(null),
+      ),
+    );
     await delete(deckCards).go();
     await (delete(decks)..where((d) => d.deckType.equals('custom'))).go();
     await _ensureFavoritesDeck();

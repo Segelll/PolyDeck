@@ -11,15 +11,8 @@ class Word {
   final int isSeen;
   final String? date;
 
-  /// Legacy 3-value feedback (1=hard, 2=easy, 3=medium).
-  /// Kept for backward compatibility. New reviews use FSRS.
+  /// Cached review feedback retained for the progress filters.
   final int feedback;
-
-  /// Translation in mother language.
-  final String? backWord;
-
-  /// Translated sentence in mother language.
-  final String? backSentence;
 
   // ── FSRS scheduling fields ──
   final int cardState;
@@ -40,8 +33,6 @@ class Word {
     this.isSeen = 0,
     this.feedback = 0,
     this.date,
-    this.backWord,
-    this.backSentence,
     this.cardState = 0,
     this.stability = 0.0,
     this.difficulty = 0.0,
@@ -83,8 +74,6 @@ class Word {
       isSeen: map['isSeen'] as int? ?? 0,
       feedback: map['feedback'] as int? ?? 0,
       date: map['date'] as String?,
-      backWord: map['backword'] as String?,
-      backSentence: map['backsentence'] as String?,
       cardState: map['card_state'] as int? ?? 0,
       stability: (map['stability'] as num?)?.toDouble() ?? 0.0,
       difficulty: (map['difficulty'] as num?)?.toDouble() ?? 0.0,
@@ -105,8 +94,6 @@ class Word {
     int? isSeen,
     int? feedback,
     String? date,
-    String? backWord,
-    String? backSentence,
     int? cardState,
     double? stability,
     double? difficulty,
@@ -125,8 +112,6 @@ class Word {
       isSeen: isSeen ?? this.isSeen,
       feedback: feedback ?? this.feedback,
       date: date ?? this.date,
-      backWord: backWord ?? this.backWord,
-      backSentence: backSentence ?? this.backSentence,
       cardState: cardState ?? this.cardState,
       stability: stability ?? this.stability,
       difficulty: difficulty ?? this.difficulty,

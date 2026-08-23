@@ -13,10 +13,12 @@ class UserRepository {
       final raw = await _db.getUserChoices();
       if (raw == null) return null;
       return {
-        'mainLanguage': LanguageCodes.displayCodeFor(raw['mainLanguage'] ?? 'en'),
+        'mainLanguage':
+            LanguageCodes.displayCodeFor(raw['mainLanguage'] ?? 'en'),
         'targetLanguage':
             LanguageCodes.displayCodeFor(raw['targetLanguage'] ?? 'tr'),
         'firstTime': raw['firstTime'] ?? 'true',
+        'reviewMode': raw['reviewMode'] ?? 'buttons',
       };
     } catch (e) {
       if (kDebugMode) print('UserRepository.getUserChoices error: $e');
@@ -24,11 +26,12 @@ class UserRepository {
     }
   }
 
-  Future<void> saveUserChoices(
-      String mainLanguage, String targetLanguage) async {
+  Future<void> saveUserChoices(String mainLanguage, String targetLanguage,
+      {String reviewMode = 'buttons'}) async {
     await _db.saveUserChoices(
       LanguageCodes.tableNameFor(mainLanguage),
       LanguageCodes.tableNameFor(targetLanguage),
+      reviewMode: reviewMode,
     );
   }
 }

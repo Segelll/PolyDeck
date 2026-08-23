@@ -11,157 +11,213 @@ class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _wordMeta = const VerificationMeta('word');
   @override
   late final GeneratedColumn<String> word = GeneratedColumn<String>(
-      'word', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _sentenceMeta =
-      const VerificationMeta('sentence');
+    'word',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sentenceMeta = const VerificationMeta(
+    'sentence',
+  );
   @override
   late final GeneratedColumn<String> sentence = GeneratedColumn<String>(
-      'sentence', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'sentence',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _levelMeta = const VerificationMeta('level');
   @override
   late final GeneratedColumn<String> level = GeneratedColumn<String>(
-      'level', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _languageCodeMeta =
-      const VerificationMeta('languageCode');
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _languageCodeMeta = const VerificationMeta(
+    'languageCode',
+  );
   @override
   late final GeneratedColumn<String> languageCode = GeneratedColumn<String>(
-      'language_code', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'language_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _isSeenMeta = const VerificationMeta('isSeen');
   @override
   late final GeneratedColumn<int> isSeen = GeneratedColumn<int>(
-      'isSeen', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _feedbackMeta =
-      const VerificationMeta('feedback');
+    'isSeen',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _feedbackMeta = const VerificationMeta(
+    'feedback',
+  );
   @override
   late final GeneratedColumn<int> feedback = GeneratedColumn<int>(
-      'feedback', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'feedback',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _dateMeta = const VerificationMeta('date');
   @override
   late final GeneratedColumn<String> date = GeneratedColumn<String>(
-      'date', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _cardStateMeta =
-      const VerificationMeta('cardState');
+    'date',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cardStateMeta = const VerificationMeta(
+    'cardState',
+  );
   @override
   late final GeneratedColumn<int> cardState = GeneratedColumn<int>(
-      'card_state', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _stabilityMeta =
-      const VerificationMeta('stability');
+    'card_state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _stabilityMeta = const VerificationMeta(
+    'stability',
+  );
   @override
   late final GeneratedColumn<double> stability = GeneratedColumn<double>(
-      'stability', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0.0));
-  static const VerificationMeta _difficultyMeta =
-      const VerificationMeta('difficulty');
+    'stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
   @override
   late final GeneratedColumn<double> difficulty = GeneratedColumn<double>(
-      'difficulty', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0.0));
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.0),
+  );
   static const VerificationMeta _dueMeta = const VerificationMeta('due');
   @override
   late final GeneratedColumn<String> due = GeneratedColumn<String>(
-      'due', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _elapsedDaysMeta =
-      const VerificationMeta('elapsedDays');
+    'due',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _elapsedDaysMeta = const VerificationMeta(
+    'elapsedDays',
+  );
   @override
   late final GeneratedColumn<int> elapsedDays = GeneratedColumn<int>(
-      'elapsed_days', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _scheduledDaysMeta =
-      const VerificationMeta('scheduledDays');
+    'elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _scheduledDaysMeta = const VerificationMeta(
+    'scheduledDays',
+  );
   @override
   late final GeneratedColumn<int> scheduledDays = GeneratedColumn<int>(
-      'scheduled_days', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'scheduled_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _repsMeta = const VerificationMeta('reps');
   @override
   late final GeneratedColumn<int> reps = GeneratedColumn<int>(
-      'reps', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
+    'reps',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _lapsesMeta = const VerificationMeta('lapses');
   @override
   late final GeneratedColumn<int> lapses = GeneratedColumn<int>(
-      'lapses', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _lastReviewMeta =
-      const VerificationMeta('lastReview');
+    'lapses',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastReviewMeta = const VerificationMeta(
+    'lastReview',
+  );
   @override
   late final GeneratedColumn<String> lastReview = GeneratedColumn<String>(
-      'last_review', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _backwordMeta =
-      const VerificationMeta('backword');
-  @override
-  late final GeneratedColumn<String> backword = GeneratedColumn<String>(
-      'backword', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _backsentenceMeta =
-      const VerificationMeta('backsentence');
-  @override
-  late final GeneratedColumn<String> backsentence = GeneratedColumn<String>(
-      'backsentence', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'last_review',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        word,
-        sentence,
-        level,
-        languageCode,
-        isSeen,
-        feedback,
-        date,
-        cardState,
-        stability,
-        difficulty,
-        due,
-        elapsedDays,
-        scheduledDays,
-        reps,
-        lapses,
-        lastReview,
-        backword,
-        backsentence
-      ];
+    id,
+    word,
+    sentence,
+    level,
+    languageCode,
+    isSeen,
+    feedback,
+    date,
+    cardState,
+    stability,
+    difficulty,
+    due,
+    elapsedDays,
+    scheduledDays,
+    reps,
+    lapses,
+    lastReview,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'words';
   @override
-  VerificationContext validateIntegrity(Insertable<Word> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Word> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -171,95 +227,116 @@ class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
     }
     if (data.containsKey('word')) {
       context.handle(
-          _wordMeta, word.isAcceptableOrUnknown(data['word']!, _wordMeta));
+        _wordMeta,
+        word.isAcceptableOrUnknown(data['word']!, _wordMeta),
+      );
     } else if (isInserting) {
       context.missing(_wordMeta);
     }
     if (data.containsKey('sentence')) {
-      context.handle(_sentenceMeta,
-          sentence.isAcceptableOrUnknown(data['sentence']!, _sentenceMeta));
+      context.handle(
+        _sentenceMeta,
+        sentence.isAcceptableOrUnknown(data['sentence']!, _sentenceMeta),
+      );
     } else if (isInserting) {
       context.missing(_sentenceMeta);
     }
     if (data.containsKey('level')) {
       context.handle(
-          _levelMeta, level.isAcceptableOrUnknown(data['level']!, _levelMeta));
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
     } else if (isInserting) {
       context.missing(_levelMeta);
     }
     if (data.containsKey('language_code')) {
       context.handle(
+        _languageCodeMeta,
+        languageCode.isAcceptableOrUnknown(
+          data['language_code']!,
           _languageCodeMeta,
-          languageCode.isAcceptableOrUnknown(
-              data['language_code']!, _languageCodeMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_languageCodeMeta);
     }
     if (data.containsKey('isSeen')) {
-      context.handle(_isSeenMeta,
-          isSeen.isAcceptableOrUnknown(data['isSeen']!, _isSeenMeta));
+      context.handle(
+        _isSeenMeta,
+        isSeen.isAcceptableOrUnknown(data['isSeen']!, _isSeenMeta),
+      );
     }
     if (data.containsKey('feedback')) {
-      context.handle(_feedbackMeta,
-          feedback.isAcceptableOrUnknown(data['feedback']!, _feedbackMeta));
+      context.handle(
+        _feedbackMeta,
+        feedback.isAcceptableOrUnknown(data['feedback']!, _feedbackMeta),
+      );
     }
     if (data.containsKey('date')) {
       context.handle(
-          _dateMeta, date.isAcceptableOrUnknown(data['date']!, _dateMeta));
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
     }
     if (data.containsKey('card_state')) {
-      context.handle(_cardStateMeta,
-          cardState.isAcceptableOrUnknown(data['card_state']!, _cardStateMeta));
+      context.handle(
+        _cardStateMeta,
+        cardState.isAcceptableOrUnknown(data['card_state']!, _cardStateMeta),
+      );
     }
     if (data.containsKey('stability')) {
-      context.handle(_stabilityMeta,
-          stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta));
+      context.handle(
+        _stabilityMeta,
+        stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta),
+      );
     }
     if (data.containsKey('difficulty')) {
       context.handle(
-          _difficultyMeta,
-          difficulty.isAcceptableOrUnknown(
-              data['difficulty']!, _difficultyMeta));
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
     }
     if (data.containsKey('due')) {
       context.handle(
-          _dueMeta, due.isAcceptableOrUnknown(data['due']!, _dueMeta));
+        _dueMeta,
+        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+      );
     }
     if (data.containsKey('elapsed_days')) {
       context.handle(
+        _elapsedDaysMeta,
+        elapsedDays.isAcceptableOrUnknown(
+          data['elapsed_days']!,
           _elapsedDaysMeta,
-          elapsedDays.isAcceptableOrUnknown(
-              data['elapsed_days']!, _elapsedDaysMeta));
+        ),
+      );
     }
     if (data.containsKey('scheduled_days')) {
       context.handle(
+        _scheduledDaysMeta,
+        scheduledDays.isAcceptableOrUnknown(
+          data['scheduled_days']!,
           _scheduledDaysMeta,
-          scheduledDays.isAcceptableOrUnknown(
-              data['scheduled_days']!, _scheduledDaysMeta));
+        ),
+      );
     }
     if (data.containsKey('reps')) {
       context.handle(
-          _repsMeta, reps.isAcceptableOrUnknown(data['reps']!, _repsMeta));
+        _repsMeta,
+        reps.isAcceptableOrUnknown(data['reps']!, _repsMeta),
+      );
     }
     if (data.containsKey('lapses')) {
-      context.handle(_lapsesMeta,
-          lapses.isAcceptableOrUnknown(data['lapses']!, _lapsesMeta));
+      context.handle(
+        _lapsesMeta,
+        lapses.isAcceptableOrUnknown(data['lapses']!, _lapsesMeta),
+      );
     }
     if (data.containsKey('last_review')) {
       context.handle(
-          _lastReviewMeta,
-          lastReview.isAcceptableOrUnknown(
-              data['last_review']!, _lastReviewMeta));
-    }
-    if (data.containsKey('backword')) {
-      context.handle(_backwordMeta,
-          backword.isAcceptableOrUnknown(data['backword']!, _backwordMeta));
-    }
-    if (data.containsKey('backsentence')) {
-      context.handle(
-          _backsentenceMeta,
-          backsentence.isAcceptableOrUnknown(
-              data['backsentence']!, _backsentenceMeta));
+        _lastReviewMeta,
+        lastReview.isAcceptableOrUnknown(data['last_review']!, _lastReviewMeta),
+      );
     }
     return context;
   }
@@ -270,44 +347,74 @@ class $WordsTable extends Words with TableInfo<$WordsTable, Word> {
   Word map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Word(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      word: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}word'])!,
-      sentence: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}sentence'])!,
-      level: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}level'])!,
-      languageCode: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}language_code'])!,
-      isSeen: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}isSeen'])!,
-      feedback: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}feedback'])!,
-      date: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}date']),
-      cardState: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}card_state'])!,
-      stability: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}stability'])!,
-      difficulty: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}difficulty'])!,
-      due: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}due']),
-      elapsedDays: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}elapsed_days'])!,
-      scheduledDays: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}scheduled_days'])!,
-      reps: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}reps'])!,
-      lapses: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}lapses'])!,
-      lastReview: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}last_review']),
-      backword: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}backword']),
-      backsentence: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}backsentence']),
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      word: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}word'],
+      )!,
+      sentence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sentence'],
+      )!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}level'],
+      )!,
+      languageCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}language_code'],
+      )!,
+      isSeen: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}isSeen'],
+      )!,
+      feedback: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}feedback'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      ),
+      cardState: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}card_state'],
+      )!,
+      stability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stability'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      due: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}due'],
+      ),
+      elapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}elapsed_days'],
+      )!,
+      scheduledDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scheduled_days'],
+      )!,
+      reps: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reps'],
+      )!,
+      lapses: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}lapses'],
+      )!,
+      lastReview: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_review'],
+      ),
     );
   }
 
@@ -335,28 +442,25 @@ class Word extends DataClass implements Insertable<Word> {
   final int reps;
   final int lapses;
   final String? lastReview;
-  final String? backword;
-  final String? backsentence;
-  const Word(
-      {required this.id,
-      required this.word,
-      required this.sentence,
-      required this.level,
-      required this.languageCode,
-      required this.isSeen,
-      required this.feedback,
-      this.date,
-      required this.cardState,
-      required this.stability,
-      required this.difficulty,
-      this.due,
-      required this.elapsedDays,
-      required this.scheduledDays,
-      required this.reps,
-      required this.lapses,
-      this.lastReview,
-      this.backword,
-      this.backsentence});
+  const Word({
+    required this.id,
+    required this.word,
+    required this.sentence,
+    required this.level,
+    required this.languageCode,
+    required this.isSeen,
+    required this.feedback,
+    this.date,
+    required this.cardState,
+    required this.stability,
+    required this.difficulty,
+    this.due,
+    required this.elapsedDays,
+    required this.scheduledDays,
+    required this.reps,
+    required this.lapses,
+    this.lastReview,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -383,12 +487,6 @@ class Word extends DataClass implements Insertable<Word> {
     if (!nullToAbsent || lastReview != null) {
       map['last_review'] = Variable<String>(lastReview);
     }
-    if (!nullToAbsent || backword != null) {
-      map['backword'] = Variable<String>(backword);
-    }
-    if (!nullToAbsent || backsentence != null) {
-      map['backsentence'] = Variable<String>(backsentence);
-    }
     return map;
   }
 
@@ -413,17 +511,13 @@ class Word extends DataClass implements Insertable<Word> {
       lastReview: lastReview == null && nullToAbsent
           ? const Value.absent()
           : Value(lastReview),
-      backword: backword == null && nullToAbsent
-          ? const Value.absent()
-          : Value(backword),
-      backsentence: backsentence == null && nullToAbsent
-          ? const Value.absent()
-          : Value(backsentence),
     );
   }
 
-  factory Word.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Word.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Word(
       id: serializer.fromJson<int>(json['id']),
@@ -443,8 +537,6 @@ class Word extends DataClass implements Insertable<Word> {
       reps: serializer.fromJson<int>(json['reps']),
       lapses: serializer.fromJson<int>(json['lapses']),
       lastReview: serializer.fromJson<String?>(json['lastReview']),
-      backword: serializer.fromJson<String?>(json['backword']),
-      backsentence: serializer.fromJson<String?>(json['backsentence']),
     );
   }
   @override
@@ -468,53 +560,46 @@ class Word extends DataClass implements Insertable<Word> {
       'reps': serializer.toJson<int>(reps),
       'lapses': serializer.toJson<int>(lapses),
       'lastReview': serializer.toJson<String?>(lastReview),
-      'backword': serializer.toJson<String?>(backword),
-      'backsentence': serializer.toJson<String?>(backsentence),
     };
   }
 
-  Word copyWith(
-          {int? id,
-          String? word,
-          String? sentence,
-          String? level,
-          String? languageCode,
-          int? isSeen,
-          int? feedback,
-          Value<String?> date = const Value.absent(),
-          int? cardState,
-          double? stability,
-          double? difficulty,
-          Value<String?> due = const Value.absent(),
-          int? elapsedDays,
-          int? scheduledDays,
-          int? reps,
-          int? lapses,
-          Value<String?> lastReview = const Value.absent(),
-          Value<String?> backword = const Value.absent(),
-          Value<String?> backsentence = const Value.absent()}) =>
-      Word(
-        id: id ?? this.id,
-        word: word ?? this.word,
-        sentence: sentence ?? this.sentence,
-        level: level ?? this.level,
-        languageCode: languageCode ?? this.languageCode,
-        isSeen: isSeen ?? this.isSeen,
-        feedback: feedback ?? this.feedback,
-        date: date.present ? date.value : this.date,
-        cardState: cardState ?? this.cardState,
-        stability: stability ?? this.stability,
-        difficulty: difficulty ?? this.difficulty,
-        due: due.present ? due.value : this.due,
-        elapsedDays: elapsedDays ?? this.elapsedDays,
-        scheduledDays: scheduledDays ?? this.scheduledDays,
-        reps: reps ?? this.reps,
-        lapses: lapses ?? this.lapses,
-        lastReview: lastReview.present ? lastReview.value : this.lastReview,
-        backword: backword.present ? backword.value : this.backword,
-        backsentence:
-            backsentence.present ? backsentence.value : this.backsentence,
-      );
+  Word copyWith({
+    int? id,
+    String? word,
+    String? sentence,
+    String? level,
+    String? languageCode,
+    int? isSeen,
+    int? feedback,
+    Value<String?> date = const Value.absent(),
+    int? cardState,
+    double? stability,
+    double? difficulty,
+    Value<String?> due = const Value.absent(),
+    int? elapsedDays,
+    int? scheduledDays,
+    int? reps,
+    int? lapses,
+    Value<String?> lastReview = const Value.absent(),
+  }) => Word(
+    id: id ?? this.id,
+    word: word ?? this.word,
+    sentence: sentence ?? this.sentence,
+    level: level ?? this.level,
+    languageCode: languageCode ?? this.languageCode,
+    isSeen: isSeen ?? this.isSeen,
+    feedback: feedback ?? this.feedback,
+    date: date.present ? date.value : this.date,
+    cardState: cardState ?? this.cardState,
+    stability: stability ?? this.stability,
+    difficulty: difficulty ?? this.difficulty,
+    due: due.present ? due.value : this.due,
+    elapsedDays: elapsedDays ?? this.elapsedDays,
+    scheduledDays: scheduledDays ?? this.scheduledDays,
+    reps: reps ?? this.reps,
+    lapses: lapses ?? this.lapses,
+    lastReview: lastReview.present ? lastReview.value : this.lastReview,
+  );
   Word copyWithCompanion(WordsCompanion data) {
     return Word(
       id: data.id.present ? data.id.value : this.id,
@@ -529,22 +614,21 @@ class Word extends DataClass implements Insertable<Word> {
       date: data.date.present ? data.date.value : this.date,
       cardState: data.cardState.present ? data.cardState.value : this.cardState,
       stability: data.stability.present ? data.stability.value : this.stability,
-      difficulty:
-          data.difficulty.present ? data.difficulty.value : this.difficulty,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
       due: data.due.present ? data.due.value : this.due,
-      elapsedDays:
-          data.elapsedDays.present ? data.elapsedDays.value : this.elapsedDays,
+      elapsedDays: data.elapsedDays.present
+          ? data.elapsedDays.value
+          : this.elapsedDays,
       scheduledDays: data.scheduledDays.present
           ? data.scheduledDays.value
           : this.scheduledDays,
       reps: data.reps.present ? data.reps.value : this.reps,
       lapses: data.lapses.present ? data.lapses.value : this.lapses,
-      lastReview:
-          data.lastReview.present ? data.lastReview.value : this.lastReview,
-      backword: data.backword.present ? data.backword.value : this.backword,
-      backsentence: data.backsentence.present
-          ? data.backsentence.value
-          : this.backsentence,
+      lastReview: data.lastReview.present
+          ? data.lastReview.value
+          : this.lastReview,
     );
   }
 
@@ -567,34 +651,31 @@ class Word extends DataClass implements Insertable<Word> {
           ..write('scheduledDays: $scheduledDays, ')
           ..write('reps: $reps, ')
           ..write('lapses: $lapses, ')
-          ..write('lastReview: $lastReview, ')
-          ..write('backword: $backword, ')
-          ..write('backsentence: $backsentence')
+          ..write('lastReview: $lastReview')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
-      id,
-      word,
-      sentence,
-      level,
-      languageCode,
-      isSeen,
-      feedback,
-      date,
-      cardState,
-      stability,
-      difficulty,
-      due,
-      elapsedDays,
-      scheduledDays,
-      reps,
-      lapses,
-      lastReview,
-      backword,
-      backsentence);
+    id,
+    word,
+    sentence,
+    level,
+    languageCode,
+    isSeen,
+    feedback,
+    date,
+    cardState,
+    stability,
+    difficulty,
+    due,
+    elapsedDays,
+    scheduledDays,
+    reps,
+    lapses,
+    lastReview,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -615,9 +696,7 @@ class Word extends DataClass implements Insertable<Word> {
           other.scheduledDays == this.scheduledDays &&
           other.reps == this.reps &&
           other.lapses == this.lapses &&
-          other.lastReview == this.lastReview &&
-          other.backword == this.backword &&
-          other.backsentence == this.backsentence);
+          other.lastReview == this.lastReview);
 }
 
 class WordsCompanion extends UpdateCompanion<Word> {
@@ -638,8 +717,6 @@ class WordsCompanion extends UpdateCompanion<Word> {
   final Value<int> reps;
   final Value<int> lapses;
   final Value<String?> lastReview;
-  final Value<String?> backword;
-  final Value<String?> backsentence;
   final Value<int> rowid;
   const WordsCompanion({
     this.id = const Value.absent(),
@@ -659,8 +736,6 @@ class WordsCompanion extends UpdateCompanion<Word> {
     this.reps = const Value.absent(),
     this.lapses = const Value.absent(),
     this.lastReview = const Value.absent(),
-    this.backword = const Value.absent(),
-    this.backsentence = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   WordsCompanion.insert({
@@ -681,14 +756,12 @@ class WordsCompanion extends UpdateCompanion<Word> {
     this.reps = const Value.absent(),
     this.lapses = const Value.absent(),
     this.lastReview = const Value.absent(),
-    this.backword = const Value.absent(),
-    this.backsentence = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : id = Value(id),
-        word = Value(word),
-        sentence = Value(sentence),
-        level = Value(level),
-        languageCode = Value(languageCode);
+  }) : id = Value(id),
+       word = Value(word),
+       sentence = Value(sentence),
+       level = Value(level),
+       languageCode = Value(languageCode);
   static Insertable<Word> custom({
     Expression<int>? id,
     Expression<String>? word,
@@ -707,8 +780,6 @@ class WordsCompanion extends UpdateCompanion<Word> {
     Expression<int>? reps,
     Expression<int>? lapses,
     Expression<String>? lastReview,
-    Expression<String>? backword,
-    Expression<String>? backsentence,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -729,33 +800,30 @@ class WordsCompanion extends UpdateCompanion<Word> {
       if (reps != null) 'reps': reps,
       if (lapses != null) 'lapses': lapses,
       if (lastReview != null) 'last_review': lastReview,
-      if (backword != null) 'backword': backword,
-      if (backsentence != null) 'backsentence': backsentence,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  WordsCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? word,
-      Value<String>? sentence,
-      Value<String>? level,
-      Value<String>? languageCode,
-      Value<int>? isSeen,
-      Value<int>? feedback,
-      Value<String?>? date,
-      Value<int>? cardState,
-      Value<double>? stability,
-      Value<double>? difficulty,
-      Value<String?>? due,
-      Value<int>? elapsedDays,
-      Value<int>? scheduledDays,
-      Value<int>? reps,
-      Value<int>? lapses,
-      Value<String?>? lastReview,
-      Value<String?>? backword,
-      Value<String?>? backsentence,
-      Value<int>? rowid}) {
+  WordsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? word,
+    Value<String>? sentence,
+    Value<String>? level,
+    Value<String>? languageCode,
+    Value<int>? isSeen,
+    Value<int>? feedback,
+    Value<String?>? date,
+    Value<int>? cardState,
+    Value<double>? stability,
+    Value<double>? difficulty,
+    Value<String?>? due,
+    Value<int>? elapsedDays,
+    Value<int>? scheduledDays,
+    Value<int>? reps,
+    Value<int>? lapses,
+    Value<String?>? lastReview,
+    Value<int>? rowid,
+  }) {
     return WordsCompanion(
       id: id ?? this.id,
       word: word ?? this.word,
@@ -774,8 +842,6 @@ class WordsCompanion extends UpdateCompanion<Word> {
       reps: reps ?? this.reps,
       lapses: lapses ?? this.lapses,
       lastReview: lastReview ?? this.lastReview,
-      backword: backword ?? this.backword,
-      backsentence: backsentence ?? this.backsentence,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -834,12 +900,6 @@ class WordsCompanion extends UpdateCompanion<Word> {
     if (lastReview.present) {
       map['last_review'] = Variable<String>(lastReview.value);
     }
-    if (backword.present) {
-      map['backword'] = Variable<String>(backword.value);
-    }
-    if (backsentence.present) {
-      map['backsentence'] = Variable<String>(backsentence.value);
-    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -866,8 +926,6 @@ class WordsCompanion extends UpdateCompanion<Word> {
           ..write('reps: $reps, ')
           ..write('lapses: $lapses, ')
           ..write('lastReview: $lastReview, ')
-          ..write('backword: $backword, ')
-          ..write('backsentence: $backsentence, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -883,175 +941,252 @@ class $RevlogEntriesTable extends RevlogEntries
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _cardIdMeta = const VerificationMeta('cardId');
   @override
   late final GeneratedColumn<int> cardId = GeneratedColumn<int>(
-      'card_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _deckTableMeta =
-      const VerificationMeta('deckTable');
+    'card_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deckTableMeta = const VerificationMeta(
+    'deckTable',
+  );
   @override
   late final GeneratedColumn<String> deckTable = GeneratedColumn<String>(
-      'deck_table', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'deck_table',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _ratingMeta = const VerificationMeta('rating');
   @override
   late final GeneratedColumn<int> rating = GeneratedColumn<int>(
-      'rating', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'rating',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _stateMeta = const VerificationMeta('state');
   @override
   late final GeneratedColumn<int> state = GeneratedColumn<int>(
-      'state', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'state',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _dueMeta = const VerificationMeta('due');
   @override
   late final GeneratedColumn<String> due = GeneratedColumn<String>(
-      'due', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _stabilityMeta =
-      const VerificationMeta('stability');
+    'due',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stabilityMeta = const VerificationMeta(
+    'stability',
+  );
   @override
   late final GeneratedColumn<double> stability = GeneratedColumn<double>(
-      'stability', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _difficultyMeta =
-      const VerificationMeta('difficulty');
+    'stability',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _difficultyMeta = const VerificationMeta(
+    'difficulty',
+  );
   @override
   late final GeneratedColumn<double> difficulty = GeneratedColumn<double>(
-      'difficulty', aliasedName, false,
-      type: DriftSqlType.double, requiredDuringInsert: true);
-  static const VerificationMeta _elapsedDaysMeta =
-      const VerificationMeta('elapsedDays');
+    'difficulty',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _elapsedDaysMeta = const VerificationMeta(
+    'elapsedDays',
+  );
   @override
   late final GeneratedColumn<int> elapsedDays = GeneratedColumn<int>(
-      'elapsed_days', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _lastElapsedDaysMeta =
-      const VerificationMeta('lastElapsedDays');
+    'elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastElapsedDaysMeta = const VerificationMeta(
+    'lastElapsedDays',
+  );
   @override
   late final GeneratedColumn<int> lastElapsedDays = GeneratedColumn<int>(
-      'last_elapsed_days', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0));
-  static const VerificationMeta _scheduledDaysMeta =
-      const VerificationMeta('scheduledDays');
+    'last_elapsed_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _scheduledDaysMeta = const VerificationMeta(
+    'scheduledDays',
+  );
   @override
   late final GeneratedColumn<int> scheduledDays = GeneratedColumn<int>(
-      'scheduled_days', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _reviewDateMeta =
-      const VerificationMeta('reviewDate');
+    'scheduled_days',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reviewDateMeta = const VerificationMeta(
+    'reviewDate',
+  );
   @override
   late final GeneratedColumn<String> reviewDate = GeneratedColumn<String>(
-      'review_date', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'review_date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        id,
-        cardId,
-        deckTable,
-        rating,
-        state,
-        due,
-        stability,
-        difficulty,
-        elapsedDays,
-        lastElapsedDays,
-        scheduledDays,
-        reviewDate
-      ];
+    id,
+    cardId,
+    deckTable,
+    rating,
+    state,
+    due,
+    stability,
+    difficulty,
+    elapsedDays,
+    lastElapsedDays,
+    scheduledDays,
+    reviewDate,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'revlog';
   @override
-  VerificationContext validateIntegrity(Insertable<RevlogEntry> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<RevlogEntry> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('card_id')) {
-      context.handle(_cardIdMeta,
-          cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta));
+      context.handle(
+        _cardIdMeta,
+        cardId.isAcceptableOrUnknown(data['card_id']!, _cardIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_cardIdMeta);
     }
     if (data.containsKey('deck_table')) {
-      context.handle(_deckTableMeta,
-          deckTable.isAcceptableOrUnknown(data['deck_table']!, _deckTableMeta));
+      context.handle(
+        _deckTableMeta,
+        deckTable.isAcceptableOrUnknown(data['deck_table']!, _deckTableMeta),
+      );
     } else if (isInserting) {
       context.missing(_deckTableMeta);
     }
     if (data.containsKey('rating')) {
-      context.handle(_ratingMeta,
-          rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta));
+      context.handle(
+        _ratingMeta,
+        rating.isAcceptableOrUnknown(data['rating']!, _ratingMeta),
+      );
     } else if (isInserting) {
       context.missing(_ratingMeta);
     }
     if (data.containsKey('state')) {
       context.handle(
-          _stateMeta, state.isAcceptableOrUnknown(data['state']!, _stateMeta));
+        _stateMeta,
+        state.isAcceptableOrUnknown(data['state']!, _stateMeta),
+      );
     } else if (isInserting) {
       context.missing(_stateMeta);
     }
     if (data.containsKey('due')) {
       context.handle(
-          _dueMeta, due.isAcceptableOrUnknown(data['due']!, _dueMeta));
+        _dueMeta,
+        due.isAcceptableOrUnknown(data['due']!, _dueMeta),
+      );
     } else if (isInserting) {
       context.missing(_dueMeta);
     }
     if (data.containsKey('stability')) {
-      context.handle(_stabilityMeta,
-          stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta));
+      context.handle(
+        _stabilityMeta,
+        stability.isAcceptableOrUnknown(data['stability']!, _stabilityMeta),
+      );
     } else if (isInserting) {
       context.missing(_stabilityMeta);
     }
     if (data.containsKey('difficulty')) {
       context.handle(
-          _difficultyMeta,
-          difficulty.isAcceptableOrUnknown(
-              data['difficulty']!, _difficultyMeta));
+        _difficultyMeta,
+        difficulty.isAcceptableOrUnknown(data['difficulty']!, _difficultyMeta),
+      );
     } else if (isInserting) {
       context.missing(_difficultyMeta);
     }
     if (data.containsKey('elapsed_days')) {
       context.handle(
+        _elapsedDaysMeta,
+        elapsedDays.isAcceptableOrUnknown(
+          data['elapsed_days']!,
           _elapsedDaysMeta,
-          elapsedDays.isAcceptableOrUnknown(
-              data['elapsed_days']!, _elapsedDaysMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_elapsedDaysMeta);
     }
     if (data.containsKey('last_elapsed_days')) {
       context.handle(
+        _lastElapsedDaysMeta,
+        lastElapsedDays.isAcceptableOrUnknown(
+          data['last_elapsed_days']!,
           _lastElapsedDaysMeta,
-          lastElapsedDays.isAcceptableOrUnknown(
-              data['last_elapsed_days']!, _lastElapsedDaysMeta));
+        ),
+      );
     }
     if (data.containsKey('scheduled_days')) {
       context.handle(
+        _scheduledDaysMeta,
+        scheduledDays.isAcceptableOrUnknown(
+          data['scheduled_days']!,
           _scheduledDaysMeta,
-          scheduledDays.isAcceptableOrUnknown(
-              data['scheduled_days']!, _scheduledDaysMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_scheduledDaysMeta);
     }
     if (data.containsKey('review_date')) {
       context.handle(
-          _reviewDateMeta,
-          reviewDate.isAcceptableOrUnknown(
-              data['review_date']!, _reviewDateMeta));
+        _reviewDateMeta,
+        reviewDate.isAcceptableOrUnknown(data['review_date']!, _reviewDateMeta),
+      );
     } else if (isInserting) {
       context.missing(_reviewDateMeta);
     }
@@ -1064,30 +1199,54 @@ class $RevlogEntriesTable extends RevlogEntries
   RevlogEntry map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return RevlogEntry(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      cardId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}card_id'])!,
-      deckTable: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}deck_table'])!,
-      rating: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}rating'])!,
-      state: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}state'])!,
-      due: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}due'])!,
-      stability: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}stability'])!,
-      difficulty: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}difficulty'])!,
-      elapsedDays: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}elapsed_days'])!,
-      lastElapsedDays: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}last_elapsed_days'])!,
-      scheduledDays: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}scheduled_days'])!,
-      reviewDate: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}review_date'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      cardId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}card_id'],
+      )!,
+      deckTable: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deck_table'],
+      )!,
+      rating: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}rating'],
+      )!,
+      state: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}state'],
+      )!,
+      due: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}due'],
+      )!,
+      stability: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}stability'],
+      )!,
+      difficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}difficulty'],
+      )!,
+      elapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}elapsed_days'],
+      )!,
+      lastElapsedDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}last_elapsed_days'],
+      )!,
+      scheduledDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}scheduled_days'],
+      )!,
+      reviewDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}review_date'],
+      )!,
     );
   }
 
@@ -1110,19 +1269,20 @@ class RevlogEntry extends DataClass implements Insertable<RevlogEntry> {
   final int lastElapsedDays;
   final int scheduledDays;
   final String reviewDate;
-  const RevlogEntry(
-      {required this.id,
-      required this.cardId,
-      required this.deckTable,
-      required this.rating,
-      required this.state,
-      required this.due,
-      required this.stability,
-      required this.difficulty,
-      required this.elapsedDays,
-      required this.lastElapsedDays,
-      required this.scheduledDays,
-      required this.reviewDate});
+  const RevlogEntry({
+    required this.id,
+    required this.cardId,
+    required this.deckTable,
+    required this.rating,
+    required this.state,
+    required this.due,
+    required this.stability,
+    required this.difficulty,
+    required this.elapsedDays,
+    required this.lastElapsedDays,
+    required this.scheduledDays,
+    required this.reviewDate,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1158,8 +1318,10 @@ class RevlogEntry extends DataClass implements Insertable<RevlogEntry> {
     );
   }
 
-  factory RevlogEntry.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory RevlogEntry.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RevlogEntry(
       id: serializer.fromJson<int>(json['id']),
@@ -1195,33 +1357,33 @@ class RevlogEntry extends DataClass implements Insertable<RevlogEntry> {
     };
   }
 
-  RevlogEntry copyWith(
-          {int? id,
-          int? cardId,
-          String? deckTable,
-          int? rating,
-          int? state,
-          String? due,
-          double? stability,
-          double? difficulty,
-          int? elapsedDays,
-          int? lastElapsedDays,
-          int? scheduledDays,
-          String? reviewDate}) =>
-      RevlogEntry(
-        id: id ?? this.id,
-        cardId: cardId ?? this.cardId,
-        deckTable: deckTable ?? this.deckTable,
-        rating: rating ?? this.rating,
-        state: state ?? this.state,
-        due: due ?? this.due,
-        stability: stability ?? this.stability,
-        difficulty: difficulty ?? this.difficulty,
-        elapsedDays: elapsedDays ?? this.elapsedDays,
-        lastElapsedDays: lastElapsedDays ?? this.lastElapsedDays,
-        scheduledDays: scheduledDays ?? this.scheduledDays,
-        reviewDate: reviewDate ?? this.reviewDate,
-      );
+  RevlogEntry copyWith({
+    int? id,
+    int? cardId,
+    String? deckTable,
+    int? rating,
+    int? state,
+    String? due,
+    double? stability,
+    double? difficulty,
+    int? elapsedDays,
+    int? lastElapsedDays,
+    int? scheduledDays,
+    String? reviewDate,
+  }) => RevlogEntry(
+    id: id ?? this.id,
+    cardId: cardId ?? this.cardId,
+    deckTable: deckTable ?? this.deckTable,
+    rating: rating ?? this.rating,
+    state: state ?? this.state,
+    due: due ?? this.due,
+    stability: stability ?? this.stability,
+    difficulty: difficulty ?? this.difficulty,
+    elapsedDays: elapsedDays ?? this.elapsedDays,
+    lastElapsedDays: lastElapsedDays ?? this.lastElapsedDays,
+    scheduledDays: scheduledDays ?? this.scheduledDays,
+    reviewDate: reviewDate ?? this.reviewDate,
+  );
   RevlogEntry copyWithCompanion(RevlogEntriesCompanion data) {
     return RevlogEntry(
       id: data.id.present ? data.id.value : this.id,
@@ -1231,18 +1393,21 @@ class RevlogEntry extends DataClass implements Insertable<RevlogEntry> {
       state: data.state.present ? data.state.value : this.state,
       due: data.due.present ? data.due.value : this.due,
       stability: data.stability.present ? data.stability.value : this.stability,
-      difficulty:
-          data.difficulty.present ? data.difficulty.value : this.difficulty,
-      elapsedDays:
-          data.elapsedDays.present ? data.elapsedDays.value : this.elapsedDays,
+      difficulty: data.difficulty.present
+          ? data.difficulty.value
+          : this.difficulty,
+      elapsedDays: data.elapsedDays.present
+          ? data.elapsedDays.value
+          : this.elapsedDays,
       lastElapsedDays: data.lastElapsedDays.present
           ? data.lastElapsedDays.value
           : this.lastElapsedDays,
       scheduledDays: data.scheduledDays.present
           ? data.scheduledDays.value
           : this.scheduledDays,
-      reviewDate:
-          data.reviewDate.present ? data.reviewDate.value : this.reviewDate,
+      reviewDate: data.reviewDate.present
+          ? data.reviewDate.value
+          : this.reviewDate,
     );
   }
 
@@ -1267,18 +1432,19 @@ class RevlogEntry extends DataClass implements Insertable<RevlogEntry> {
 
   @override
   int get hashCode => Object.hash(
-      id,
-      cardId,
-      deckTable,
-      rating,
-      state,
-      due,
-      stability,
-      difficulty,
-      elapsedDays,
-      lastElapsedDays,
-      scheduledDays,
-      reviewDate);
+    id,
+    cardId,
+    deckTable,
+    rating,
+    state,
+    due,
+    stability,
+    difficulty,
+    elapsedDays,
+    lastElapsedDays,
+    scheduledDays,
+    reviewDate,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1337,16 +1503,16 @@ class RevlogEntriesCompanion extends UpdateCompanion<RevlogEntry> {
     this.lastElapsedDays = const Value.absent(),
     required int scheduledDays,
     required String reviewDate,
-  })  : cardId = Value(cardId),
-        deckTable = Value(deckTable),
-        rating = Value(rating),
-        state = Value(state),
-        due = Value(due),
-        stability = Value(stability),
-        difficulty = Value(difficulty),
-        elapsedDays = Value(elapsedDays),
-        scheduledDays = Value(scheduledDays),
-        reviewDate = Value(reviewDate);
+  }) : cardId = Value(cardId),
+       deckTable = Value(deckTable),
+       rating = Value(rating),
+       state = Value(state),
+       due = Value(due),
+       stability = Value(stability),
+       difficulty = Value(difficulty),
+       elapsedDays = Value(elapsedDays),
+       scheduledDays = Value(scheduledDays),
+       reviewDate = Value(reviewDate);
   static Insertable<RevlogEntry> custom({
     Expression<int>? id,
     Expression<int>? cardId,
@@ -1377,19 +1543,20 @@ class RevlogEntriesCompanion extends UpdateCompanion<RevlogEntry> {
     });
   }
 
-  RevlogEntriesCompanion copyWith(
-      {Value<int>? id,
-      Value<int>? cardId,
-      Value<String>? deckTable,
-      Value<int>? rating,
-      Value<int>? state,
-      Value<String>? due,
-      Value<double>? stability,
-      Value<double>? difficulty,
-      Value<int>? elapsedDays,
-      Value<int>? lastElapsedDays,
-      Value<int>? scheduledDays,
-      Value<String>? reviewDate}) {
+  RevlogEntriesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? cardId,
+    Value<String>? deckTable,
+    Value<int>? rating,
+    Value<int>? state,
+    Value<String>? due,
+    Value<double>? stability,
+    Value<double>? difficulty,
+    Value<int>? elapsedDays,
+    Value<int>? lastElapsedDays,
+    Value<int>? scheduledDays,
+    Value<String>? reviewDate,
+  }) {
     return RevlogEntriesCompanion(
       id: id ?? this.id,
       cardId: cardId ?? this.cardId,
@@ -1477,108 +1644,152 @@ class $DeckConfigsTable extends DeckConfigs
   static const VerificationMeta _levelMeta = const VerificationMeta('level');
   @override
   late final GeneratedColumn<String> level = GeneratedColumn<String>(
-      'level', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _maxNewPerDayMeta =
-      const VerificationMeta('maxNewPerDay');
+    'level',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _maxNewPerDayMeta = const VerificationMeta(
+    'maxNewPerDay',
+  );
   @override
   late final GeneratedColumn<int> maxNewPerDay = GeneratedColumn<int>(
-      'max_new_per_day', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(10));
-  static const VerificationMeta _maxReviewsPerDayMeta =
-      const VerificationMeta('maxReviewsPerDay');
+    'max_new_per_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(10),
+  );
+  static const VerificationMeta _maxReviewsPerDayMeta = const VerificationMeta(
+    'maxReviewsPerDay',
+  );
   @override
   late final GeneratedColumn<int> maxReviewsPerDay = GeneratedColumn<int>(
-      'max_reviews_per_day', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(20));
-  static const VerificationMeta _learningStepsMeta =
-      const VerificationMeta('learningSteps');
+    'max_reviews_per_day',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(20),
+  );
+  static const VerificationMeta _learningStepsMeta = const VerificationMeta(
+    'learningSteps',
+  );
   @override
   late final GeneratedColumn<String> learningSteps = GeneratedColumn<String>(
-      'learning_steps', aliasedName, false,
-      type: DriftSqlType.string,
-      requiredDuringInsert: false,
-      defaultValue: const Constant('[1,10]'));
-  static const VerificationMeta _enableFuzzMeta =
-      const VerificationMeta('enableFuzz');
+    'learning_steps',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[1,10]'),
+  );
+  static const VerificationMeta _enableFuzzMeta = const VerificationMeta(
+    'enableFuzz',
+  );
   @override
   late final GeneratedColumn<int> enableFuzz = GeneratedColumn<int>(
-      'enable_fuzz', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(1));
-  static const VerificationMeta _requestRetentionMeta =
-      const VerificationMeta('requestRetention');
+    'enable_fuzz',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _requestRetentionMeta = const VerificationMeta(
+    'requestRetention',
+  );
   @override
   late final GeneratedColumn<double> requestRetention = GeneratedColumn<double>(
-      'request_retention', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(0.9));
+    'request_retention',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0.9),
+  );
   static const VerificationMeta _wMeta = const VerificationMeta('w');
   @override
   late final GeneratedColumn<String> w = GeneratedColumn<String>(
-      'w', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+    'w',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
-        level,
-        maxNewPerDay,
-        maxReviewsPerDay,
-        learningSteps,
-        enableFuzz,
-        requestRetention,
-        w
-      ];
+    level,
+    maxNewPerDay,
+    maxReviewsPerDay,
+    learningSteps,
+    enableFuzz,
+    requestRetention,
+    w,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'deck_config';
   @override
-  VerificationContext validateIntegrity(Insertable<DeckConfig> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<DeckConfig> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('level')) {
       context.handle(
-          _levelMeta, level.isAcceptableOrUnknown(data['level']!, _levelMeta));
+        _levelMeta,
+        level.isAcceptableOrUnknown(data['level']!, _levelMeta),
+      );
     } else if (isInserting) {
       context.missing(_levelMeta);
     }
     if (data.containsKey('max_new_per_day')) {
       context.handle(
+        _maxNewPerDayMeta,
+        maxNewPerDay.isAcceptableOrUnknown(
+          data['max_new_per_day']!,
           _maxNewPerDayMeta,
-          maxNewPerDay.isAcceptableOrUnknown(
-              data['max_new_per_day']!, _maxNewPerDayMeta));
+        ),
+      );
     }
     if (data.containsKey('max_reviews_per_day')) {
       context.handle(
+        _maxReviewsPerDayMeta,
+        maxReviewsPerDay.isAcceptableOrUnknown(
+          data['max_reviews_per_day']!,
           _maxReviewsPerDayMeta,
-          maxReviewsPerDay.isAcceptableOrUnknown(
-              data['max_reviews_per_day']!, _maxReviewsPerDayMeta));
+        ),
+      );
     }
     if (data.containsKey('learning_steps')) {
       context.handle(
+        _learningStepsMeta,
+        learningSteps.isAcceptableOrUnknown(
+          data['learning_steps']!,
           _learningStepsMeta,
-          learningSteps.isAcceptableOrUnknown(
-              data['learning_steps']!, _learningStepsMeta));
+        ),
+      );
     }
     if (data.containsKey('enable_fuzz')) {
       context.handle(
-          _enableFuzzMeta,
-          enableFuzz.isAcceptableOrUnknown(
-              data['enable_fuzz']!, _enableFuzzMeta));
+        _enableFuzzMeta,
+        enableFuzz.isAcceptableOrUnknown(data['enable_fuzz']!, _enableFuzzMeta),
+      );
     }
     if (data.containsKey('request_retention')) {
       context.handle(
+        _requestRetentionMeta,
+        requestRetention.isAcceptableOrUnknown(
+          data['request_retention']!,
           _requestRetentionMeta,
-          requestRetention.isAcceptableOrUnknown(
-              data['request_retention']!, _requestRetentionMeta));
+        ),
+      );
     }
     if (data.containsKey('w')) {
       context.handle(_wMeta, w.isAcceptableOrUnknown(data['w']!, _wMeta));
@@ -1592,20 +1803,34 @@ class $DeckConfigsTable extends DeckConfigs
   DeckConfig map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DeckConfig(
-      level: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}level'])!,
-      maxNewPerDay: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}max_new_per_day'])!,
+      level: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}level'],
+      )!,
+      maxNewPerDay: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}max_new_per_day'],
+      )!,
       maxReviewsPerDay: attachedDatabase.typeMapping.read(
-          DriftSqlType.int, data['${effectivePrefix}max_reviews_per_day'])!,
-      learningSteps: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}learning_steps'])!,
-      enableFuzz: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}enable_fuzz'])!,
+        DriftSqlType.int,
+        data['${effectivePrefix}max_reviews_per_day'],
+      )!,
+      learningSteps: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}learning_steps'],
+      )!,
+      enableFuzz: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}enable_fuzz'],
+      )!,
       requestRetention: attachedDatabase.typeMapping.read(
-          DriftSqlType.double, data['${effectivePrefix}request_retention'])!,
-      w: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}w']),
+        DriftSqlType.double,
+        data['${effectivePrefix}request_retention'],
+      )!,
+      w: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}w'],
+      ),
     );
   }
 
@@ -1623,14 +1848,15 @@ class DeckConfig extends DataClass implements Insertable<DeckConfig> {
   final int enableFuzz;
   final double requestRetention;
   final String? w;
-  const DeckConfig(
-      {required this.level,
-      required this.maxNewPerDay,
-      required this.maxReviewsPerDay,
-      required this.learningSteps,
-      required this.enableFuzz,
-      required this.requestRetention,
-      this.w});
+  const DeckConfig({
+    required this.level,
+    required this.maxNewPerDay,
+    required this.maxReviewsPerDay,
+    required this.learningSteps,
+    required this.enableFuzz,
+    required this.requestRetention,
+    this.w,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1658,8 +1884,10 @@ class DeckConfig extends DataClass implements Insertable<DeckConfig> {
     );
   }
 
-  factory DeckConfig.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DeckConfig.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DeckConfig(
       level: serializer.fromJson<String>(json['level']),
@@ -1685,23 +1913,23 @@ class DeckConfig extends DataClass implements Insertable<DeckConfig> {
     };
   }
 
-  DeckConfig copyWith(
-          {String? level,
-          int? maxNewPerDay,
-          int? maxReviewsPerDay,
-          String? learningSteps,
-          int? enableFuzz,
-          double? requestRetention,
-          Value<String?> w = const Value.absent()}) =>
-      DeckConfig(
-        level: level ?? this.level,
-        maxNewPerDay: maxNewPerDay ?? this.maxNewPerDay,
-        maxReviewsPerDay: maxReviewsPerDay ?? this.maxReviewsPerDay,
-        learningSteps: learningSteps ?? this.learningSteps,
-        enableFuzz: enableFuzz ?? this.enableFuzz,
-        requestRetention: requestRetention ?? this.requestRetention,
-        w: w.present ? w.value : this.w,
-      );
+  DeckConfig copyWith({
+    String? level,
+    int? maxNewPerDay,
+    int? maxReviewsPerDay,
+    String? learningSteps,
+    int? enableFuzz,
+    double? requestRetention,
+    Value<String?> w = const Value.absent(),
+  }) => DeckConfig(
+    level: level ?? this.level,
+    maxNewPerDay: maxNewPerDay ?? this.maxNewPerDay,
+    maxReviewsPerDay: maxReviewsPerDay ?? this.maxReviewsPerDay,
+    learningSteps: learningSteps ?? this.learningSteps,
+    enableFuzz: enableFuzz ?? this.enableFuzz,
+    requestRetention: requestRetention ?? this.requestRetention,
+    w: w.present ? w.value : this.w,
+  );
   DeckConfig copyWithCompanion(DeckConfigsCompanion data) {
     return DeckConfig(
       level: data.level.present ? data.level.value : this.level,
@@ -1714,8 +1942,9 @@ class DeckConfig extends DataClass implements Insertable<DeckConfig> {
       learningSteps: data.learningSteps.present
           ? data.learningSteps.value
           : this.learningSteps,
-      enableFuzz:
-          data.enableFuzz.present ? data.enableFuzz.value : this.enableFuzz,
+      enableFuzz: data.enableFuzz.present
+          ? data.enableFuzz.value
+          : this.enableFuzz,
       requestRetention: data.requestRetention.present
           ? data.requestRetention.value
           : this.requestRetention,
@@ -1738,8 +1967,15 @@ class DeckConfig extends DataClass implements Insertable<DeckConfig> {
   }
 
   @override
-  int get hashCode => Object.hash(level, maxNewPerDay, maxReviewsPerDay,
-      learningSteps, enableFuzz, requestRetention, w);
+  int get hashCode => Object.hash(
+    level,
+    maxNewPerDay,
+    maxReviewsPerDay,
+    learningSteps,
+    enableFuzz,
+    requestRetention,
+    w,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1804,15 +2040,16 @@ class DeckConfigsCompanion extends UpdateCompanion<DeckConfig> {
     });
   }
 
-  DeckConfigsCompanion copyWith(
-      {Value<String>? level,
-      Value<int>? maxNewPerDay,
-      Value<int>? maxReviewsPerDay,
-      Value<String>? learningSteps,
-      Value<int>? enableFuzz,
-      Value<double>? requestRetention,
-      Value<String?>? w,
-      Value<int>? rowid}) {
+  DeckConfigsCompanion copyWith({
+    Value<String>? level,
+    Value<int>? maxNewPerDay,
+    Value<int>? maxReviewsPerDay,
+    Value<String>? learningSteps,
+    Value<int>? enableFuzz,
+    Value<double>? requestRetention,
+    Value<String?>? w,
+    Value<int>? rowid,
+  }) {
     return DeckConfigsCompanion(
       level: level ?? this.level,
       maxNewPerDay: maxNewPerDay ?? this.maxNewPerDay,
@@ -1877,58 +2114,105 @@ class $UserSettingsTable extends UserSettings
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
   $UserSettingsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _mainLanguageMeta =
-      const VerificationMeta('mainLanguage');
+  static const VerificationMeta _mainLanguageMeta = const VerificationMeta(
+    'mainLanguage',
+  );
   @override
   late final GeneratedColumn<String> mainLanguage = GeneratedColumn<String>(
-      'mainLanguage', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _targetLanguageMeta =
-      const VerificationMeta('targetLanguage');
+    'mainLanguage',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetLanguageMeta = const VerificationMeta(
+    'targetLanguage',
+  );
   @override
   late final GeneratedColumn<String> targetLanguage = GeneratedColumn<String>(
-      'targetLanguage', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _firstTimeMeta =
-      const VerificationMeta('firstTime');
+    'targetLanguage',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _firstTimeMeta = const VerificationMeta(
+    'firstTime',
+  );
   @override
   late final GeneratedColumn<String> firstTime = GeneratedColumn<String>(
-      'firstTime', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'firstTime',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reviewModeMeta = const VerificationMeta(
+    'reviewMode',
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [mainLanguage, targetLanguage, firstTime];
+  late final GeneratedColumn<String> reviewMode = GeneratedColumn<String>(
+    'review_mode',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('buttons'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    mainLanguage,
+    targetLanguage,
+    firstTime,
+    reviewMode,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'user';
   @override
-  VerificationContext validateIntegrity(Insertable<UserSetting> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<UserSetting> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('mainLanguage')) {
       context.handle(
+        _mainLanguageMeta,
+        mainLanguage.isAcceptableOrUnknown(
+          data['mainLanguage']!,
           _mainLanguageMeta,
-          mainLanguage.isAcceptableOrUnknown(
-              data['mainLanguage']!, _mainLanguageMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_mainLanguageMeta);
     }
     if (data.containsKey('targetLanguage')) {
       context.handle(
+        _targetLanguageMeta,
+        targetLanguage.isAcceptableOrUnknown(
+          data['targetLanguage']!,
           _targetLanguageMeta,
-          targetLanguage.isAcceptableOrUnknown(
-              data['targetLanguage']!, _targetLanguageMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_targetLanguageMeta);
     }
     if (data.containsKey('firstTime')) {
-      context.handle(_firstTimeMeta,
-          firstTime.isAcceptableOrUnknown(data['firstTime']!, _firstTimeMeta));
+      context.handle(
+        _firstTimeMeta,
+        firstTime.isAcceptableOrUnknown(data['firstTime']!, _firstTimeMeta),
+      );
     } else if (isInserting) {
       context.missing(_firstTimeMeta);
+    }
+    if (data.containsKey('review_mode')) {
+      context.handle(
+        _reviewModeMeta,
+        reviewMode.isAcceptableOrUnknown(data['review_mode']!, _reviewModeMeta),
+      );
     }
     return context;
   }
@@ -1939,12 +2223,22 @@ class $UserSettingsTable extends UserSettings
   UserSetting map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return UserSetting(
-      mainLanguage: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}mainLanguage'])!,
-      targetLanguage: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}targetLanguage'])!,
-      firstTime: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}firstTime'])!,
+      mainLanguage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mainLanguage'],
+      )!,
+      targetLanguage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}targetLanguage'],
+      )!,
+      firstTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}firstTime'],
+      )!,
+      reviewMode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}review_mode'],
+      )!,
     );
   }
 
@@ -1958,16 +2252,20 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
   final String mainLanguage;
   final String targetLanguage;
   final String firstTime;
-  const UserSetting(
-      {required this.mainLanguage,
-      required this.targetLanguage,
-      required this.firstTime});
+  final String reviewMode;
+  const UserSetting({
+    required this.mainLanguage,
+    required this.targetLanguage,
+    required this.firstTime,
+    required this.reviewMode,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['mainLanguage'] = Variable<String>(mainLanguage);
     map['targetLanguage'] = Variable<String>(targetLanguage);
     map['firstTime'] = Variable<String>(firstTime);
+    map['review_mode'] = Variable<String>(reviewMode);
     return map;
   }
 
@@ -1976,16 +2274,20 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       mainLanguage: Value(mainLanguage),
       targetLanguage: Value(targetLanguage),
       firstTime: Value(firstTime),
+      reviewMode: Value(reviewMode),
     );
   }
 
-  factory UserSetting.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory UserSetting.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UserSetting(
       mainLanguage: serializer.fromJson<String>(json['mainLanguage']),
       targetLanguage: serializer.fromJson<String>(json['targetLanguage']),
       firstTime: serializer.fromJson<String>(json['firstTime']),
+      reviewMode: serializer.fromJson<String>(json['reviewMode']),
     );
   }
   @override
@@ -1995,16 +2297,21 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
       'mainLanguage': serializer.toJson<String>(mainLanguage),
       'targetLanguage': serializer.toJson<String>(targetLanguage),
       'firstTime': serializer.toJson<String>(firstTime),
+      'reviewMode': serializer.toJson<String>(reviewMode),
     };
   }
 
-  UserSetting copyWith(
-          {String? mainLanguage, String? targetLanguage, String? firstTime}) =>
-      UserSetting(
-        mainLanguage: mainLanguage ?? this.mainLanguage,
-        targetLanguage: targetLanguage ?? this.targetLanguage,
-        firstTime: firstTime ?? this.firstTime,
-      );
+  UserSetting copyWith({
+    String? mainLanguage,
+    String? targetLanguage,
+    String? firstTime,
+    String? reviewMode,
+  }) => UserSetting(
+    mainLanguage: mainLanguage ?? this.mainLanguage,
+    targetLanguage: targetLanguage ?? this.targetLanguage,
+    firstTime: firstTime ?? this.firstTime,
+    reviewMode: reviewMode ?? this.reviewMode,
+  );
   UserSetting copyWithCompanion(UserSettingsCompanion data) {
     return UserSetting(
       mainLanguage: data.mainLanguage.present
@@ -2014,6 +2321,9 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
           ? data.targetLanguage.value
           : this.targetLanguage,
       firstTime: data.firstTime.present ? data.firstTime.value : this.firstTime,
+      reviewMode: data.reviewMode.present
+          ? data.reviewMode.value
+          : this.reviewMode,
     );
   }
 
@@ -2022,64 +2332,75 @@ class UserSetting extends DataClass implements Insertable<UserSetting> {
     return (StringBuffer('UserSetting(')
           ..write('mainLanguage: $mainLanguage, ')
           ..write('targetLanguage: $targetLanguage, ')
-          ..write('firstTime: $firstTime')
+          ..write('firstTime: $firstTime, ')
+          ..write('reviewMode: $reviewMode')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(mainLanguage, targetLanguage, firstTime);
+  int get hashCode =>
+      Object.hash(mainLanguage, targetLanguage, firstTime, reviewMode);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UserSetting &&
           other.mainLanguage == this.mainLanguage &&
           other.targetLanguage == this.targetLanguage &&
-          other.firstTime == this.firstTime);
+          other.firstTime == this.firstTime &&
+          other.reviewMode == this.reviewMode);
 }
 
 class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
   final Value<String> mainLanguage;
   final Value<String> targetLanguage;
   final Value<String> firstTime;
+  final Value<String> reviewMode;
   final Value<int> rowid;
   const UserSettingsCompanion({
     this.mainLanguage = const Value.absent(),
     this.targetLanguage = const Value.absent(),
     this.firstTime = const Value.absent(),
+    this.reviewMode = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UserSettingsCompanion.insert({
     required String mainLanguage,
     required String targetLanguage,
     required String firstTime,
+    this.reviewMode = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : mainLanguage = Value(mainLanguage),
-        targetLanguage = Value(targetLanguage),
-        firstTime = Value(firstTime);
+  }) : mainLanguage = Value(mainLanguage),
+       targetLanguage = Value(targetLanguage),
+       firstTime = Value(firstTime);
   static Insertable<UserSetting> custom({
     Expression<String>? mainLanguage,
     Expression<String>? targetLanguage,
     Expression<String>? firstTime,
+    Expression<String>? reviewMode,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (mainLanguage != null) 'mainLanguage': mainLanguage,
       if (targetLanguage != null) 'targetLanguage': targetLanguage,
       if (firstTime != null) 'firstTime': firstTime,
+      if (reviewMode != null) 'review_mode': reviewMode,
       if (rowid != null) 'rowid': rowid,
     });
   }
 
-  UserSettingsCompanion copyWith(
-      {Value<String>? mainLanguage,
-      Value<String>? targetLanguage,
-      Value<String>? firstTime,
-      Value<int>? rowid}) {
+  UserSettingsCompanion copyWith({
+    Value<String>? mainLanguage,
+    Value<String>? targetLanguage,
+    Value<String>? firstTime,
+    Value<String>? reviewMode,
+    Value<int>? rowid,
+  }) {
     return UserSettingsCompanion(
       mainLanguage: mainLanguage ?? this.mainLanguage,
       targetLanguage: targetLanguage ?? this.targetLanguage,
       firstTime: firstTime ?? this.firstTime,
+      reviewMode: reviewMode ?? this.reviewMode,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2096,6 +2417,9 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
     if (firstTime.present) {
       map['firstTime'] = Variable<String>(firstTime.value);
     }
+    if (reviewMode.present) {
+      map['review_mode'] = Variable<String>(reviewMode.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2108,6 +2432,7 @@ class UserSettingsCompanion extends UpdateCompanion<UserSetting> {
           ..write('mainLanguage: $mainLanguage, ')
           ..write('targetLanguage: $targetLanguage, ')
           ..write('firstTime: $firstTime, ')
+          ..write('reviewMode: $reviewMode, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2122,46 +2447,76 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
   late final GeneratedColumn<String> name = GeneratedColumn<String>(
-      'name', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _deckTypeMeta =
-      const VerificationMeta('deckType');
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deckTypeMeta = const VerificationMeta(
+    'deckType',
+  );
   @override
   late final GeneratedColumn<String> deckType = GeneratedColumn<String>(
-      'deck_type', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _systemKeyMeta =
-      const VerificationMeta('systemKey');
+    'deck_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _systemKeyMeta = const VerificationMeta(
+    'systemKey',
+  );
   @override
   late final GeneratedColumn<String> systemKey = GeneratedColumn<String>(
-      'system_key', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
+    'system_key',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
   @override
   late final GeneratedColumn<String> createdAt = GeneratedColumn<String>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, name, deckType, systemKey, createdAt];
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    deckType,
+    systemKey,
+    createdAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'decks';
   @override
-  VerificationContext validateIntegrity(Insertable<Deck> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<Deck> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
@@ -2169,23 +2524,31 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
     }
     if (data.containsKey('name')) {
       context.handle(
-          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
     } else if (isInserting) {
       context.missing(_nameMeta);
     }
     if (data.containsKey('deck_type')) {
-      context.handle(_deckTypeMeta,
-          deckType.isAcceptableOrUnknown(data['deck_type']!, _deckTypeMeta));
+      context.handle(
+        _deckTypeMeta,
+        deckType.isAcceptableOrUnknown(data['deck_type']!, _deckTypeMeta),
+      );
     } else if (isInserting) {
       context.missing(_deckTypeMeta);
     }
     if (data.containsKey('system_key')) {
-      context.handle(_systemKeyMeta,
-          systemKey.isAcceptableOrUnknown(data['system_key']!, _systemKeyMeta));
+      context.handle(
+        _systemKeyMeta,
+        systemKey.isAcceptableOrUnknown(data['system_key']!, _systemKeyMeta),
+      );
     }
     if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
@@ -2198,16 +2561,26 @@ class $DecksTable extends Decks with TableInfo<$DecksTable, Deck> {
   Deck map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return Deck(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      name: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
-      deckType: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}deck_type'])!,
-      systemKey: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}system_key']),
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}created_at'])!,
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      deckType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}deck_type'],
+      )!,
+      systemKey: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}system_key'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_at'],
+      )!,
     );
   }
 
@@ -2223,12 +2596,13 @@ class Deck extends DataClass implements Insertable<Deck> {
   final String deckType;
   final String? systemKey;
   final String createdAt;
-  const Deck(
-      {required this.id,
-      required this.name,
-      required this.deckType,
-      this.systemKey,
-      required this.createdAt});
+  const Deck({
+    required this.id,
+    required this.name,
+    required this.deckType,
+    this.systemKey,
+    required this.createdAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2254,8 +2628,10 @@ class Deck extends DataClass implements Insertable<Deck> {
     );
   }
 
-  factory Deck.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Deck.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return Deck(
       id: serializer.fromJson<int>(json['id']),
@@ -2277,19 +2653,19 @@ class Deck extends DataClass implements Insertable<Deck> {
     };
   }
 
-  Deck copyWith(
-          {int? id,
-          String? name,
-          String? deckType,
-          Value<String?> systemKey = const Value.absent(),
-          String? createdAt}) =>
-      Deck(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        deckType: deckType ?? this.deckType,
-        systemKey: systemKey.present ? systemKey.value : this.systemKey,
-        createdAt: createdAt ?? this.createdAt,
-      );
+  Deck copyWith({
+    int? id,
+    String? name,
+    String? deckType,
+    Value<String?> systemKey = const Value.absent(),
+    String? createdAt,
+  }) => Deck(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    deckType: deckType ?? this.deckType,
+    systemKey: systemKey.present ? systemKey.value : this.systemKey,
+    createdAt: createdAt ?? this.createdAt,
+  );
   Deck copyWithCompanion(DecksCompanion data) {
     return Deck(
       id: data.id.present ? data.id.value : this.id,
@@ -2344,9 +2720,9 @@ class DecksCompanion extends UpdateCompanion<Deck> {
     required String deckType,
     this.systemKey = const Value.absent(),
     required String createdAt,
-  })  : name = Value(name),
-        deckType = Value(deckType),
-        createdAt = Value(createdAt);
+  }) : name = Value(name),
+       deckType = Value(deckType),
+       createdAt = Value(createdAt);
   static Insertable<Deck> custom({
     Expression<int>? id,
     Expression<String>? name,
@@ -2363,12 +2739,13 @@ class DecksCompanion extends UpdateCompanion<Deck> {
     });
   }
 
-  DecksCompanion copyWith(
-      {Value<int>? id,
-      Value<String>? name,
-      Value<String>? deckType,
-      Value<String?>? systemKey,
-      Value<String>? createdAt}) {
+  DecksCompanion copyWith({
+    Value<int>? id,
+    Value<String>? name,
+    Value<String>? deckType,
+    Value<String?>? systemKey,
+    Value<String>? createdAt,
+  }) {
     return DecksCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
@@ -2421,75 +2798,117 @@ class $DeckCardsTable extends DeckCards
   static const VerificationMeta _deckIdMeta = const VerificationMeta('deckId');
   @override
   late final GeneratedColumn<int> deckId = GeneratedColumn<int>(
-      'deck_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+    'deck_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
   static const VerificationMeta _wordIdMeta = const VerificationMeta('wordId');
   @override
   late final GeneratedColumn<int> wordId = GeneratedColumn<int>(
-      'word_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _sourceLanguageMeta =
-      const VerificationMeta('sourceLanguage');
+    'word_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceLanguageMeta = const VerificationMeta(
+    'sourceLanguage',
+  );
   @override
   late final GeneratedColumn<String> sourceLanguage = GeneratedColumn<String>(
-      'source_language', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _targetLanguageMeta =
-      const VerificationMeta('targetLanguage');
+    'source_language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetLanguageMeta = const VerificationMeta(
+    'targetLanguage',
+  );
   @override
   late final GeneratedColumn<String> targetLanguage = GeneratedColumn<String>(
-      'target_language', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
-  static const VerificationMeta _addedAtMeta =
-      const VerificationMeta('addedAt');
+    'target_language',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
   @override
   late final GeneratedColumn<String> addedAt = GeneratedColumn<String>(
-      'added_at', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
   @override
-  List<GeneratedColumn> get $columns =>
-      [deckId, wordId, sourceLanguage, targetLanguage, addedAt];
+  List<GeneratedColumn> get $columns => [
+    deckId,
+    wordId,
+    sourceLanguage,
+    targetLanguage,
+    addedAt,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
   static const String $name = 'deck_cards';
   @override
-  VerificationContext validateIntegrity(Insertable<DeckCard> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(
+    Insertable<DeckCard> instance, {
+    bool isInserting = false,
+  }) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('deck_id')) {
-      context.handle(_deckIdMeta,
-          deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta));
+      context.handle(
+        _deckIdMeta,
+        deckId.isAcceptableOrUnknown(data['deck_id']!, _deckIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_deckIdMeta);
     }
     if (data.containsKey('word_id')) {
-      context.handle(_wordIdMeta,
-          wordId.isAcceptableOrUnknown(data['word_id']!, _wordIdMeta));
+      context.handle(
+        _wordIdMeta,
+        wordId.isAcceptableOrUnknown(data['word_id']!, _wordIdMeta),
+      );
     } else if (isInserting) {
       context.missing(_wordIdMeta);
     }
     if (data.containsKey('source_language')) {
       context.handle(
+        _sourceLanguageMeta,
+        sourceLanguage.isAcceptableOrUnknown(
+          data['source_language']!,
           _sourceLanguageMeta,
-          sourceLanguage.isAcceptableOrUnknown(
-              data['source_language']!, _sourceLanguageMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_sourceLanguageMeta);
     }
     if (data.containsKey('target_language')) {
       context.handle(
+        _targetLanguageMeta,
+        targetLanguage.isAcceptableOrUnknown(
+          data['target_language']!,
           _targetLanguageMeta,
-          targetLanguage.isAcceptableOrUnknown(
-              data['target_language']!, _targetLanguageMeta));
+        ),
+      );
     } else if (isInserting) {
       context.missing(_targetLanguageMeta);
     }
     if (data.containsKey('added_at')) {
-      context.handle(_addedAtMeta,
-          addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta));
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
     } else if (isInserting) {
       context.missing(_addedAtMeta);
     }
@@ -2497,22 +2916,36 @@ class $DeckCardsTable extends DeckCards
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey =>
-      {deckId, wordId, sourceLanguage, targetLanguage};
+  Set<GeneratedColumn> get $primaryKey => {
+    deckId,
+    wordId,
+    sourceLanguage,
+    targetLanguage,
+  };
   @override
   DeckCard map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DeckCard(
-      deckId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}deck_id'])!,
-      wordId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}word_id'])!,
+      deckId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deck_id'],
+      )!,
+      wordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}word_id'],
+      )!,
       sourceLanguage: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}source_language'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}source_language'],
+      )!,
       targetLanguage: attachedDatabase.typeMapping.read(
-          DriftSqlType.string, data['${effectivePrefix}target_language'])!,
-      addedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}added_at'])!,
+        DriftSqlType.string,
+        data['${effectivePrefix}target_language'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}added_at'],
+      )!,
     );
   }
 
@@ -2528,12 +2961,13 @@ class DeckCard extends DataClass implements Insertable<DeckCard> {
   final String sourceLanguage;
   final String targetLanguage;
   final String addedAt;
-  const DeckCard(
-      {required this.deckId,
-      required this.wordId,
-      required this.sourceLanguage,
-      required this.targetLanguage,
-      required this.addedAt});
+  const DeckCard({
+    required this.deckId,
+    required this.wordId,
+    required this.sourceLanguage,
+    required this.targetLanguage,
+    required this.addedAt,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -2555,8 +2989,10 @@ class DeckCard extends DataClass implements Insertable<DeckCard> {
     );
   }
 
-  factory DeckCard.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory DeckCard.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DeckCard(
       deckId: serializer.fromJson<int>(json['deckId']),
@@ -2578,19 +3014,19 @@ class DeckCard extends DataClass implements Insertable<DeckCard> {
     };
   }
 
-  DeckCard copyWith(
-          {int? deckId,
-          int? wordId,
-          String? sourceLanguage,
-          String? targetLanguage,
-          String? addedAt}) =>
-      DeckCard(
-        deckId: deckId ?? this.deckId,
-        wordId: wordId ?? this.wordId,
-        sourceLanguage: sourceLanguage ?? this.sourceLanguage,
-        targetLanguage: targetLanguage ?? this.targetLanguage,
-        addedAt: addedAt ?? this.addedAt,
-      );
+  DeckCard copyWith({
+    int? deckId,
+    int? wordId,
+    String? sourceLanguage,
+    String? targetLanguage,
+    String? addedAt,
+  }) => DeckCard(
+    deckId: deckId ?? this.deckId,
+    wordId: wordId ?? this.wordId,
+    sourceLanguage: sourceLanguage ?? this.sourceLanguage,
+    targetLanguage: targetLanguage ?? this.targetLanguage,
+    addedAt: addedAt ?? this.addedAt,
+  );
   DeckCard copyWithCompanion(DeckCardsCompanion data) {
     return DeckCard(
       deckId: data.deckId.present ? data.deckId.value : this.deckId,
@@ -2653,11 +3089,11 @@ class DeckCardsCompanion extends UpdateCompanion<DeckCard> {
     required String targetLanguage,
     required String addedAt,
     this.rowid = const Value.absent(),
-  })  : deckId = Value(deckId),
-        wordId = Value(wordId),
-        sourceLanguage = Value(sourceLanguage),
-        targetLanguage = Value(targetLanguage),
-        addedAt = Value(addedAt);
+  }) : deckId = Value(deckId),
+       wordId = Value(wordId),
+       sourceLanguage = Value(sourceLanguage),
+       targetLanguage = Value(targetLanguage),
+       addedAt = Value(addedAt);
   static Insertable<DeckCard> custom({
     Expression<int>? deckId,
     Expression<int>? wordId,
@@ -2676,13 +3112,14 @@ class DeckCardsCompanion extends UpdateCompanion<DeckCard> {
     });
   }
 
-  DeckCardsCompanion copyWith(
-      {Value<int>? deckId,
-      Value<int>? wordId,
-      Value<String>? sourceLanguage,
-      Value<String>? targetLanguage,
-      Value<String>? addedAt,
-      Value<int>? rowid}) {
+  DeckCardsCompanion copyWith({
+    Value<int>? deckId,
+    Value<int>? wordId,
+    Value<String>? sourceLanguage,
+    Value<String>? targetLanguage,
+    Value<String>? addedAt,
+    Value<int>? rowid,
+  }) {
     return DeckCardsCompanion(
       deckId: deckId ?? this.deckId,
       wordId: wordId ?? this.wordId,
@@ -2744,8 +3181,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [words, revlogEntries, deckConfigs, userSettings, decks, deckCards];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [
+    words,
+    revlogEntries,
+    deckConfigs,
+    userSettings,
+    decks,
+    deckCards,
+  ];
 }
 
 typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
@@ -2766,8 +3209,6 @@ typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
   Value<int> reps,
   Value<int> lapses,
   Value<String?> lastReview,
-  Value<String?> backword,
-  Value<String?> backsentence,
   Value<int> rowid,
 });
 typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
@@ -2788,8 +3229,6 @@ typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<int> reps,
   Value<int> lapses,
   Value<String?> lastReview,
-  Value<String?> backword,
-  Value<String?> backsentence,
   Value<int> rowid,
 });
 
@@ -2802,61 +3241,89 @@ class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get word => $composableBuilder(
-      column: $table.word, builder: (column) => ColumnFilters(column));
+    column: $table.word,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get sentence => $composableBuilder(
-      column: $table.sentence, builder: (column) => ColumnFilters(column));
+    column: $table.sentence,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get level => $composableBuilder(
-      column: $table.level, builder: (column) => ColumnFilters(column));
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get languageCode => $composableBuilder(
-      column: $table.languageCode, builder: (column) => ColumnFilters(column));
+    column: $table.languageCode,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get isSeen => $composableBuilder(
-      column: $table.isSeen, builder: (column) => ColumnFilters(column));
+    column: $table.isSeen,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get feedback => $composableBuilder(
-      column: $table.feedback, builder: (column) => ColumnFilters(column));
+    column: $table.feedback,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get date => $composableBuilder(
-      column: $table.date, builder: (column) => ColumnFilters(column));
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get cardState => $composableBuilder(
-      column: $table.cardState, builder: (column) => ColumnFilters(column));
+    column: $table.cardState,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get stability => $composableBuilder(
-      column: $table.stability, builder: (column) => ColumnFilters(column));
+    column: $table.stability,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get difficulty => $composableBuilder(
-      column: $table.difficulty, builder: (column) => ColumnFilters(column));
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get due => $composableBuilder(
-      column: $table.due, builder: (column) => ColumnFilters(column));
+    column: $table.due,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get elapsedDays => $composableBuilder(
-      column: $table.elapsedDays, builder: (column) => ColumnFilters(column));
+    column: $table.elapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get scheduledDays => $composableBuilder(
-      column: $table.scheduledDays, builder: (column) => ColumnFilters(column));
+    column: $table.scheduledDays,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get reps => $composableBuilder(
-      column: $table.reps, builder: (column) => ColumnFilters(column));
+    column: $table.reps,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get lapses => $composableBuilder(
-      column: $table.lapses, builder: (column) => ColumnFilters(column));
+    column: $table.lapses,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get lastReview => $composableBuilder(
-      column: $table.lastReview, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get backword => $composableBuilder(
-      column: $table.backword, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<String> get backsentence => $composableBuilder(
-      column: $table.backsentence, builder: (column) => ColumnFilters(column));
+    column: $table.lastReview,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$WordsTableOrderingComposer
@@ -2869,64 +3336,89 @@ class $$WordsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get word => $composableBuilder(
-      column: $table.word, builder: (column) => ColumnOrderings(column));
+    column: $table.word,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get sentence => $composableBuilder(
-      column: $table.sentence, builder: (column) => ColumnOrderings(column));
+    column: $table.sentence,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get level => $composableBuilder(
-      column: $table.level, builder: (column) => ColumnOrderings(column));
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get languageCode => $composableBuilder(
-      column: $table.languageCode,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.languageCode,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get isSeen => $composableBuilder(
-      column: $table.isSeen, builder: (column) => ColumnOrderings(column));
+    column: $table.isSeen,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get feedback => $composableBuilder(
-      column: $table.feedback, builder: (column) => ColumnOrderings(column));
+    column: $table.feedback,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get date => $composableBuilder(
-      column: $table.date, builder: (column) => ColumnOrderings(column));
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get cardState => $composableBuilder(
-      column: $table.cardState, builder: (column) => ColumnOrderings(column));
+    column: $table.cardState,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get stability => $composableBuilder(
-      column: $table.stability, builder: (column) => ColumnOrderings(column));
+    column: $table.stability,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get difficulty => $composableBuilder(
-      column: $table.difficulty, builder: (column) => ColumnOrderings(column));
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get due => $composableBuilder(
-      column: $table.due, builder: (column) => ColumnOrderings(column));
+    column: $table.due,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get elapsedDays => $composableBuilder(
-      column: $table.elapsedDays, builder: (column) => ColumnOrderings(column));
+    column: $table.elapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get scheduledDays => $composableBuilder(
-      column: $table.scheduledDays,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.scheduledDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get reps => $composableBuilder(
-      column: $table.reps, builder: (column) => ColumnOrderings(column));
+    column: $table.reps,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get lapses => $composableBuilder(
-      column: $table.lapses, builder: (column) => ColumnOrderings(column));
+    column: $table.lapses,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get lastReview => $composableBuilder(
-      column: $table.lastReview, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get backword => $composableBuilder(
-      column: $table.backword, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get backsentence => $composableBuilder(
-      column: $table.backsentence,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.lastReview,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$WordsTableAnnotationComposer
@@ -2951,7 +3443,9 @@ class $$WordsTableAnnotationComposer
       $composableBuilder(column: $table.level, builder: (column) => column);
 
   GeneratedColumn<String> get languageCode => $composableBuilder(
-      column: $table.languageCode, builder: (column) => column);
+    column: $table.languageCode,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get isSeen =>
       $composableBuilder(column: $table.isSeen, builder: (column) => column);
@@ -2969,16 +3463,22 @@ class $$WordsTableAnnotationComposer
       $composableBuilder(column: $table.stability, builder: (column) => column);
 
   GeneratedColumn<double> get difficulty => $composableBuilder(
-      column: $table.difficulty, builder: (column) => column);
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get due =>
       $composableBuilder(column: $table.due, builder: (column) => column);
 
   GeneratedColumn<int> get elapsedDays => $composableBuilder(
-      column: $table.elapsedDays, builder: (column) => column);
+    column: $table.elapsedDays,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get scheduledDays => $composableBuilder(
-      column: $table.scheduledDays, builder: (column) => column);
+    column: $table.scheduledDays,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get reps =>
       $composableBuilder(column: $table.reps, builder: (column) => column);
@@ -2987,29 +3487,29 @@ class $$WordsTableAnnotationComposer
       $composableBuilder(column: $table.lapses, builder: (column) => column);
 
   GeneratedColumn<String> get lastReview => $composableBuilder(
-      column: $table.lastReview, builder: (column) => column);
-
-  GeneratedColumn<String> get backword =>
-      $composableBuilder(column: $table.backword, builder: (column) => column);
-
-  GeneratedColumn<String> get backsentence => $composableBuilder(
-      column: $table.backsentence, builder: (column) => column);
+    column: $table.lastReview,
+    builder: (column) => column,
+  );
 }
 
-class $$WordsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $WordsTable,
-    Word,
-    $$WordsTableFilterComposer,
-    $$WordsTableOrderingComposer,
-    $$WordsTableAnnotationComposer,
-    $$WordsTableCreateCompanionBuilder,
-    $$WordsTableUpdateCompanionBuilder,
-    (Word, BaseReferences<_$AppDatabase, $WordsTable, Word>),
-    Word,
-    PrefetchHooks Function()> {
+class $$WordsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $WordsTable,
+          Word,
+          $$WordsTableFilterComposer,
+          $$WordsTableOrderingComposer,
+          $$WordsTableAnnotationComposer,
+          $$WordsTableCreateCompanionBuilder,
+          $$WordsTableUpdateCompanionBuilder,
+          (Word, BaseReferences<_$AppDatabase, $WordsTable, Word>),
+          Word,
+          PrefetchHooks Function()
+        > {
   $$WordsTableTableManager(_$AppDatabase db, $WordsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3018,143 +3518,138 @@ class $$WordsTableTableManager extends RootTableManager<
               $$WordsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$WordsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> word = const Value.absent(),
-            Value<String> sentence = const Value.absent(),
-            Value<String> level = const Value.absent(),
-            Value<String> languageCode = const Value.absent(),
-            Value<int> isSeen = const Value.absent(),
-            Value<int> feedback = const Value.absent(),
-            Value<String?> date = const Value.absent(),
-            Value<int> cardState = const Value.absent(),
-            Value<double> stability = const Value.absent(),
-            Value<double> difficulty = const Value.absent(),
-            Value<String?> due = const Value.absent(),
-            Value<int> elapsedDays = const Value.absent(),
-            Value<int> scheduledDays = const Value.absent(),
-            Value<int> reps = const Value.absent(),
-            Value<int> lapses = const Value.absent(),
-            Value<String?> lastReview = const Value.absent(),
-            Value<String?> backword = const Value.absent(),
-            Value<String?> backsentence = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              WordsCompanion(
-            id: id,
-            word: word,
-            sentence: sentence,
-            level: level,
-            languageCode: languageCode,
-            isSeen: isSeen,
-            feedback: feedback,
-            date: date,
-            cardState: cardState,
-            stability: stability,
-            difficulty: difficulty,
-            due: due,
-            elapsedDays: elapsedDays,
-            scheduledDays: scheduledDays,
-            reps: reps,
-            lapses: lapses,
-            lastReview: lastReview,
-            backword: backword,
-            backsentence: backsentence,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required int id,
-            required String word,
-            required String sentence,
-            required String level,
-            required String languageCode,
-            Value<int> isSeen = const Value.absent(),
-            Value<int> feedback = const Value.absent(),
-            Value<String?> date = const Value.absent(),
-            Value<int> cardState = const Value.absent(),
-            Value<double> stability = const Value.absent(),
-            Value<double> difficulty = const Value.absent(),
-            Value<String?> due = const Value.absent(),
-            Value<int> elapsedDays = const Value.absent(),
-            Value<int> scheduledDays = const Value.absent(),
-            Value<int> reps = const Value.absent(),
-            Value<int> lapses = const Value.absent(),
-            Value<String?> lastReview = const Value.absent(),
-            Value<String?> backword = const Value.absent(),
-            Value<String?> backsentence = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              WordsCompanion.insert(
-            id: id,
-            word: word,
-            sentence: sentence,
-            level: level,
-            languageCode: languageCode,
-            isSeen: isSeen,
-            feedback: feedback,
-            date: date,
-            cardState: cardState,
-            stability: stability,
-            difficulty: difficulty,
-            due: due,
-            elapsedDays: elapsedDays,
-            scheduledDays: scheduledDays,
-            reps: reps,
-            lapses: lapses,
-            lastReview: lastReview,
-            backword: backword,
-            backsentence: backsentence,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> word = const Value.absent(),
+                Value<String> sentence = const Value.absent(),
+                Value<String> level = const Value.absent(),
+                Value<String> languageCode = const Value.absent(),
+                Value<int> isSeen = const Value.absent(),
+                Value<int> feedback = const Value.absent(),
+                Value<String?> date = const Value.absent(),
+                Value<int> cardState = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<String?> due = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<int> reps = const Value.absent(),
+                Value<int> lapses = const Value.absent(),
+                Value<String?> lastReview = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WordsCompanion(
+                id: id,
+                word: word,
+                sentence: sentence,
+                level: level,
+                languageCode: languageCode,
+                isSeen: isSeen,
+                feedback: feedback,
+                date: date,
+                cardState: cardState,
+                stability: stability,
+                difficulty: difficulty,
+                due: due,
+                elapsedDays: elapsedDays,
+                scheduledDays: scheduledDays,
+                reps: reps,
+                lapses: lapses,
+                lastReview: lastReview,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int id,
+                required String word,
+                required String sentence,
+                required String level,
+                required String languageCode,
+                Value<int> isSeen = const Value.absent(),
+                Value<int> feedback = const Value.absent(),
+                Value<String?> date = const Value.absent(),
+                Value<int> cardState = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<String?> due = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<int> reps = const Value.absent(),
+                Value<int> lapses = const Value.absent(),
+                Value<String?> lastReview = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => WordsCompanion.insert(
+                id: id,
+                word: word,
+                sentence: sentence,
+                level: level,
+                languageCode: languageCode,
+                isSeen: isSeen,
+                feedback: feedback,
+                date: date,
+                cardState: cardState,
+                stability: stability,
+                difficulty: difficulty,
+                due: due,
+                elapsedDays: elapsedDays,
+                scheduledDays: scheduledDays,
+                reps: reps,
+                lapses: lapses,
+                lastReview: lastReview,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$WordsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $WordsTable,
-    Word,
-    $$WordsTableFilterComposer,
-    $$WordsTableOrderingComposer,
-    $$WordsTableAnnotationComposer,
-    $$WordsTableCreateCompanionBuilder,
-    $$WordsTableUpdateCompanionBuilder,
-    (Word, BaseReferences<_$AppDatabase, $WordsTable, Word>),
-    Word,
-    PrefetchHooks Function()>;
-typedef $$RevlogEntriesTableCreateCompanionBuilder = RevlogEntriesCompanion
-    Function({
-  Value<int> id,
-  required int cardId,
-  required String deckTable,
-  required int rating,
-  required int state,
-  required String due,
-  required double stability,
-  required double difficulty,
-  required int elapsedDays,
-  Value<int> lastElapsedDays,
-  required int scheduledDays,
-  required String reviewDate,
-});
-typedef $$RevlogEntriesTableUpdateCompanionBuilder = RevlogEntriesCompanion
-    Function({
-  Value<int> id,
-  Value<int> cardId,
-  Value<String> deckTable,
-  Value<int> rating,
-  Value<int> state,
-  Value<String> due,
-  Value<double> stability,
-  Value<double> difficulty,
-  Value<int> elapsedDays,
-  Value<int> lastElapsedDays,
-  Value<int> scheduledDays,
-  Value<String> reviewDate,
-});
+typedef $$WordsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $WordsTable,
+      Word,
+      $$WordsTableFilterComposer,
+      $$WordsTableOrderingComposer,
+      $$WordsTableAnnotationComposer,
+      $$WordsTableCreateCompanionBuilder,
+      $$WordsTableUpdateCompanionBuilder,
+      (Word, BaseReferences<_$AppDatabase, $WordsTable, Word>),
+      Word,
+      PrefetchHooks Function()
+    >;
+typedef $$RevlogEntriesTableCreateCompanionBuilder =
+    RevlogEntriesCompanion Function({
+      Value<int> id,
+      required int cardId,
+      required String deckTable,
+      required int rating,
+      required int state,
+      required String due,
+      required double stability,
+      required double difficulty,
+      required int elapsedDays,
+      Value<int> lastElapsedDays,
+      required int scheduledDays,
+      required String reviewDate,
+    });
+typedef $$RevlogEntriesTableUpdateCompanionBuilder =
+    RevlogEntriesCompanion Function({
+      Value<int> id,
+      Value<int> cardId,
+      Value<String> deckTable,
+      Value<int> rating,
+      Value<int> state,
+      Value<String> due,
+      Value<double> stability,
+      Value<double> difficulty,
+      Value<int> elapsedDays,
+      Value<int> lastElapsedDays,
+      Value<int> scheduledDays,
+      Value<String> reviewDate,
+    });
 
 class $$RevlogEntriesTableFilterComposer
     extends Composer<_$AppDatabase, $RevlogEntriesTable> {
@@ -3166,41 +3661,64 @@ class $$RevlogEntriesTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get cardId => $composableBuilder(
-      column: $table.cardId, builder: (column) => ColumnFilters(column));
+    column: $table.cardId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get deckTable => $composableBuilder(
-      column: $table.deckTable, builder: (column) => ColumnFilters(column));
+    column: $table.deckTable,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get rating => $composableBuilder(
-      column: $table.rating, builder: (column) => ColumnFilters(column));
+    column: $table.rating,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get state => $composableBuilder(
-      column: $table.state, builder: (column) => ColumnFilters(column));
+    column: $table.state,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get due => $composableBuilder(
-      column: $table.due, builder: (column) => ColumnFilters(column));
+    column: $table.due,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get stability => $composableBuilder(
-      column: $table.stability, builder: (column) => ColumnFilters(column));
+    column: $table.stability,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get difficulty => $composableBuilder(
-      column: $table.difficulty, builder: (column) => ColumnFilters(column));
+    column: $table.difficulty,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get elapsedDays => $composableBuilder(
-      column: $table.elapsedDays, builder: (column) => ColumnFilters(column));
+    column: $table.elapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get lastElapsedDays => $composableBuilder(
-      column: $table.lastElapsedDays,
-      builder: (column) => ColumnFilters(column));
+    column: $table.lastElapsedDays,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get scheduledDays => $composableBuilder(
-      column: $table.scheduledDays, builder: (column) => ColumnFilters(column));
+    column: $table.scheduledDays,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get reviewDate => $composableBuilder(
-      column: $table.reviewDate, builder: (column) => ColumnFilters(column));
+    column: $table.reviewDate,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$RevlogEntriesTableOrderingComposer
@@ -3213,42 +3731,64 @@ class $$RevlogEntriesTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get cardId => $composableBuilder(
-      column: $table.cardId, builder: (column) => ColumnOrderings(column));
+    column: $table.cardId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get deckTable => $composableBuilder(
-      column: $table.deckTable, builder: (column) => ColumnOrderings(column));
+    column: $table.deckTable,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get rating => $composableBuilder(
-      column: $table.rating, builder: (column) => ColumnOrderings(column));
+    column: $table.rating,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get state => $composableBuilder(
-      column: $table.state, builder: (column) => ColumnOrderings(column));
+    column: $table.state,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get due => $composableBuilder(
-      column: $table.due, builder: (column) => ColumnOrderings(column));
+    column: $table.due,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get stability => $composableBuilder(
-      column: $table.stability, builder: (column) => ColumnOrderings(column));
+    column: $table.stability,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get difficulty => $composableBuilder(
-      column: $table.difficulty, builder: (column) => ColumnOrderings(column));
+    column: $table.difficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get elapsedDays => $composableBuilder(
-      column: $table.elapsedDays, builder: (column) => ColumnOrderings(column));
+    column: $table.elapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get lastElapsedDays => $composableBuilder(
-      column: $table.lastElapsedDays,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.lastElapsedDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get scheduledDays => $composableBuilder(
-      column: $table.scheduledDays,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.scheduledDays,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get reviewDate => $composableBuilder(
-      column: $table.reviewDate, builder: (column) => ColumnOrderings(column));
+    column: $table.reviewDate,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$RevlogEntriesTableAnnotationComposer
@@ -3282,38 +3822,52 @@ class $$RevlogEntriesTableAnnotationComposer
       $composableBuilder(column: $table.stability, builder: (column) => column);
 
   GeneratedColumn<double> get difficulty => $composableBuilder(
-      column: $table.difficulty, builder: (column) => column);
+    column: $table.difficulty,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get elapsedDays => $composableBuilder(
-      column: $table.elapsedDays, builder: (column) => column);
+    column: $table.elapsedDays,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get lastElapsedDays => $composableBuilder(
-      column: $table.lastElapsedDays, builder: (column) => column);
+    column: $table.lastElapsedDays,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get scheduledDays => $composableBuilder(
-      column: $table.scheduledDays, builder: (column) => column);
+    column: $table.scheduledDays,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get reviewDate => $composableBuilder(
-      column: $table.reviewDate, builder: (column) => column);
+    column: $table.reviewDate,
+    builder: (column) => column,
+  );
 }
 
-class $$RevlogEntriesTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $RevlogEntriesTable,
-    RevlogEntry,
-    $$RevlogEntriesTableFilterComposer,
-    $$RevlogEntriesTableOrderingComposer,
-    $$RevlogEntriesTableAnnotationComposer,
-    $$RevlogEntriesTableCreateCompanionBuilder,
-    $$RevlogEntriesTableUpdateCompanionBuilder,
-    (
-      RevlogEntry,
-      BaseReferences<_$AppDatabase, $RevlogEntriesTable, RevlogEntry>
-    ),
-    RevlogEntry,
-    PrefetchHooks Function()> {
+class $$RevlogEntriesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $RevlogEntriesTable,
+          RevlogEntry,
+          $$RevlogEntriesTableFilterComposer,
+          $$RevlogEntriesTableOrderingComposer,
+          $$RevlogEntriesTableAnnotationComposer,
+          $$RevlogEntriesTableCreateCompanionBuilder,
+          $$RevlogEntriesTableUpdateCompanionBuilder,
+          (
+            RevlogEntry,
+            BaseReferences<_$AppDatabase, $RevlogEntriesTable, RevlogEntry>,
+          ),
+          RevlogEntry,
+          PrefetchHooks Function()
+        > {
   $$RevlogEntriesTableTableManager(_$AppDatabase db, $RevlogEntriesTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3322,106 +3876,109 @@ class $$RevlogEntriesTableTableManager extends RootTableManager<
               $$RevlogEntriesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$RevlogEntriesTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<int> cardId = const Value.absent(),
-            Value<String> deckTable = const Value.absent(),
-            Value<int> rating = const Value.absent(),
-            Value<int> state = const Value.absent(),
-            Value<String> due = const Value.absent(),
-            Value<double> stability = const Value.absent(),
-            Value<double> difficulty = const Value.absent(),
-            Value<int> elapsedDays = const Value.absent(),
-            Value<int> lastElapsedDays = const Value.absent(),
-            Value<int> scheduledDays = const Value.absent(),
-            Value<String> reviewDate = const Value.absent(),
-          }) =>
-              RevlogEntriesCompanion(
-            id: id,
-            cardId: cardId,
-            deckTable: deckTable,
-            rating: rating,
-            state: state,
-            due: due,
-            stability: stability,
-            difficulty: difficulty,
-            elapsedDays: elapsedDays,
-            lastElapsedDays: lastElapsedDays,
-            scheduledDays: scheduledDays,
-            reviewDate: reviewDate,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required int cardId,
-            required String deckTable,
-            required int rating,
-            required int state,
-            required String due,
-            required double stability,
-            required double difficulty,
-            required int elapsedDays,
-            Value<int> lastElapsedDays = const Value.absent(),
-            required int scheduledDays,
-            required String reviewDate,
-          }) =>
-              RevlogEntriesCompanion.insert(
-            id: id,
-            cardId: cardId,
-            deckTable: deckTable,
-            rating: rating,
-            state: state,
-            due: due,
-            stability: stability,
-            difficulty: difficulty,
-            elapsedDays: elapsedDays,
-            lastElapsedDays: lastElapsedDays,
-            scheduledDays: scheduledDays,
-            reviewDate: reviewDate,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> cardId = const Value.absent(),
+                Value<String> deckTable = const Value.absent(),
+                Value<int> rating = const Value.absent(),
+                Value<int> state = const Value.absent(),
+                Value<String> due = const Value.absent(),
+                Value<double> stability = const Value.absent(),
+                Value<double> difficulty = const Value.absent(),
+                Value<int> elapsedDays = const Value.absent(),
+                Value<int> lastElapsedDays = const Value.absent(),
+                Value<int> scheduledDays = const Value.absent(),
+                Value<String> reviewDate = const Value.absent(),
+              }) => RevlogEntriesCompanion(
+                id: id,
+                cardId: cardId,
+                deckTable: deckTable,
+                rating: rating,
+                state: state,
+                due: due,
+                stability: stability,
+                difficulty: difficulty,
+                elapsedDays: elapsedDays,
+                lastElapsedDays: lastElapsedDays,
+                scheduledDays: scheduledDays,
+                reviewDate: reviewDate,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int cardId,
+                required String deckTable,
+                required int rating,
+                required int state,
+                required String due,
+                required double stability,
+                required double difficulty,
+                required int elapsedDays,
+                Value<int> lastElapsedDays = const Value.absent(),
+                required int scheduledDays,
+                required String reviewDate,
+              }) => RevlogEntriesCompanion.insert(
+                id: id,
+                cardId: cardId,
+                deckTable: deckTable,
+                rating: rating,
+                state: state,
+                due: due,
+                stability: stability,
+                difficulty: difficulty,
+                elapsedDays: elapsedDays,
+                lastElapsedDays: lastElapsedDays,
+                scheduledDays: scheduledDays,
+                reviewDate: reviewDate,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$RevlogEntriesTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $RevlogEntriesTable,
-    RevlogEntry,
-    $$RevlogEntriesTableFilterComposer,
-    $$RevlogEntriesTableOrderingComposer,
-    $$RevlogEntriesTableAnnotationComposer,
-    $$RevlogEntriesTableCreateCompanionBuilder,
-    $$RevlogEntriesTableUpdateCompanionBuilder,
-    (
+typedef $$RevlogEntriesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $RevlogEntriesTable,
       RevlogEntry,
-      BaseReferences<_$AppDatabase, $RevlogEntriesTable, RevlogEntry>
-    ),
-    RevlogEntry,
-    PrefetchHooks Function()>;
-typedef $$DeckConfigsTableCreateCompanionBuilder = DeckConfigsCompanion
-    Function({
-  required String level,
-  Value<int> maxNewPerDay,
-  Value<int> maxReviewsPerDay,
-  Value<String> learningSteps,
-  Value<int> enableFuzz,
-  Value<double> requestRetention,
-  Value<String?> w,
-  Value<int> rowid,
-});
-typedef $$DeckConfigsTableUpdateCompanionBuilder = DeckConfigsCompanion
-    Function({
-  Value<String> level,
-  Value<int> maxNewPerDay,
-  Value<int> maxReviewsPerDay,
-  Value<String> learningSteps,
-  Value<int> enableFuzz,
-  Value<double> requestRetention,
-  Value<String?> w,
-  Value<int> rowid,
-});
+      $$RevlogEntriesTableFilterComposer,
+      $$RevlogEntriesTableOrderingComposer,
+      $$RevlogEntriesTableAnnotationComposer,
+      $$RevlogEntriesTableCreateCompanionBuilder,
+      $$RevlogEntriesTableUpdateCompanionBuilder,
+      (
+        RevlogEntry,
+        BaseReferences<_$AppDatabase, $RevlogEntriesTable, RevlogEntry>,
+      ),
+      RevlogEntry,
+      PrefetchHooks Function()
+    >;
+typedef $$DeckConfigsTableCreateCompanionBuilder =
+    DeckConfigsCompanion Function({
+      required String level,
+      Value<int> maxNewPerDay,
+      Value<int> maxReviewsPerDay,
+      Value<String> learningSteps,
+      Value<int> enableFuzz,
+      Value<double> requestRetention,
+      Value<String?> w,
+      Value<int> rowid,
+    });
+typedef $$DeckConfigsTableUpdateCompanionBuilder =
+    DeckConfigsCompanion Function({
+      Value<String> level,
+      Value<int> maxNewPerDay,
+      Value<int> maxReviewsPerDay,
+      Value<String> learningSteps,
+      Value<int> enableFuzz,
+      Value<double> requestRetention,
+      Value<String?> w,
+      Value<int> rowid,
+    });
 
 class $$DeckConfigsTableFilterComposer
     extends Composer<_$AppDatabase, $DeckConfigsTable> {
@@ -3433,27 +3990,39 @@ class $$DeckConfigsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get level => $composableBuilder(
-      column: $table.level, builder: (column) => ColumnFilters(column));
+    column: $table.level,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get maxNewPerDay => $composableBuilder(
-      column: $table.maxNewPerDay, builder: (column) => ColumnFilters(column));
+    column: $table.maxNewPerDay,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get maxReviewsPerDay => $composableBuilder(
-      column: $table.maxReviewsPerDay,
-      builder: (column) => ColumnFilters(column));
+    column: $table.maxReviewsPerDay,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get learningSteps => $composableBuilder(
-      column: $table.learningSteps, builder: (column) => ColumnFilters(column));
+    column: $table.learningSteps,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get enableFuzz => $composableBuilder(
-      column: $table.enableFuzz, builder: (column) => ColumnFilters(column));
+    column: $table.enableFuzz,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<double> get requestRetention => $composableBuilder(
-      column: $table.requestRetention,
-      builder: (column) => ColumnFilters(column));
+    column: $table.requestRetention,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get w => $composableBuilder(
-      column: $table.w, builder: (column) => ColumnFilters(column));
+    column: $table.w,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$DeckConfigsTableOrderingComposer
@@ -3466,29 +4035,39 @@ class $$DeckConfigsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get level => $composableBuilder(
-      column: $table.level, builder: (column) => ColumnOrderings(column));
+    column: $table.level,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get maxNewPerDay => $composableBuilder(
-      column: $table.maxNewPerDay,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.maxNewPerDay,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get maxReviewsPerDay => $composableBuilder(
-      column: $table.maxReviewsPerDay,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.maxReviewsPerDay,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get learningSteps => $composableBuilder(
-      column: $table.learningSteps,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.learningSteps,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get enableFuzz => $composableBuilder(
-      column: $table.enableFuzz, builder: (column) => ColumnOrderings(column));
+    column: $table.enableFuzz,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<double> get requestRetention => $composableBuilder(
-      column: $table.requestRetention,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.requestRetention,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get w => $composableBuilder(
-      column: $table.w, builder: (column) => ColumnOrderings(column));
+    column: $table.w,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DeckConfigsTableAnnotationComposer
@@ -3504,38 +4083,55 @@ class $$DeckConfigsTableAnnotationComposer
       $composableBuilder(column: $table.level, builder: (column) => column);
 
   GeneratedColumn<int> get maxNewPerDay => $composableBuilder(
-      column: $table.maxNewPerDay, builder: (column) => column);
+    column: $table.maxNewPerDay,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get maxReviewsPerDay => $composableBuilder(
-      column: $table.maxReviewsPerDay, builder: (column) => column);
+    column: $table.maxReviewsPerDay,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get learningSteps => $composableBuilder(
-      column: $table.learningSteps, builder: (column) => column);
+    column: $table.learningSteps,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get enableFuzz => $composableBuilder(
-      column: $table.enableFuzz, builder: (column) => column);
+    column: $table.enableFuzz,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<double> get requestRetention => $composableBuilder(
-      column: $table.requestRetention, builder: (column) => column);
+    column: $table.requestRetention,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get w =>
       $composableBuilder(column: $table.w, builder: (column) => column);
 }
 
-class $$DeckConfigsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $DeckConfigsTable,
-    DeckConfig,
-    $$DeckConfigsTableFilterComposer,
-    $$DeckConfigsTableOrderingComposer,
-    $$DeckConfigsTableAnnotationComposer,
-    $$DeckConfigsTableCreateCompanionBuilder,
-    $$DeckConfigsTableUpdateCompanionBuilder,
-    (DeckConfig, BaseReferences<_$AppDatabase, $DeckConfigsTable, DeckConfig>),
-    DeckConfig,
-    PrefetchHooks Function()> {
+class $$DeckConfigsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DeckConfigsTable,
+          DeckConfig,
+          $$DeckConfigsTableFilterComposer,
+          $$DeckConfigsTableOrderingComposer,
+          $$DeckConfigsTableAnnotationComposer,
+          $$DeckConfigsTableCreateCompanionBuilder,
+          $$DeckConfigsTableUpdateCompanionBuilder,
+          (
+            DeckConfig,
+            BaseReferences<_$AppDatabase, $DeckConfigsTable, DeckConfig>,
+          ),
+          DeckConfig,
+          PrefetchHooks Function()
+        > {
   $$DeckConfigsTableTableManager(_$AppDatabase db, $DeckConfigsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3544,79 +4140,87 @@ class $$DeckConfigsTableTableManager extends RootTableManager<
               $$DeckConfigsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$DeckConfigsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> level = const Value.absent(),
-            Value<int> maxNewPerDay = const Value.absent(),
-            Value<int> maxReviewsPerDay = const Value.absent(),
-            Value<String> learningSteps = const Value.absent(),
-            Value<int> enableFuzz = const Value.absent(),
-            Value<double> requestRetention = const Value.absent(),
-            Value<String?> w = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DeckConfigsCompanion(
-            level: level,
-            maxNewPerDay: maxNewPerDay,
-            maxReviewsPerDay: maxReviewsPerDay,
-            learningSteps: learningSteps,
-            enableFuzz: enableFuzz,
-            requestRetention: requestRetention,
-            w: w,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String level,
-            Value<int> maxNewPerDay = const Value.absent(),
-            Value<int> maxReviewsPerDay = const Value.absent(),
-            Value<String> learningSteps = const Value.absent(),
-            Value<int> enableFuzz = const Value.absent(),
-            Value<double> requestRetention = const Value.absent(),
-            Value<String?> w = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DeckConfigsCompanion.insert(
-            level: level,
-            maxNewPerDay: maxNewPerDay,
-            maxReviewsPerDay: maxReviewsPerDay,
-            learningSteps: learningSteps,
-            enableFuzz: enableFuzz,
-            requestRetention: requestRetention,
-            w: w,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> level = const Value.absent(),
+                Value<int> maxNewPerDay = const Value.absent(),
+                Value<int> maxReviewsPerDay = const Value.absent(),
+                Value<String> learningSteps = const Value.absent(),
+                Value<int> enableFuzz = const Value.absent(),
+                Value<double> requestRetention = const Value.absent(),
+                Value<String?> w = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DeckConfigsCompanion(
+                level: level,
+                maxNewPerDay: maxNewPerDay,
+                maxReviewsPerDay: maxReviewsPerDay,
+                learningSteps: learningSteps,
+                enableFuzz: enableFuzz,
+                requestRetention: requestRetention,
+                w: w,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String level,
+                Value<int> maxNewPerDay = const Value.absent(),
+                Value<int> maxReviewsPerDay = const Value.absent(),
+                Value<String> learningSteps = const Value.absent(),
+                Value<int> enableFuzz = const Value.absent(),
+                Value<double> requestRetention = const Value.absent(),
+                Value<String?> w = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DeckConfigsCompanion.insert(
+                level: level,
+                maxNewPerDay: maxNewPerDay,
+                maxReviewsPerDay: maxReviewsPerDay,
+                learningSteps: learningSteps,
+                enableFuzz: enableFuzz,
+                requestRetention: requestRetention,
+                w: w,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$DeckConfigsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $DeckConfigsTable,
-    DeckConfig,
-    $$DeckConfigsTableFilterComposer,
-    $$DeckConfigsTableOrderingComposer,
-    $$DeckConfigsTableAnnotationComposer,
-    $$DeckConfigsTableCreateCompanionBuilder,
-    $$DeckConfigsTableUpdateCompanionBuilder,
-    (DeckConfig, BaseReferences<_$AppDatabase, $DeckConfigsTable, DeckConfig>),
-    DeckConfig,
-    PrefetchHooks Function()>;
-typedef $$UserSettingsTableCreateCompanionBuilder = UserSettingsCompanion
-    Function({
-  required String mainLanguage,
-  required String targetLanguage,
-  required String firstTime,
-  Value<int> rowid,
-});
-typedef $$UserSettingsTableUpdateCompanionBuilder = UserSettingsCompanion
-    Function({
-  Value<String> mainLanguage,
-  Value<String> targetLanguage,
-  Value<String> firstTime,
-  Value<int> rowid,
-});
+typedef $$DeckConfigsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DeckConfigsTable,
+      DeckConfig,
+      $$DeckConfigsTableFilterComposer,
+      $$DeckConfigsTableOrderingComposer,
+      $$DeckConfigsTableAnnotationComposer,
+      $$DeckConfigsTableCreateCompanionBuilder,
+      $$DeckConfigsTableUpdateCompanionBuilder,
+      (
+        DeckConfig,
+        BaseReferences<_$AppDatabase, $DeckConfigsTable, DeckConfig>,
+      ),
+      DeckConfig,
+      PrefetchHooks Function()
+    >;
+typedef $$UserSettingsTableCreateCompanionBuilder =
+    UserSettingsCompanion Function({
+      required String mainLanguage,
+      required String targetLanguage,
+      required String firstTime,
+      Value<String> reviewMode,
+      Value<int> rowid,
+    });
+typedef $$UserSettingsTableUpdateCompanionBuilder =
+    UserSettingsCompanion Function({
+      Value<String> mainLanguage,
+      Value<String> targetLanguage,
+      Value<String> firstTime,
+      Value<String> reviewMode,
+      Value<int> rowid,
+    });
 
 class $$UserSettingsTableFilterComposer
     extends Composer<_$AppDatabase, $UserSettingsTable> {
@@ -3628,14 +4232,24 @@ class $$UserSettingsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<String> get mainLanguage => $composableBuilder(
-      column: $table.mainLanguage, builder: (column) => ColumnFilters(column));
+    column: $table.mainLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get targetLanguage => $composableBuilder(
-      column: $table.targetLanguage,
-      builder: (column) => ColumnFilters(column));
+    column: $table.targetLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get firstTime => $composableBuilder(
-      column: $table.firstTime, builder: (column) => ColumnFilters(column));
+    column: $table.firstTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reviewMode => $composableBuilder(
+    column: $table.reviewMode,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$UserSettingsTableOrderingComposer
@@ -3648,15 +4262,24 @@ class $$UserSettingsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<String> get mainLanguage => $composableBuilder(
-      column: $table.mainLanguage,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.mainLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get targetLanguage => $composableBuilder(
-      column: $table.targetLanguage,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.targetLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get firstTime => $composableBuilder(
-      column: $table.firstTime, builder: (column) => ColumnOrderings(column));
+    column: $table.firstTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reviewMode => $composableBuilder(
+    column: $table.reviewMode,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserSettingsTableAnnotationComposer
@@ -3669,32 +4292,45 @@ class $$UserSettingsTableAnnotationComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   GeneratedColumn<String> get mainLanguage => $composableBuilder(
-      column: $table.mainLanguage, builder: (column) => column);
+    column: $table.mainLanguage,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get targetLanguage => $composableBuilder(
-      column: $table.targetLanguage, builder: (column) => column);
+    column: $table.targetLanguage,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get firstTime =>
       $composableBuilder(column: $table.firstTime, builder: (column) => column);
+
+  GeneratedColumn<String> get reviewMode => $composableBuilder(
+    column: $table.reviewMode,
+    builder: (column) => column,
+  );
 }
 
-class $$UserSettingsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $UserSettingsTable,
-    UserSetting,
-    $$UserSettingsTableFilterComposer,
-    $$UserSettingsTableOrderingComposer,
-    $$UserSettingsTableAnnotationComposer,
-    $$UserSettingsTableCreateCompanionBuilder,
-    $$UserSettingsTableUpdateCompanionBuilder,
-    (
-      UserSetting,
-      BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>
-    ),
-    UserSetting,
-    PrefetchHooks Function()> {
+class $$UserSettingsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserSettingsTable,
+          UserSetting,
+          $$UserSettingsTableFilterComposer,
+          $$UserSettingsTableOrderingComposer,
+          $$UserSettingsTableAnnotationComposer,
+          $$UserSettingsTableCreateCompanionBuilder,
+          $$UserSettingsTableUpdateCompanionBuilder,
+          (
+            UserSetting,
+            BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>,
+          ),
+          UserSetting,
+          PrefetchHooks Function()
+        > {
   $$UserSettingsTableTableManager(_$AppDatabase db, $UserSettingsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3703,52 +4339,59 @@ class $$UserSettingsTableTableManager extends RootTableManager<
               $$UserSettingsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$UserSettingsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<String> mainLanguage = const Value.absent(),
-            Value<String> targetLanguage = const Value.absent(),
-            Value<String> firstTime = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              UserSettingsCompanion(
-            mainLanguage: mainLanguage,
-            targetLanguage: targetLanguage,
-            firstTime: firstTime,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required String mainLanguage,
-            required String targetLanguage,
-            required String firstTime,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              UserSettingsCompanion.insert(
-            mainLanguage: mainLanguage,
-            targetLanguage: targetLanguage,
-            firstTime: firstTime,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<String> mainLanguage = const Value.absent(),
+                Value<String> targetLanguage = const Value.absent(),
+                Value<String> firstTime = const Value.absent(),
+                Value<String> reviewMode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UserSettingsCompanion(
+                mainLanguage: mainLanguage,
+                targetLanguage: targetLanguage,
+                firstTime: firstTime,
+                reviewMode: reviewMode,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String mainLanguage,
+                required String targetLanguage,
+                required String firstTime,
+                Value<String> reviewMode = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => UserSettingsCompanion.insert(
+                mainLanguage: mainLanguage,
+                targetLanguage: targetLanguage,
+                firstTime: firstTime,
+                reviewMode: reviewMode,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$UserSettingsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $UserSettingsTable,
-    UserSetting,
-    $$UserSettingsTableFilterComposer,
-    $$UserSettingsTableOrderingComposer,
-    $$UserSettingsTableAnnotationComposer,
-    $$UserSettingsTableCreateCompanionBuilder,
-    $$UserSettingsTableUpdateCompanionBuilder,
-    (
+typedef $$UserSettingsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserSettingsTable,
       UserSetting,
-      BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>
-    ),
-    UserSetting,
-    PrefetchHooks Function()>;
+      $$UserSettingsTableFilterComposer,
+      $$UserSettingsTableOrderingComposer,
+      $$UserSettingsTableAnnotationComposer,
+      $$UserSettingsTableCreateCompanionBuilder,
+      $$UserSettingsTableUpdateCompanionBuilder,
+      (
+        UserSetting,
+        BaseReferences<_$AppDatabase, $UserSettingsTable, UserSetting>,
+      ),
+      UserSetting,
+      PrefetchHooks Function()
+    >;
 typedef $$DecksTableCreateCompanionBuilder = DecksCompanion Function({
   Value<int> id,
   required String name,
@@ -3773,19 +4416,29 @@ class $$DecksTableFilterComposer extends Composer<_$AppDatabase, $DecksTable> {
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnFilters(column));
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get deckType => $composableBuilder(
-      column: $table.deckType, builder: (column) => ColumnFilters(column));
+    column: $table.deckType,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get systemKey => $composableBuilder(
-      column: $table.systemKey, builder: (column) => ColumnFilters(column));
+    column: $table.systemKey,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$DecksTableOrderingComposer
@@ -3798,19 +4451,29 @@ class $$DecksTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get name => $composableBuilder(
-      column: $table.name, builder: (column) => ColumnOrderings(column));
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get deckType => $composableBuilder(
-      column: $table.deckType, builder: (column) => ColumnOrderings(column));
+    column: $table.deckType,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get systemKey => $composableBuilder(
-      column: $table.systemKey, builder: (column) => ColumnOrderings(column));
+    column: $table.systemKey,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DecksTableAnnotationComposer
@@ -3838,20 +4501,24 @@ class $$DecksTableAnnotationComposer
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
 }
 
-class $$DecksTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $DecksTable,
-    Deck,
-    $$DecksTableFilterComposer,
-    $$DecksTableOrderingComposer,
-    $$DecksTableAnnotationComposer,
-    $$DecksTableCreateCompanionBuilder,
-    $$DecksTableUpdateCompanionBuilder,
-    (Deck, BaseReferences<_$AppDatabase, $DecksTable, Deck>),
-    Deck,
-    PrefetchHooks Function()> {
+class $$DecksTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DecksTable,
+          Deck,
+          $$DecksTableFilterComposer,
+          $$DecksTableOrderingComposer,
+          $$DecksTableAnnotationComposer,
+          $$DecksTableCreateCompanionBuilder,
+          $$DecksTableUpdateCompanionBuilder,
+          (Deck, BaseReferences<_$AppDatabase, $DecksTable, Deck>),
+          Deck,
+          PrefetchHooks Function()
+        > {
   $$DecksTableTableManager(_$AppDatabase db, $DecksTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -3860,53 +4527,56 @@ class $$DecksTableTableManager extends RootTableManager<
               $$DecksTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$DecksTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<String> name = const Value.absent(),
-            Value<String> deckType = const Value.absent(),
-            Value<String?> systemKey = const Value.absent(),
-            Value<String> createdAt = const Value.absent(),
-          }) =>
-              DecksCompanion(
-            id: id,
-            name: name,
-            deckType: deckType,
-            systemKey: systemKey,
-            createdAt: createdAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            required String name,
-            required String deckType,
-            Value<String?> systemKey = const Value.absent(),
-            required String createdAt,
-          }) =>
-              DecksCompanion.insert(
-            id: id,
-            name: name,
-            deckType: deckType,
-            systemKey: systemKey,
-            createdAt: createdAt,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> deckType = const Value.absent(),
+                Value<String?> systemKey = const Value.absent(),
+                Value<String> createdAt = const Value.absent(),
+              }) => DecksCompanion(
+                id: id,
+                name: name,
+                deckType: deckType,
+                systemKey: systemKey,
+                createdAt: createdAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String name,
+                required String deckType,
+                Value<String?> systemKey = const Value.absent(),
+                required String createdAt,
+              }) => DecksCompanion.insert(
+                id: id,
+                name: name,
+                deckType: deckType,
+                systemKey: systemKey,
+                createdAt: createdAt,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$DecksTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $DecksTable,
-    Deck,
-    $$DecksTableFilterComposer,
-    $$DecksTableOrderingComposer,
-    $$DecksTableAnnotationComposer,
-    $$DecksTableCreateCompanionBuilder,
-    $$DecksTableUpdateCompanionBuilder,
-    (Deck, BaseReferences<_$AppDatabase, $DecksTable, Deck>),
-    Deck,
-    PrefetchHooks Function()>;
+typedef $$DecksTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DecksTable,
+      Deck,
+      $$DecksTableFilterComposer,
+      $$DecksTableOrderingComposer,
+      $$DecksTableAnnotationComposer,
+      $$DecksTableCreateCompanionBuilder,
+      $$DecksTableUpdateCompanionBuilder,
+      (Deck, BaseReferences<_$AppDatabase, $DecksTable, Deck>),
+      Deck,
+      PrefetchHooks Function()
+    >;
 typedef $$DeckCardsTableCreateCompanionBuilder = DeckCardsCompanion Function({
   required int deckId,
   required int wordId,
@@ -3934,21 +4604,29 @@ class $$DeckCardsTableFilterComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnFilters<int> get deckId => $composableBuilder(
-      column: $table.deckId, builder: (column) => ColumnFilters(column));
+    column: $table.deckId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<int> get wordId => $composableBuilder(
-      column: $table.wordId, builder: (column) => ColumnFilters(column));
+    column: $table.wordId,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get sourceLanguage => $composableBuilder(
-      column: $table.sourceLanguage,
-      builder: (column) => ColumnFilters(column));
+    column: $table.sourceLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get targetLanguage => $composableBuilder(
-      column: $table.targetLanguage,
-      builder: (column) => ColumnFilters(column));
+    column: $table.targetLanguage,
+    builder: (column) => ColumnFilters(column),
+  );
 
   ColumnFilters<String> get addedAt => $composableBuilder(
-      column: $table.addedAt, builder: (column) => ColumnFilters(column));
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
 }
 
 class $$DeckCardsTableOrderingComposer
@@ -3961,21 +4639,29 @@ class $$DeckCardsTableOrderingComposer
     super.$removeJoinBuilderFromRootComposer,
   });
   ColumnOrderings<int> get deckId => $composableBuilder(
-      column: $table.deckId, builder: (column) => ColumnOrderings(column));
+    column: $table.deckId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<int> get wordId => $composableBuilder(
-      column: $table.wordId, builder: (column) => ColumnOrderings(column));
+    column: $table.wordId,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get sourceLanguage => $composableBuilder(
-      column: $table.sourceLanguage,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.sourceLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get targetLanguage => $composableBuilder(
-      column: $table.targetLanguage,
-      builder: (column) => ColumnOrderings(column));
+    column: $table.targetLanguage,
+    builder: (column) => ColumnOrderings(column),
+  );
 
   ColumnOrderings<String> get addedAt => $composableBuilder(
-      column: $table.addedAt, builder: (column) => ColumnOrderings(column));
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DeckCardsTableAnnotationComposer
@@ -3994,29 +4680,37 @@ class $$DeckCardsTableAnnotationComposer
       $composableBuilder(column: $table.wordId, builder: (column) => column);
 
   GeneratedColumn<String> get sourceLanguage => $composableBuilder(
-      column: $table.sourceLanguage, builder: (column) => column);
+    column: $table.sourceLanguage,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get targetLanguage => $composableBuilder(
-      column: $table.targetLanguage, builder: (column) => column);
+    column: $table.targetLanguage,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get addedAt =>
       $composableBuilder(column: $table.addedAt, builder: (column) => column);
 }
 
-class $$DeckCardsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $DeckCardsTable,
-    DeckCard,
-    $$DeckCardsTableFilterComposer,
-    $$DeckCardsTableOrderingComposer,
-    $$DeckCardsTableAnnotationComposer,
-    $$DeckCardsTableCreateCompanionBuilder,
-    $$DeckCardsTableUpdateCompanionBuilder,
-    (DeckCard, BaseReferences<_$AppDatabase, $DeckCardsTable, DeckCard>),
-    DeckCard,
-    PrefetchHooks Function()> {
+class $$DeckCardsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $DeckCardsTable,
+          DeckCard,
+          $$DeckCardsTableFilterComposer,
+          $$DeckCardsTableOrderingComposer,
+          $$DeckCardsTableAnnotationComposer,
+          $$DeckCardsTableCreateCompanionBuilder,
+          $$DeckCardsTableUpdateCompanionBuilder,
+          (DeckCard, BaseReferences<_$AppDatabase, $DeckCardsTable, DeckCard>),
+          DeckCard,
+          PrefetchHooks Function()
+        > {
   $$DeckCardsTableTableManager(_$AppDatabase db, $DeckCardsTable table)
-      : super(TableManagerState(
+    : super(
+        TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
@@ -4025,57 +4719,60 @@ class $$DeckCardsTableTableManager extends RootTableManager<
               $$DeckCardsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
               $$DeckCardsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> deckId = const Value.absent(),
-            Value<int> wordId = const Value.absent(),
-            Value<String> sourceLanguage = const Value.absent(),
-            Value<String> targetLanguage = const Value.absent(),
-            Value<String> addedAt = const Value.absent(),
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DeckCardsCompanion(
-            deckId: deckId,
-            wordId: wordId,
-            sourceLanguage: sourceLanguage,
-            targetLanguage: targetLanguage,
-            addedAt: addedAt,
-            rowid: rowid,
-          ),
-          createCompanionCallback: ({
-            required int deckId,
-            required int wordId,
-            required String sourceLanguage,
-            required String targetLanguage,
-            required String addedAt,
-            Value<int> rowid = const Value.absent(),
-          }) =>
-              DeckCardsCompanion.insert(
-            deckId: deckId,
-            wordId: wordId,
-            sourceLanguage: sourceLanguage,
-            targetLanguage: targetLanguage,
-            addedAt: addedAt,
-            rowid: rowid,
-          ),
+          updateCompanionCallback:
+              ({
+                Value<int> deckId = const Value.absent(),
+                Value<int> wordId = const Value.absent(),
+                Value<String> sourceLanguage = const Value.absent(),
+                Value<String> targetLanguage = const Value.absent(),
+                Value<String> addedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => DeckCardsCompanion(
+                deckId: deckId,
+                wordId: wordId,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage,
+                addedAt: addedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required int deckId,
+                required int wordId,
+                required String sourceLanguage,
+                required String targetLanguage,
+                required String addedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => DeckCardsCompanion.insert(
+                deckId: deckId,
+                wordId: wordId,
+                sourceLanguage: sourceLanguage,
+                targetLanguage: targetLanguage,
+                addedAt: addedAt,
+                rowid: rowid,
+              ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
               .toList(),
           prefetchHooksCallback: null,
-        ));
+        ),
+      );
 }
 
-typedef $$DeckCardsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $DeckCardsTable,
-    DeckCard,
-    $$DeckCardsTableFilterComposer,
-    $$DeckCardsTableOrderingComposer,
-    $$DeckCardsTableAnnotationComposer,
-    $$DeckCardsTableCreateCompanionBuilder,
-    $$DeckCardsTableUpdateCompanionBuilder,
-    (DeckCard, BaseReferences<_$AppDatabase, $DeckCardsTable, DeckCard>),
-    DeckCard,
-    PrefetchHooks Function()>;
+typedef $$DeckCardsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $DeckCardsTable,
+      DeckCard,
+      $$DeckCardsTableFilterComposer,
+      $$DeckCardsTableOrderingComposer,
+      $$DeckCardsTableAnnotationComposer,
+      $$DeckCardsTableCreateCompanionBuilder,
+      $$DeckCardsTableUpdateCompanionBuilder,
+      (DeckCard, BaseReferences<_$AppDatabase, $DeckCardsTable, DeckCard>),
+      DeckCard,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;

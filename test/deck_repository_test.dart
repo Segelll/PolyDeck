@@ -42,6 +42,7 @@ void main() {
     expect(entries, hasLength(1));
     expect(entries.single.word.word, 'merhaba');
     expect(entries.single.sourceWord, 'hello');
+    expect(entries.single.sourceSentence, 'Hello world.');
     expect(entries.single.sourceLanguage, 'en');
     expect(entries.single.targetLanguage, 'tr');
     expect(summaries.any((deck) => deck.isFavorites), isTrue);

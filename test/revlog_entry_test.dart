@@ -4,7 +4,7 @@ import 'package:poly2/domain/models/revlog_entry.dart';
 void main() {
   group('RevlogEntry', () {
     test('fromMap and toMap roundtrip', () {
-      final entry = RevlogEntry(
+      final entry = const RevlogEntry(
         id: 1,
         cardId: 42,
         deckTable: 'en',
@@ -55,7 +55,7 @@ void main() {
     });
 
     test('toMap excludes null id', () {
-      final entry = RevlogEntry(
+      final entry = const RevlogEntry(
         cardId: 1,
         deckTable: 'tr',
         rating: 2,

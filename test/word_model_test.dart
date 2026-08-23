@@ -11,8 +11,6 @@ void main() {
       'isSeen': 1,
       'feedback': 2,
       'date': '2025-06-14',
-      'backword': 'merhaba',
-      'backsentence': 'Merhaba, nasılsın?',
     };
 
     test('fromMap creates correct Word instance', () {
@@ -25,8 +23,6 @@ void main() {
       expect(word.isSeen, 1);
       expect(word.feedback, 2);
       expect(word.date, '2025-06-14');
-      expect(word.backWord, 'merhaba');
-      expect(word.backSentence, 'Merhaba, nasılsın?');
     });
 
     test('fromMap handles missing optional fields', () {

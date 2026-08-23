@@ -1,8 +1,7 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:poly2/domain/models/exam_model.dart';
-import 'package:poly2/pages/decks_page.dart';
+import 'package:poly2/core/theme/app_palette.dart';
+import 'package:poly2/pages/app_shell.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 
@@ -40,11 +39,11 @@ class ResultPage extends StatelessWidget {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            unawaited(
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(builder: (_) => const DecksPage()),
-                (Route<dynamic> route) => false,
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (_) => const AppShell(initialIndex: 1),
               ),
+              (Route<dynamic> route) => false,
             );
           },
         ),
@@ -84,7 +83,9 @@ class ResultPage extends StatelessWidget {
             bool isCorrect = userAnswer == question.correctAnswerIndex;
 
             return Card(
-              color: isCorrect ? Colors.green[50] : Colors.red[50],
+              color: isCorrect
+                  ? AppPalette.almostAqua
+                  : AppPalette.raindropsOnRoses,
               margin: const EdgeInsets.symmetric(vertical: 8.0),
               child: ListTile(
                 title: Text(
@@ -92,7 +93,7 @@ class ResultPage extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                    color: AppPalette.ink,
                   ),
                 ),
                 subtitle: Column(
@@ -101,8 +102,8 @@ class ResultPage extends StatelessWidget {
                     const SizedBox(height: 5),
                     Text(
                       '${local.yourAnswer}: ${userAnswer != null && userAnswer < question.options.length ? question.options[userAnswer] : 'No Answer'}',
-                      style: TextStyle(
-                        color: isCorrect ? Colors.green : Colors.red,
+                      style: const TextStyle(
+                        color: AppPalette.ink,
                         fontSize: 16,
                       ),
                     ),
@@ -112,7 +113,7 @@ class ResultPage extends StatelessWidget {
                       Text(
                         '${local.correctAnswer}: ${question.options[question.correctAnswerIndex]}',
                         style: const TextStyle(
-                          color: Colors.green,
+                          color: AppPalette.ink,
                           fontSize: 16,
                         ),
                       ),

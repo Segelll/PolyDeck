@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/presentation/widgets/highlighted_sentence.dart';
 
 /// An animated card that flips on its horizontal or vertical axis
@@ -105,7 +106,11 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
           // The text widgets are created once per parent build. Only the
           // transform and the visible face change on animation ticks.
           final face = _flipAnimation.value < 0.5 ? frontFace : backFace;
-          return Transform(transform: transform, child: face);
+          return Transform(
+            alignment: Alignment.center,
+            transform: transform,
+            child: face,
+          );
         },
       ),
     );
@@ -140,7 +145,7 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
             children: [
               Text(
                 text,
-                style: const TextStyle(color: Colors.white, fontSize: 28),
+                style: const TextStyle(color: AppPalette.ink, fontSize: 28),
                 textAlign: TextAlign.center,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
@@ -150,7 +155,7 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
                 child: HighlightedSentence(
                   sentence: sentence,
                   word: text,
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  style: const TextStyle(color: AppPalette.ink, fontSize: 16),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -166,7 +171,11 @@ class CardFlipAnimationState extends State<CardFlipAnimation>
         color: color,
         borderRadius: BorderRadius.circular(12),
         boxShadow: const [
-          BoxShadow(color: Colors.black26, blurRadius: 4, offset: Offset(1, 1)),
+          BoxShadow(
+            color: AppPalette.shadow,
+            blurRadius: 4,
+            offset: Offset(1, 1),
+          ),
         ],
       ),
       child: content,

@@ -6,11 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
 import 'package:poly2/domain/enums/rating.dart';
 import 'package:poly2/domain/enums/review_input_mode.dart';
+import 'package:poly2/domain/models/deck_summary.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/pages/add_to_deck_sheet.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/core/theme/app_theme.dart';
 import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/pages/settings_page.dart';
@@ -85,7 +87,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
             backgroundColor: color,
-            foregroundColor: Colors.white,
+            foregroundColor: AppTheme.ratingOnColor,
             padding: const EdgeInsets.all(12),
             shape: const CircleBorder(),
           ),
@@ -187,19 +189,41 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     if (state.isEmpty || state.isReviewing) return;
 
     final repo = ref.read(deckRepositoryProvider);
-    final decks = await repo.fetchDeckSummaries();
-    if (!mounted) return;
-
     final card = state.currentCard;
+    // Open immediately. The deck query runs while the sheet is visible so a
+    // slow database read never makes the tap appear to be ignored.
+    final decksFuture = repo.fetchDeckSummaries();
     final addedDeckId = await showModalBottomSheet<int>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      builder: (_) => AddToDeckSheet(
-        decks: decks,
-        wordId: card.id,
-        sourceLanguage: card.sourceLanguageCode,
-        targetLanguage: card.targetLanguageCode,
+      builder: (_) => FutureBuilder<List<DeckSummary>>(
+        future: decksFuture,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const SafeArea(
+              child: SizedBox(
+                height: 180,
+                child: Center(child: Text('Desteler yüklenemedi.')),
+              ),
+            );
+          }
+          final decks = snapshot.data;
+          if (decks == null) {
+            return const SafeArea(
+              child: SizedBox(
+                height: 180,
+                child: Center(child: CircularProgressIndicator()),
+              ),
+            );
+          }
+          return AddToDeckSheet(
+            decks: decks,
+            wordId: card.id,
+            sourceLanguage: card.sourceLanguageCode,
+            targetLanguage: card.targetLanguageCode,
+          );
+        },
       ),
     );
 
@@ -260,7 +284,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
     );
     final backColor = isFlipped && currentIndex < colorTracker.length
         ? colorTracker[currentIndex]
-        : Colors.grey;
+        : AppTheme.cardDefault;
 
     if (errorMessage != null) {
       return Scaffold(
@@ -272,7 +296,11 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppPalette.raindropsOnRoses,
+              ),
               const SizedBox(height: 16),
               Text(errorMessage, textAlign: TextAlign.center),
               const SizedBox(height: 16),
@@ -309,7 +337,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
               const Icon(
                 Icons.check_circle_outline,
                 size: 64,
-                color: Colors.green,
+                color: AppPalette.almostAqua,
               ),
               const SizedBox(height: 16),
               const Text(
@@ -352,13 +380,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
         ],
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.blueGrey.shade50, Colors.white],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.bodyGradient),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -391,7 +413,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                                 borderRadius: BorderRadius.circular(6),
                                 boxShadow: const [
                                   BoxShadow(
-                                    color: Colors.black26,
+                                    color: AppPalette.shadow,
                                     blurRadius: 3,
                                     offset: Offset(1, 1),
                                   ),
@@ -447,7 +469,7 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                                   : null,
                               child: CardFlipAnimation(
                                 isFlipped: isFlipped,
-                                frontCardColor: Colors.blue.shade200,
+                                frontCardColor: AppPalette.iceMelt,
                                 backCardColor: backColor,
                                 frontText: currentCard.frontText,
                                 backText: currentCard.backText,

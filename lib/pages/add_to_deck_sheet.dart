@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/models/deck_summary.dart';
 import 'package:poly2/presentation/providers/deck_repository_provider.dart';
@@ -139,7 +140,7 @@ class _AddToDeckSheetState extends ConsumerState<AddToDeckSheet> {
                         deck.isFavorites
                             ? Icons.star_rounded
                             : Icons.folder_outlined,
-                        color: deck.isFavorites ? Colors.amber.shade700 : null,
+                        color: deck.isFavorites ? AppPalette.ink : null,
                       ),
                       title: Text(deck.name),
                       subtitle: Text('${deck.cardCount} kart'),

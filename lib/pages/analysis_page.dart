@@ -50,15 +50,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Text(
-              widget.previousDeckName,
-              style: const TextStyle(fontSize: 20),
-            ),
+            Text(widget.previousDeckName, style: const TextStyle(fontSize: 20)),
             const SizedBox(height: 20),
-            Text(
-              local.analysisResults,
-              style: const TextStyle(fontSize: 24),
-            ),
+            Text(local.analysisResults, style: const TextStyle(fontSize: 24)),
             const SizedBox(height: 10),
             Expanded(
               child: ListView.builder(
@@ -67,9 +61,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
                   final result = widget.analysisResults[index];
 
                   return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: result.color,
-                    ),
+                    leading: CircleAvatar(backgroundColor: result.color),
                     title: Text(
                       '${result.word} - ${result.meaning}',
                       style: const TextStyle(fontSize: 18),

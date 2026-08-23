@@ -6,19 +6,26 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:poly2/core/utils/date_utils.dart';
 import 'package:poly2/data/database/database.dart';
 import 'package:poly2/data/repositories/deck_repository.dart';
 import 'package:poly2/data/repositories/progress_repository.dart';
 import 'package:poly2/data/repositories/user_repository.dart';
 import 'package:poly2/data/repositories/word_repository.dart';
+import 'package:poly2/domain/enums/rating.dart';
+import 'package:poly2/domain/enums/review_input_mode.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/pages/app_shell.dart';
 import 'package:poly2/pages/analysis_page.dart';
 import 'package:poly2/pages/exam_result_page.dart';
+import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/exam_provider.dart';
+import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
 import 'package:poly2/presentation/widgets/highlighted_sentence.dart';
+import 'package:poly2/presentation/widgets/review_rating_controls.dart';
+import 'package:poly2/presentation/widgets/review_utility_controls.dart';
 import 'package:poly2/domain/enums/flip_direction.dart';
 import 'package:poly2/services/fsrs_service.dart';
 
@@ -176,6 +183,127 @@ void main() {
 
     expect(counts, [1, 0, 0, 0]);
     await db.close();
+  });
+
+  test('weekly progress query keeps only the current week range', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    for (final entry in [
+      (id: 1, date: '2026-08-17'),
+      (id: 2, date: '2026-08-23'),
+      (id: 3, date: '2026-08-24'),
+    ]) {
+      await db
+          .into(db.words)
+          .insert(
+            WordsCompanion.insert(
+              id: entry.id,
+              word: 'word-${entry.id}',
+              sentence: 'sentence-${entry.id}',
+              level: 'A1',
+              languageCode: 'tr',
+              date: Value(entry.date),
+            ),
+          );
+    }
+
+    final counts = await ProgressRepository(db)
+        .fetchDateCounts('tr', dateStart: '2026-08-17', dateEnd: '2026-08-24');
+
+    expect(counts, {'2026-08-17': 1, '2026-08-23': 1});
+    await db.close();
+  });
+
+  test('startOfWeek returns Monday for a Sunday date', () {
+    expect(startOfWeek(DateTime(2026, 8, 23)), DateTime(2026, 8, 17));
+  });
+
+  test('review mode updates provider state and persists immediately', () async {
+    final db = AppDatabase.forTesting(NativeDatabase.memory());
+    await db.saveUserChoices('en', 'tr');
+    final container = ProviderContainer(
+      overrides: [appDatabaseProvider.overrideWithValue(db)],
+    );
+
+    await container.read(settingsProvider.future);
+    await container
+        .read(settingsProvider.notifier)
+        .saveReviewInputMode(ReviewInputMode.swipe);
+
+    expect(
+      container.read(settingsProvider).value?.reviewInputMode,
+      ReviewInputMode.swipe,
+    );
+    expect((await db.getUserChoices())?['reviewMode'], 'swipe');
+
+    container.dispose();
+    await db.close();
+  });
+
+  testWidgets('compact rating controls render all four actions', (
+    tester,
+  ) async {
+    final ratings = <Rating>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: ReviewRatingControls(
+            againLabel: 'Again',
+            hardLabel: 'Hard',
+            goodLabel: 'Good',
+            easyLabel: 'Easy',
+            disabled: false,
+            onRating: ratings.add,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byIcon(Icons.replay), findsOneWidget);
+    expect(find.byIcon(Icons.trending_down), findsOneWidget);
+    expect(find.byIcon(Icons.check), findsOneWidget);
+    expect(find.byIcon(Icons.thumb_up), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Again'));
+    expect(ratings, [Rating.again]);
+  });
+
+  testWidgets('swipe mode hides utility buttons and button mode uses icons', (
+    tester,
+  ) async {
+    var reflipCount = 0;
+    var newCardCount = 0;
+
+    Widget buildControls(ReviewInputMode mode) {
+      return MaterialApp(
+        home: Scaffold(
+          body: ReviewUtilityControls(
+            inputMode: mode,
+            isFlipped: true,
+            showReflip: true,
+            disabled: false,
+            reflipLabel: 'Reflip',
+            newCardLabel: 'New Card',
+            onReflip: () => reflipCount++,
+            onNewCard: () => newCardCount++,
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildControls(ReviewInputMode.swipe));
+    expect(find.byIcon(Icons.refresh), findsNothing);
+    expect(find.byIcon(Icons.skip_next), findsNothing);
+
+    await tester.pumpWidget(buildControls(ReviewInputMode.buttons));
+    expect(find.byIcon(Icons.refresh), findsOneWidget);
+    expect(find.byIcon(Icons.skip_next), findsOneWidget);
+    expect(find.byTooltip('Reflip'), findsOneWidget);
+    expect(find.byTooltip('New Card'), findsOneWidget);
+
+    await tester.tap(find.byTooltip('Reflip'));
+    await tester.tap(find.byTooltip('New Card'));
+    expect(reflipCount, 1);
+    expect(newCardCount, 1);
   });
 
   test('exam generation keeps all level questions after ID batching', () async {

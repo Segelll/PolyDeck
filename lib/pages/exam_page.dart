@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/presentation/providers/exam_provider.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 
 import 'exam_result_page.dart';
 
@@ -52,25 +53,23 @@ class _ExamPageState extends ConsumerState<ExamPage> {
   Widget _buildOption(int idx, String option) {
     final state = ref.watch(examProvider);
     Color? buttonColor;
-    Color textColor = Colors.white;
+    Color textColor = AppPalette.ink;
 
     if (state.answered) {
       if (idx == state.currentQuestion.correctAnswerIndex) {
-        buttonColor = Colors.green[700];
+        buttonColor = AppPalette.almostAqua;
       } else if (idx == state.selectedAnswerIndex) {
-        buttonColor = Colors.red[700];
+        buttonColor = AppPalette.raindropsOnRoses;
       } else {
         buttonColor = Theme.of(context).colorScheme.surface;
-        textColor =
-            Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+        textColor = AppPalette.ink;
       }
     } else {
       if (state.selectedAnswerIndex == idx) {
-        buttonColor = Theme.of(context).colorScheme.primary;
+        buttonColor = AppPalette.almostAqua;
       } else {
         buttonColor = Theme.of(context).colorScheme.surface;
-        textColor =
-            Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black;
+        textColor = AppPalette.ink;
       }
     }
 
@@ -84,12 +83,12 @@ class _ExamPageState extends ConsumerState<ExamPage> {
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
           color: buttonColor,
-          borderRadius: BorderRadius.circular(8.0),
-          border: Border.all(color: Colors.grey[400]!, width: 1.5),
-          boxShadow: [
+          borderRadius: const BorderRadius.all(Radius.circular(8.0)),
+          border: Border.all(color: AppPalette.outline, width: 1.5),
+          boxShadow: const [
             BoxShadow(
-              color: Colors.grey[400]!,
-              offset: const Offset(2, 2),
+              color: AppPalette.shadow,
+              offset: Offset(2, 2),
               blurRadius: 2,
             ),
           ],
@@ -122,7 +121,11 @@ class _ExamPageState extends ConsumerState<ExamPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
+              const Icon(
+                Icons.error_outline,
+                size: 48,
+                color: AppPalette.raindropsOnRoses,
+              ),
               const SizedBox(height: 16),
               Text(state.errorMessage!, textAlign: TextAlign.center),
               const SizedBox(height: 16),
@@ -152,7 +155,7 @@ class _ExamPageState extends ConsumerState<ExamPage> {
           children: [
             LinearProgressIndicator(
               value: (state.currentIndex + 1) / state.questions.length,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: AppPalette.nimbusCloud,
               color: Theme.of(context).colorScheme.primary,
             ),
             const SizedBox(height: 20),
@@ -193,15 +196,15 @@ class _ExamPageState extends ConsumerState<ExamPage> {
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: state.answered
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+                    ? AppPalette.almostAqua
+                    : AppPalette.nimbusCloud,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8.0)),
                 ),
               ),
               child: Text(
                 state.isLastQuestion ? local.finishExam : local.nextQuestion,
-                style: const TextStyle(fontSize: 18, color: Colors.white),
+                style: const TextStyle(fontSize: 18, color: AppPalette.ink),
               ),
             ),
           ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/presentation/providers/home_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 
@@ -19,24 +20,22 @@ class HomePage extends ConsumerWidget {
       children: [
         Text(
           'Bugünün çalışması',
-          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF162A32),
-          ),
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(fontWeight: FontWeight.w700, color: AppPalette.ink),
         ),
         const SizedBox(height: 6),
         Text(
           pair,
           style: Theme.of(context).textTheme.bodyMedium
-              ?.copyWith(color: const Color(0xFF6D7C80), letterSpacing: 0.5),
+              ?.copyWith(color: AppPalette.mutedInk),
         ),
         const SizedBox(height: 24),
         Container(
           padding: const EdgeInsets.fromLTRB(20, 18, 20, 20),
           decoration: BoxDecoration(
-            color: const Color(0xFFE8F1ED),
+            color: AppPalette.almostAqua,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFD5E5DE)),
+            border: Border.all(color: AppPalette.nimbusCloud),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -48,7 +47,7 @@ class HomePage extends ConsumerWidget {
                     Text(
                       'Bugün görülen kelime',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: const Color(0xFF31554A),
+                        color: AppPalette.ink,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -64,7 +63,7 @@ class HomePage extends ConsumerWidget {
                         '$count',
                         style: Theme.of(context).textTheme.displaySmall
                             ?.copyWith(
-                              color: const Color(0xFF162A32),
+                              color: AppPalette.ink,
                               fontWeight: FontWeight.w800,
                             ),
                       ),
@@ -75,7 +74,7 @@ class HomePage extends ConsumerWidget {
               const Icon(
                 Icons.auto_graph_rounded,
                 size: 46,
-                color: Color(0xFF4E8572),
+                color: AppPalette.ink,
               ),
             ],
           ),
@@ -83,15 +82,13 @@ class HomePage extends ConsumerWidget {
         const SizedBox(height: 28),
         Text(
           'Çalışma akışı',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: const Color(0xFF162A32),
-          ),
+          style: Theme.of(context).textTheme.titleMedium
+              ?.copyWith(fontWeight: FontWeight.w700, color: AppPalette.ink),
         ),
         const SizedBox(height: 8),
         const Text(
           'Destelerim bölümünden bir deste seçerek çalışmaya başlayabilirsin.',
-          style: TextStyle(color: Color(0xFF6D7C80), height: 1.4),
+          style: TextStyle(color: AppPalette.mutedInk, height: 1.4),
         ),
       ],
     );

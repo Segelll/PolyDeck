@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/domain/enums/proficiency_level.dart';
 import 'package:poly2/domain/models/deck_summary.dart';
 import 'package:poly2/pages/card_flip_page.dart';
@@ -19,7 +20,7 @@ class DecksPage extends ConsumerWidget {
       child: Column(
         children: [
           const Material(
-            color: Color(0xFFF8FAF8),
+            color: AppPalette.cloudDancer,
             child: TabBar(
               tabs: [
                 Tab(text: 'Varsayılan'),
@@ -137,7 +138,7 @@ class _CustomDeckList extends ConsumerWidget {
               const Expanded(
                 child: Text(
                   'Kendi çalışma listelerin',
-                  style: TextStyle(color: Color(0xFF6D7C80)),
+                  style: TextStyle(color: AppPalette.mutedInk),
                 ),
               ),
               IconButton(
@@ -193,7 +194,7 @@ class _DeckRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppPalette.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
         onTap: onTap,
@@ -202,7 +203,7 @@ class _DeckRow extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
             children: [
-              Icon(icon, color: const Color(0xFF4E8572)),
+              Icon(icon, color: AppPalette.ink),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -213,18 +214,18 @@ class _DeckRow extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF162A32),
+                        color: AppPalette.ink,
                       ),
                     ),
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
-                      style: const TextStyle(color: Color(0xFF6D7C80)),
+                      style: const TextStyle(color: AppPalette.mutedInk),
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.chevron_right, color: Color(0xFF9AA8A6)),
+              const Icon(Icons.chevron_right, color: AppPalette.mutedInk),
             ],
           ),
         ),
@@ -242,7 +243,7 @@ class _CategoryPlaceholder extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.category_outlined, size: 46, color: Color(0xFF4E8572)),
+          Icon(Icons.category_outlined, size: 46, color: AppPalette.ink),
           SizedBox(height: 12),
           Text('Kategoriler yakında burada.'),
         ],
@@ -265,7 +266,11 @@ class _CatalogError extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 40, color: Colors.redAccent),
+            const Icon(
+              Icons.error_outline,
+              size: 40,
+              color: AppPalette.raindropsOnRoses,
+            ),
             const SizedBox(height: 12),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),

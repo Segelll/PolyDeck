@@ -1,68 +1,97 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 
 /// Centralized theme configuration for PolyDeck.
 class AppTheme {
   AppTheme._();
 
-  // ── Brand Colors ──
+  // Compatibility names used by the FSRS card state UI.
+  static const Color primaryBlue = AppPalette.iceMelt;
+  static const Color cardRed = AppPalette.raindropsOnRoses;
+  static const Color cardGreen = AppPalette.almostAqua;
+  static const Color cardYellow = AppPalette.lemonIcing;
+  static const Color cardDefault = AppPalette.nimbusCloud;
 
-  static const Color primaryBlue = Color(0xFFADD8E6);
-  static const Color cardRed = Colors.red;
-  static const Color cardGreen = Colors.green;
-  static const Color cardYellow = Color.fromARGB(255, 179, 130, 8);
-  static const Color cardDefault = Colors.grey;
-
-  // FSRS 4-button rating colors
-  static const Color ratingAgain = Colors.red;
-  static const Color ratingHard = Colors.orange;
-  static const Color ratingGood = Color(0xFF8BC34A); // Light green
-  static const Color ratingEasy = Colors.blue;
-
-  // ── Gradients ──
+  // FSRS 4-button rating colors. The on-color is intentionally shared so the
+  // four soft surfaces remain consistent and readable on small screens.
+  static const Color ratingAgain = AppPalette.raindropsOnRoses;
+  static const Color ratingHard = AppPalette.peachDust;
+  static const Color ratingGood = AppPalette.almostAqua;
+  static const Color ratingEasy = AppPalette.iceMelt;
+  static const Color ratingOnColor = AppPalette.ink;
 
   static const LinearGradient selectedDeckGradient = LinearGradient(
-    colors: [Color(0xFF2196F3), Color(0xFF64B5F6)],
+    colors: [AppPalette.almostAqua, AppPalette.iceMelt],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient unselectedDeckGradient = LinearGradient(
-    colors: [Color(0xFF9E9E9E), Color(0xFFBDBDBD)],
+    colors: [AppPalette.nimbusCloud, AppPalette.orchidTint],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const LinearGradient bodyGradient = LinearGradient(
-    colors: [Color(0xFFECEFF1), Colors.white],
+    colors: [AppPalette.cloudDancer, AppPalette.white],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
-  // ── Theme Data ──
-
   static ThemeData get lightTheme {
     final scheme =
         ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4E8572),
+          seedColor: AppPalette.almostAqua,
           brightness: Brightness.light,
         ).copyWith(
-          primary: const Color(0xFF31554A),
-          onPrimary: Colors.white,
-          secondary: const Color(0xFFD9785A),
-          surface: const Color(0xFFF8FAF8),
+          primary: AppPalette.almostAqua,
+          onPrimary: AppPalette.ink,
+          primaryContainer: AppPalette.almostAqua,
+          onPrimaryContainer: AppPalette.ink,
+          secondary: AppPalette.peachDust,
+          onSecondary: AppPalette.ink,
+          secondaryContainer: AppPalette.peachDust,
+          onSecondaryContainer: AppPalette.ink,
+          tertiary: AppPalette.iceMelt,
+          onTertiary: AppPalette.ink,
+          tertiaryContainer: AppPalette.iceMelt,
+          onTertiaryContainer: AppPalette.ink,
+          error: AppPalette.raindropsOnRoses,
+          onError: AppPalette.ink,
+          errorContainer: AppPalette.raindropsOnRoses,
+          onErrorContainer: AppPalette.ink,
+          surface: AppPalette.cloudDancer,
+          onSurface: AppPalette.ink,
+          surfaceContainer: AppPalette.cloudDancer,
+          surfaceContainerHighest: AppPalette.nimbusCloud,
+          onSurfaceVariant: AppPalette.mutedInk,
+          outline: AppPalette.outline,
+          outlineVariant: AppPalette.nimbusCloud,
         );
+
     return ThemeData(
       colorScheme: scheme,
       brightness: Brightness.light,
-      scaffoldBackgroundColor: const Color(0xFFF8FAF8),
+      scaffoldBackgroundColor: AppPalette.cloudDancer,
       appBarTheme: const AppBarTheme(
         elevation: 0,
-        backgroundColor: Color(0xFFF8FAF8),
-        foregroundColor: Color(0xFF162A32),
+        backgroundColor: AppPalette.cloudDancer,
+        foregroundColor: AppPalette.ink,
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           minimumSize: const Size(0, 46),
+          foregroundColor: AppPalette.ink,
+          backgroundColor: AppPalette.almostAqua,
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          foregroundColor: AppPalette.ink,
+          backgroundColor: AppPalette.almostAqua,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(10)),
           ),
@@ -70,19 +99,25 @@ class AppTheme {
       ),
       cardTheme: const CardThemeData(
         elevation: 0,
-        color: Colors.white,
+        color: AppPalette.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
       navigationDrawerTheme: const NavigationDrawerThemeData(
-        backgroundColor: Color(0xFFF8FAF8),
-        indicatorColor: Color(0xFFD5E5DE),
+        backgroundColor: AppPalette.cloudDancer,
+        indicatorColor: AppPalette.almostAqua,
+        surfaceTintColor: Colors.transparent,
       ),
       tabBarTheme: const TabBarThemeData(
-        labelColor: Color(0xFF31554A),
-        unselectedLabelColor: Color(0xFF6D7C80),
-        indicatorColor: Color(0xFFD9785A),
+        labelColor: AppPalette.ink,
+        unselectedLabelColor: AppPalette.mutedInk,
+        indicatorColor: AppPalette.peachDust,
+      ),
+      inputDecorationTheme: const InputDecorationTheme(
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppPalette.ink),
+        ),
       ),
     );
   }
@@ -90,7 +125,7 @@ class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
-        seedColor: const Color(0xFF4E8572),
+        seedColor: AppPalette.almostAqua,
         brightness: Brightness.dark,
       ),
       brightness: Brightness.dark,

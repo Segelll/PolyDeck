@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/domain/enums/proficiency_level.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/presentation/providers/database_provider.dart';
 import 'package:poly2/presentation/providers/deck_config_provider.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
@@ -194,13 +195,15 @@ class _ResetSrsButton extends ConsumerWidget {
     final local = AppLocalizations.of(context)!;
 
     return Card(
-      color: Colors.red.shade50,
+      color: AppPalette.raindropsOnRoses,
       child: ListTile(
-        leading: const Icon(Icons.warning, color: Colors.red),
+        leading: const Icon(Icons.warning, color: AppPalette.ink),
         title: Text(local.resetAllSrsProgress),
         subtitle: Text(local.resetSrsDescription),
         trailing: ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppPalette.raindropsOnRoses,
+          ),
           onPressed: () async {
             final confirmed = await showDialog<bool>(
               context: context,
@@ -216,7 +219,7 @@ class _ResetSrsButton extends ConsumerWidget {
                     onPressed: () => Navigator.pop(ctx, true),
                     child: Text(
                       local.reset,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(color: AppPalette.ink),
                     ),
                   ),
                 ],
@@ -242,7 +245,10 @@ class _ResetSrsButton extends ConsumerWidget {
               }
             }
           },
-          child: Text(local.reset, style: const TextStyle(color: Colors.white)),
+          child: Text(
+            local.reset,
+            style: const TextStyle(color: AppPalette.ink),
+          ),
         ),
       ),
     );

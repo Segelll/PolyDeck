@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 
 /// A title widget where the second half of the text is colored light blue.
 ///
@@ -15,18 +16,15 @@ class HalfColoredTitle extends StatelessWidget {
     return RichText(
       textAlign: TextAlign.center,
       text: TextSpan(
-        style: const TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         children: [
           TextSpan(
             text: text.substring(0, half),
-            style: const TextStyle(color: Colors.black),
+            style: const TextStyle(color: AppPalette.ink),
           ),
           TextSpan(
             text: text.substring(half),
-            style: const TextStyle(color: Color(0xFFADD8E6)),
+            style: const TextStyle(color: AppPalette.iceMelt),
           ),
         ],
       ),

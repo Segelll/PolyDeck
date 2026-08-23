@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/pages/app_shell.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 
@@ -33,11 +34,11 @@ class _FirstTimeSelectionPageState
         centerTitle: true,
       ),
       body: Container(
-        color: Colors.grey[100],
+        color: AppPalette.cloudDancer,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Icon(Icons.flag, size: 80, color: Colors.blueGrey[600]),
+            const Icon(Icons.flag, size: 80, color: AppPalette.ink),
             const SizedBox(height: 20),
             Text(
               local.firstTimePromptContent,

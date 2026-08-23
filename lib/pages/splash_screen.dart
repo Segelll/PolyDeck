@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:poly2/pages/app_shell.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/pages/first_time_selection_page.dart';
 import 'package:poly2/domain/state/language_preferences.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
@@ -22,15 +23,16 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   }
 
   Future<void> _routeFromSplash() async {
-    await Future<void>.delayed(const Duration(milliseconds: 650));
+    // Start database initialization immediately, while keeping the splash
+    // visible long enough to avoid a one-frame flash on fast devices.
+    final preferencesFuture = ref.read(settingsProvider.future);
+    await Future<void>.delayed(const Duration(milliseconds: 200));
     var isFirstTime = true;
     try {
-      final preferences = await ref
-          .read(settingsProvider.future)
-          .timeout(
-            const Duration(seconds: 8),
-            onTimeout: () => LanguagePreferences.defaultPreferences,
-          );
+      final preferences = await preferencesFuture.timeout(
+        const Duration(seconds: 8),
+        onTimeout: () => LanguagePreferences.defaultPreferences,
+      );
       isFirstTime = preferences.isFirstTime;
     } catch (_) {
       // A broken or unavailable local database must not leave the app stuck
@@ -54,7 +56,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF8),
+      backgroundColor: AppPalette.cloudDancer,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -74,7 +76,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen> {
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.w800,
-                color: Color(0xFF162A32),
+                color: AppPalette.ink,
               ),
             ),
           ],

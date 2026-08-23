@@ -17,6 +17,7 @@ import 'package:poly2/presentation/providers/settings_provider.dart';
 import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 import 'package:poly2/domain/enums/review_input_mode.dart';
@@ -267,7 +268,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Reset', style: TextStyle(color: Colors.red)),
+            child: const Text('Reset', style: TextStyle(color: AppPalette.ink)),
           ),
         ],
       ),
@@ -309,7 +310,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(local.saveFailed),
-            backgroundColor: Colors.red,
+            backgroundColor: AppPalette.raindropsOnRoses,
           ),
         );
       }
@@ -317,7 +318,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(local.selectLanguages),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppPalette.peachDust,
         ),
       );
     }
@@ -337,11 +338,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         centerTitle: true,
       ),
       body: Container(
-        color: Colors.blueGrey.shade50,
+        color: AppPalette.cloudDancer,
         child: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            Icon(Icons.tune, size: 80, color: Colors.blueGrey[700]),
+            const Icon(Icons.tune, size: 80, color: AppPalette.ink),
             const SizedBox(height: 20),
             // MOTHER language
             DropdownButtonFormField<String>(
@@ -473,10 +474,13 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 10),
             ElevatedButton.icon(
-              icon: const Icon(Icons.delete_forever, color: Colors.red),
+              icon: const Icon(
+                Icons.delete_forever,
+                color: AppPalette.raindropsOnRoses,
+              ),
               label: const Text(
                 'Reset All Data',
-                style: TextStyle(color: Colors.red),
+                style: TextStyle(color: AppPalette.ink),
               ),
               onPressed: _resetAllData,
               style: ElevatedButton.styleFrom(

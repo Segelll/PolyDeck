@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:poly2/core/theme/app_palette.dart';
 import 'package:poly2/pages/decks_page.dart';
 import 'package:poly2/pages/exam_page.dart';
 import 'package:poly2/pages/home_page.dart';
@@ -28,9 +29,10 @@ class _AppShellState extends ConsumerState<AppShell> {
 
   void _openSettings() {
     Navigator.of(context).pop();
-    unawaited(Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const SettingsPage()),
-    ));
+    unawaited(
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => const SettingsPage())),
+    );
   }
 
   @override
@@ -38,7 +40,7 @@ class _AppShellState extends ConsumerState<AppShell> {
     final isDecks = _selectedIndex == 1;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF8),
+      backgroundColor: AppPalette.cloudDancer,
       appBar: AppBar(
         title: Text(isDecks ? 'Destelerim' : 'Ana Sayfa'),
         actions: [
@@ -46,16 +48,14 @@ class _AppShellState extends ConsumerState<AppShell> {
             IconButton(
               tooltip: 'Sınav',
               icon: const Icon(Icons.quiz_outlined),
-              onPressed: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ExamPage()),
-              ),
+              onPressed: () => Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const ExamPage())),
             ),
           IconButton(
             tooltip: 'Ayarlar',
             icon: const Icon(Icons.tune_rounded),
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const SettingsPage()),
-            ),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const SettingsPage())),
           ),
         ],
       ),

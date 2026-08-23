@@ -1,13 +1,13 @@
 # PolyDeck Performance and Refactor Plan
 
-Date: 2026-07-04  
+Date: 2026-08-23
 Goal: Turn PolyDeck into an offline, multilingual FSRS flashcard app that stays smooth even on low-end phones.
 
 This document was prepared by scanning the current repository and checking the current official documentation for Flutter, Drift, Riverpod, SQLite, and related packages. The goal is not only "cleaner code"; it is measurable speed improvement in the user-visible paths: first launch, deck loading, card review, exam generation, progress screens, and settings.
 
 ## Short Summary
 
-PolyDeck currently runs on Flutter 3.44.2 / Dart 3.12.2. The data layer uses Drift 2.34.0 and copies the pre-populated SQLite database from `assets/polydesk.db`. FSRS is provided by `package:fsrs` 2.0.1. State management uses Riverpod 2.6.1.
+PolyDeck currently runs on Flutter 3.47.1 / Dart 3.13.1. The data layer uses Drift 2.34.3 and copies the single current SQLite schema from `assets/polydesk.db`. FSRS is provided by `package:fsrs` 2.0.1. State management uses Riverpod 2.6.1.
 
 Primary performance risks:
 
@@ -26,25 +26,24 @@ Primary performance risks:
 
 According to `flutter pub deps --style=compact`:
 
-- Flutter SDK: 3.44.2
-- Dart SDK: 3.12.2
-- `drift`: 2.34.0
-- `drift_dev`: 2.34.0
+- Flutter SDK: 3.47.1
+- Dart SDK: 3.13.1
+- `drift`: 2.34.3
+- `drift_dev`: 2.34.5
 - `sqlite3_flutter_libs`: 0.5.42
 - `flutter_riverpod`: 2.6.1
 - `fsrs`: 2.0.1
 - `shared_preferences`: 2.5.5
-- `share_plus`: 10.1.4
-- `file_picker`: 8.3.7
-- `flutter_lints`: 4.0.0
+- `share_plus`: 13.3.0
+- `file_picker`: 12.0.0
+- `flutter_lints`: 6.0.0
 
 `flutter pub outdated` notes:
 
-- Riverpod 3.3.2 is resolvable.
-- `share_plus` 13.2.0 is resolvable.
-- For `file_picker`, the latest stable version is 11.0.2; the resolvable row shows beta 12.0.0-beta.7, but stable should be targeted.
-- `flutter_lints` 6.0.0 is latest.
-- `path_provider` has a minor update to 2.1.6.
+- Riverpod 3.x is available, but this repository keeps it as a separate upgrade because the provider API and test toolchain should move together.
+- `share_plus` 13.3.0 and `file_picker` 12.0.0 are the current active targets.
+- `flutter_lints` 6.0.0 is in use.
+- `path_provider` 2.1.6 is in use.
 - `sqlite3_flutter_libs` shows 0.6.0+eol as latest; do not automatically upgrade this package without checking the changelog and Drift compatibility.
 
 ### Database State
@@ -177,24 +176,23 @@ Files:
 - `lib/core/constants/language_codes.dart`
 - `lib/core/constants/app_constants.dart`
 - `lib/pages/srs_settings_page.dart`
-- `tool/migrate_db.dart`
 - Tests if needed
 
 Tasks:
 
 - Standardize DB codes for the active `polydesk.db` as `en`, `tr`, `de`, `fr`, `it`, `pt`, `es`.
 - `LanguageCodes.tableNameFor('pt')` should now return `pt`, and `LanguageCodes.tableNameFor('es')` should now return `es`.
-- `displayCodeFor` can keep support for old `pr`/`esp` only for legacy import/migration compatibility.
+- Language-code conversion must not carry backward `pr`/`esp` compatibility; the active schema uses the ISO codes directly.
 - `AppConstants.languageTables` should use `pt` and `es`.
 - The SRS reset list should use `pt` and `es`.
-- If `tool/migrate_db.dart` is kept for old pre-single-table databases, rename or document its scope clearly; it should not look like the active DB migrator.
+- The old `tool/migrate_db.dart` was removed. `assets/polydesk.db` is the single current schema source; schema changes reset the development database.
 - Verify that no runtime code path still reads `assets/language_data.db`. The current repository scan only found it in `pubspec.yaml`; if that remains true, remove it from the asset list to cut about 2.6 MB from the packaged asset payload.
 
 Acceptance:
 
 - `sqlite3 assets/polydesk.db "SELECT DISTINCT language_code FROM words"` matches the repository constants.
 - Portuguese and Spanish deck loading tests do not produce empty results.
-- Language-code unit tests cover both modern and legacy mapping.
+- Language-code unit tests cover the seven active ISO codes.
 
 ### 0.2 Add Performance Instrumentation
 
@@ -282,8 +280,8 @@ File:
 Tasks:
 
 - Remove empty catch blocks; asset-copy failures should at least be logged in debug/profile and surfaced as meaningful errors.
-- Define a clear contract between copied DB `PRAGMA user_version` or `schemaVersion` and the app version.
-- `schemaVersion => 1` is compatible with the active pre-populated DB, but future asset DB changes need a migration strategy.
+- Drift requires a positive `schemaVersion`, so `schemaVersion => 1` remains; it is not a compatibility mechanism, only Drift's contract for the single current schema.
+- `assets/polydesk.db` carries the same current schema with `PRAGMA user_version = 1`. There is no `onUpgrade`; schema changes during development require rebuilding the asset and resetting the local database.
 - If `assets/language_data.db` is no longer used, decide whether to remove it from pubspec or document why it remains.
 - After copy + open, run a lightweight integrity check: `words` must be non-empty, expected language codes must exist, and the five CEFR levels must be present. If this fails, show a blocking error dialog at startup (before the user can navigate to the decks screen) with a clear message like "Database could not be loaded. Please reinstall the app." Do not let the app proceed into a half-functional state where decks appear empty with no explanation.
 
@@ -437,7 +435,7 @@ Plan:
   - `due_day INTEGER`
   - `seen_day INTEGER`
   - `reviewed_at_ms INTEGER`
-- Due to migration cost, this change can wait until after Phase 1.
+- Under the single-schema policy, this format change rebuilds the development asset and resets the local database; no runtime migration is added.
 
 Acceptance:
 
@@ -795,14 +793,14 @@ Current:
 
 Target:
 
-- Versioned JSON schema:
-  - `schemaVersion`
+- Single current JSON format:
   - `exportedAt`
   - `userChoices`
-  - `favorites`
   - `srsProgress`
   - `revlog`
   - `deckConfig`
+  - `decks`
+  - `deckCards` (including favorites)
 - For large exports, consider streaming or chunking; for the current data size, normal JSON is probably enough.
 
 Acceptance:
@@ -814,14 +812,14 @@ Acceptance:
 Tasks:
 
 - Validate the JSON schema.
-- Normalize legacy `pr`/`esp` codes to `pt`/`es`.
+- Accept only the active ISO language codes; do not migrate old backup formats.
 - Import should be one transaction.
 - Define duplicate favorite and revlog id conflict strategy.
 
 Acceptance:
 
 - Broken JSON does not write partial data.
-- Old backup files are migrated in a controlled way.
+- Old backup files are outside the backward-compatibility scope.
 
 ## Phase 7: Tooling, Lint, and Test Strategy
 
@@ -834,7 +832,7 @@ Files:
 
 Tasks:
 
-- Move to `flutter_lints` 6.0.0 in a separate PR.
+- `flutter_lints` 6.0.0 is already in use; keep the lint set clean in CI.
 - Additional rules:
   - `prefer_const_constructors`
   - `prefer_const_literals_to_create_immutables`
@@ -918,14 +916,13 @@ Plan:
 Plan:
 
 - `path_provider` minor update is low risk.
-- `share_plus` major update can affect import/export flow; it needs manual Android/iOS testing.
-- Target stable `file_picker` 11.0.2; do not move to a beta resolvable version.
+- `share_plus` 13.3.0 and `file_picker` 12.0.0 are in use; the import/export flow needs an Android device smoke test.
 
 ### 8.3 Dependency Placement
 
 Plan:
 
-- `sqflite_common_ffi` is currently listed under production dependencies, but it appears to be used for desktop/test/tooling workflows such as `tool/migrate_db.dart`. If it is not used by runtime app code, move it to `dev_dependencies`.
+- `sqflite_common_ffi` is kept in `dev_dependencies` for tests only; it is not part of the shipped runtime.
 - Keep production dependencies limited to packages required by the shipped app. This reduces dependency surface and avoids accidental mobile build weight from tooling-only packages.
 
 ### 8.4 Android Build Settings
@@ -952,7 +949,7 @@ Recommended PR order:
 
 1. Language-code mismatch fix and tests.
 2. Performance trace helper and baseline measurement.
-3. Drift `createInBackground` migration.
+3. Drift `createInBackground` adoption.
 4. Review transaction/idempotency.
 5. Query indexes and removal of `ORDER BY RANDOM()`.
 6. Exam batch refactor.
@@ -972,15 +969,15 @@ This order is deliberate: correctness first, then measurement, then the biggest 
 - 320 dp small-screen smoke test
 - At least one low/mid-range Android device test
 - Turkish/English UI smoke test; all 7 languages for language-code changes
-- Data preservation test if import/export or migration changes
+- Current-format round-trip test if import/export or schema/format changes
 
 ## Open Questions
 
 1. After verifying no runtime references, remove `assets/language_data.db` from the asset bundle; the current repository scan only found it in `pubspec.yaml`.
-2. Should `fav` records remain inside `words`, or should they move to a separate `favorites` table?
+2. Favorites should remain as language-aware `deck_cards` memberships in the single deck model.
 3. Will FSRS `w` parameters be optimized per user, or only manually configured?
 4. Are web/desktop targets active? If yes, Drift web/desktop opening strategy should be planned separately from mobile optimization.
-5. Is there an old backup format that import/export must remain backward compatible with?
+5. Should a dedicated asset-schema validation command be added to CI before the next content refresh?
 
 ## Definition of Done
 

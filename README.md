@@ -33,7 +33,7 @@ test/               # Unit and widget tests
 
 - **Flutter** — Cross-platform UI
 - **Riverpod** — State management
-- **SQLite (sqflite)** — Local database (~4800 words per language)
+- **SQLite (Drift + sqlite3)** — Type-safe local database with a preloaded single-schema asset (~4800 words per language)
 - **flutter_localizations** — i18n with 7 languages
 
 ## Getting Started
@@ -42,6 +42,12 @@ test/               # Unit and widget tests
 flutter pub get
 flutter run
 ```
+
+The project targets Flutter 3.47.1, Dart 3.13.1, Java 17, AGP 9.0.1,
+Kotlin 2.3.21, and Gradle 9.1.0. The database is intentionally single-schema
+while the app is pre-production. After a schema change, rebuild
+`assets/polydesk.db` and clear local app data instead of adding a migration
+branch.
 
 ## Tests
 

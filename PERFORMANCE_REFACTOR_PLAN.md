@@ -1,13 +1,13 @@
 # PolyDeck Performans ve Refactor Plani
 
-Tarih: 2026-07-04  
+Tarih: 2026-08-23
 Hedef: PolyDeck'i dusuk donanimli telefonlarda da akici calisan, offline, cok dilli FSRS flashcard uygulamasi haline getirmek.
 
 Bu dokuman, mevcut repoyu tarayarak ve Flutter, Drift, Riverpod, SQLite ve ilgili paketlerin guncel resmi dokumanlarini kontrol ederek hazirlandi. Amac sadece "daha temiz kod" degil; ilk acilis, deste yukleme, kart review etme, sinav uretme, ilerleme ekranlari ve ayarlar gibi kullanicinin hissettigi yollarin olculebilir sekilde hizlanmasi.
 
 ## Kisa Ozet
 
-PolyDeck su anda Flutter 3.44.2 / Dart 3.12.2 ile calisiyor. Veri katmani Drift 2.34.0 uzerinden `assets/polydesk.db` icindeki hazir SQLite veritabanini kopyalayip kullaniyor. FSRS icin `package:fsrs` 2.0.1 var. State yonetimi Riverpod 2.6.1.
+PolyDeck su anda Flutter 3.47.1 / Dart 3.13.1 ile calisiyor. Veri katmani Drift 2.34.3 uzerinden `assets/polydesk.db` icindeki tek guncel SQLite semasini kopyalayip kullaniyor. FSRS icin `package:fsrs` 2.0.1 var. State yonetimi Riverpod 2.6.1.
 
 Oncelikli performans riskleri:
 
@@ -26,25 +26,24 @@ Oncelikli performans riskleri:
 
 `flutter pub deps --style=compact` sonucuna gore:
 
-- Flutter SDK: 3.44.2
-- Dart SDK: 3.12.2
-- `drift`: 2.34.0
-- `drift_dev`: 2.34.0
+- Flutter SDK: 3.47.1
+- Dart SDK: 3.13.1
+- `drift`: 2.34.3
+- `drift_dev`: 2.34.5
 - `sqlite3_flutter_libs`: 0.5.42
 - `flutter_riverpod`: 2.6.1
 - `fsrs`: 2.0.1
 - `shared_preferences`: 2.5.5
-- `share_plus`: 10.1.4
-- `file_picker`: 8.3.7
-- `flutter_lints`: 4.0.0
+- `share_plus`: 13.3.0
+- `file_picker`: 12.0.0
+- `flutter_lints`: 6.0.0
 
 `flutter pub outdated` notlari:
 
-- Riverpod 3.3.2 resolvable.
-- `share_plus` 13.2.0 resolvable.
-- `file_picker` icin stable latest 11.0.2; resolvable satiri beta 12.0.0-beta.7 gosteriyor, stable hedeflenmeli.
-- `flutter_lints` 6.0.0 latest.
-- `path_provider` 2.1.6 minor update.
+- Riverpod 3.x mevcut ancak bu repoda mevcut provider API'si ve test arac zinciriyle birlikte ayri bir calisma olarak tutuluyor.
+- `share_plus` 13.3.0 ve `file_picker` 12.0.0 guncel aktif hedeflerdir.
+- `flutter_lints` 6.0.0 kullaniliyor.
+- `path_provider` 2.1.6 kullaniliyor.
 - `sqlite3_flutter_libs` 0.6.0+eol latest olarak gorunuyor; bu paket icin changelog ve Drift uyumlulugu ayrica kontrol edilmeden otomatik major/minor update yapilmamali.
 
 ### Veritabani durumu
@@ -177,23 +176,22 @@ Dosyalar:
 - `lib/core/constants/language_codes.dart`
 - `lib/core/constants/app_constants.dart`
 - `lib/pages/srs_settings_page.dart`
-- `tool/migrate_db.dart`
 - Gerekirse testler
 
 Yapilacaklar:
 
 - Aktif `polydesk.db` icin DB kodlarini `en`, `tr`, `de`, `fr`, `it`, `pt`, `es` olarak standartlastir.
 - `LanguageCodes.tableNameFor('pt')` artik `pt`, `LanguageCodes.tableNameFor('es')` artik `es` donmeli.
-- `displayCodeFor` icinde eski `pr`/`esp` sadece legacy import/migration uyumlulugu icin desteklenebilir.
+- Dil kodu cevirmeleri geriye donuk `pr`/`esp` uyumlulugu tasimamali; aktif sema ISO kodlarini dogrudan kullanir.
 - `AppConstants.languageTables` `pt` ve `es` kullanmali.
 - SRS reset listesi `pt` ve `es` kullanmali.
-- `tool/migrate_db.dart` eski tek tablo oncesi DB'ler icin tutulacaksa adi ve kapsamı netlestirilmeli; aktif DB migrator'u gibi algilanmamali.
+- Eski `tool/migrate_db.dart` kaldirildi. `assets/polydesk.db` tek guncel sema kaynagidir; sema degisikliginde gelistirme veritabani sifirlanir.
 
 Kabul:
 
 - `sqlite3 assets/polydesk.db "SELECT DISTINCT language_code FROM words"` ile kod listesi repo sabitleriyle ayni.
 - Portekizce ve Ispanyolca deste yukleme testleri bos sonuc uretmiyor.
-- Dil kodu unit testleri hem modern hem legacy mapping'i kapsiyor.
+- Dil kodu unit testleri yedi aktif ISO kodunu kapsiyor.
 
 ### 0.2 Performans instrumentation ekle
 
@@ -279,8 +277,8 @@ Dosya:
 Yapilacaklar:
 
 - Bos catch bloklarini kaldir; asset kopyalama hatasi en azindan debug/profile loglanmali ve kullaniciya anlamli hata tasinmali.
-- Kopyalanan DB icin `PRAGMA user_version` veya `schemaVersion` ile uygulama versiyonu arasinda net sozlesme kur.
-- `schemaVersion => 1` aktif pre-populated DB ile uyumlu ama gelecekte asset DB degisirse migration stratejisi gerekiyor.
+- Drift pozitif bir `schemaVersion` istedigi icin `schemaVersion => 1` tutulur; bu bir uyumluluk mekanizmasi degil, tek guncel semanin Drift sozlesmesidir.
+- `assets/polydesk.db` ayni guncel sema ile `PRAGMA user_version = 1` tasir. `onUpgrade` yoktur; sema degisikligi gelistirme asamasinda asset'in yeniden uretilmesini ve yerel DB'nin sifirlanmasini gerektirir.
 - `assets/language_data.db` artik kullanilmiyorsa pubspec'ten kaldirma veya neden tutuldugunu README'de aciklama karari ver.
 
 Kabul:
@@ -431,7 +429,7 @@ Plan:
   - `due_day INTEGER`
   - `seen_day INTEGER`
   - `reviewed_at_ms INTEGER`
-- Migration maliyeti nedeniyle bu degisim Faz 1 sonrasina alinabilir.
+- Tek-sema politikasi nedeniyle bu format degisikligi gelistirme asset'i yeniden uretilerek ve yerel DB sifirlanarak yapilir; runtime migration eklenmez.
 
 Kabul:
 
@@ -782,14 +780,14 @@ Mevcut:
 
 Hedef:
 
-- Versiyonlu JSON schema:
-  - `schemaVersion`
+- Tek guncel JSON formati:
   - `exportedAt`
   - `userChoices`
-  - `favorites`
   - `srsProgress`
   - `revlog`
   - `deckConfig`
+  - `decks`
+  - `deckCards` (favoriler dahil)
 - Buyuk export icin streaming veya chunk dusunulebilir; mevcut veri boyutunda normal JSON yeterli olabilir.
 
 Kabul:
@@ -801,14 +799,14 @@ Kabul:
 Yapilacaklar:
 
 - JSON schema validate et.
-- Legacy `pr`/`esp` kodlarini `pt`/`es` olarak normalize et.
+- Yalnizca aktif ISO dil kodlarini kabul et; eski backup formatlarini migrate etme.
 - Import tek transaction olmali.
 - Duplicate favorites ve revlog id conflict stratejisi tanimli olmali.
 
 Kabul:
 
 - Bozuk JSON kismi veri yazmaz.
-- Eski backup dosyalari kontrollu migrate edilir.
+- Eski backup dosyalari geriye donuk uyumluluk kapsaminda degildir.
 
 ## Faz 7: Tooling, Lint ve Test Stratejisi
 
@@ -821,7 +819,7 @@ Dosyalar:
 
 Yapilacaklar:
 
-- `flutter_lints` 6.0.0'a gecis icin ayri PR.
+- `flutter_lints` 6.0.0 kullaniliyor; lint seti CI'da temiz tutulmali.
 - Ek kurallar:
   - `prefer_const_constructors`
   - `prefer_const_literals_to_create_immutables`
@@ -905,8 +903,7 @@ Plan:
 Plan:
 
 - `path_provider` minor update dusuk riskli.
-- `share_plus` major update import/export akisini etkileyebilir; manuel Android/iOS test gerekir.
-- `file_picker` stable 11.0.2 hedeflenmeli; beta resolvable surume gecilmemeli.
+- `share_plus` 13.3.0 ve `file_picker` 12.0.0 kullaniliyor; import/export akisi Android cihazda smoke test edilmeli.
 
 ### 8.3 Android build ayarlari
 
@@ -952,15 +949,15 @@ Bu siralama bilincli: once dogruluk, sonra olcum, sonra en buyuk DB/IO kazanimla
 - 320 dp kucuk ekran smoke test
 - En az bir dusuk/orta Android cihaz testi
 - Turkish/English UI smoke test; dil kodu degisikliklerinde tum 7 dil
-- Import/export veya migration degisirse eski veri koruma testi
+- Import/export veya sema/formati degisirse guncel format round-trip testi
 
 ## Acik Sorular
 
 1. `assets/language_data.db` artik kullaniliyor mu? Kullanilmiyorsa kaldirilmasi app size ve kafa karisikligi acisindan iyi olur.
-2. `fav` kayitlari `words` icinde kalmaya devam edecek mi, yoksa ayri `favorites` tablosuna tasinacak mi?
+2. Favoriler, dil ciftini koruyan `deck_cards` uyeligi olarak tek modelde tutulmaya devam etmeli.
 3. FSRS `w` parametreleri kullanici bazinda optimize edilecek mi, yoksa sadece manuel ayar mi olacak?
 4. Web/desktop hedefleri aktif mi? Aktifse Drift web/desktop acilis stratejisi mobil optimizasyonundan ayri planlanmali.
-5. Export/import geriye donuk uyumluluk icin eski backup formati var mi?
+5. Bir sonraki icerik yenilemesinden once CI'a ayri bir asset-sema dogrulama komutu eklenmeli mi?
 
 ## Son Durum Tanimi
 

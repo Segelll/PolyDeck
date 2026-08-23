@@ -20,17 +20,15 @@ class HomePage extends ConsumerWidget {
         Text(
           'Bugünün çalışması',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF162A32),
-              ),
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF162A32),
+          ),
         ),
         const SizedBox(height: 6),
         Text(
           pair,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: const Color(0xFF6D7C80),
-                letterSpacing: 0.5,
-              ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: const Color(0xFF6D7C80), letterSpacing: 0.5),
         ),
         const SizedBox(height: 24),
         Container(
@@ -50,9 +48,9 @@ class HomePage extends ConsumerWidget {
                     Text(
                       'Bugün görülen kelime',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: const Color(0xFF31554A),
-                            fontWeight: FontWeight.w600,
-                          ),
+                        color: const Color(0xFF31554A),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     countAsync.when(
@@ -61,10 +59,11 @@ class HomePage extends ConsumerWidget {
                         height: 28,
                         child: CircularProgressIndicator(strokeWidth: 3),
                       ),
-                      error: (_, __) => const Text('—'),
+                      error: (_, _) => const Text('—'),
                       data: (count) => Text(
                         '$count',
-                        style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        style: Theme.of(context).textTheme.displaySmall
+                            ?.copyWith(
                               color: const Color(0xFF162A32),
                               fontWeight: FontWeight.w800,
                             ),
@@ -85,9 +84,9 @@ class HomePage extends ConsumerWidget {
         Text(
           'Çalışma akışı',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF162A32),
-              ),
+            fontWeight: FontWeight.w700,
+            color: const Color(0xFF162A32),
+          ),
         ),
         const SizedBox(height: 8),
         const Text(

@@ -59,20 +59,22 @@ class _DefaultDeckList extends StatelessWidget {
   Widget build(BuildContext context) {
     final favorites = decks.where((deck) => deck.isFavorites).firstOrNull;
     final levels = ProficiencyLevel.standardLevels
-        .map((level) => DeckSummary(
-              id: 0,
-              name: level.code,
-              deckType: 'system',
-              systemKey: level.code,
-              cardCount: 0,
-            ))
+        .map(
+          (level) => DeckSummary(
+            id: 0,
+            name: level.code,
+            deckType: 'system',
+            systemKey: level.code,
+            cardCount: 0,
+          ),
+        )
         .toList();
     if (favorites != null) levels.insert(0, favorites);
 
     return ListView.separated(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
       itemCount: levels.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
       itemBuilder: (context, index) => _DeckRow(
         deck: levels[index],
         icon: levels[index].isFavorites
@@ -158,7 +160,7 @@ class _CustomDeckList extends ConsumerWidget {
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
                   itemCount: customDecks.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     final deck = customDecks[index];
                     return _DeckRow(
@@ -267,7 +269,10 @@ class _CatalogError extends StatelessWidget {
             const SizedBox(height: 12),
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            OutlinedButton(onPressed: onRetry, child: const Text('Tekrar dene')),
+            OutlinedButton(
+              onPressed: onRetry,
+              child: const Text('Tekrar dene'),
+            ),
           ],
         ),
       ),
@@ -276,13 +281,15 @@ class _CatalogError extends StatelessWidget {
 }
 
 void _openDeck(BuildContext context, DeckSummary deck) {
-  unawaited(Navigator.of(context).push(
-    MaterialPageRoute(
-      builder: (_) => CardFlipPage(
-        levels: deck.systemKey ?? 'custom',
-        deckId: deck.id == 0 ? null : deck.id,
-        deckName: deck.name,
+  unawaited(
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => CardFlipPage(
+          levels: deck.systemKey ?? 'custom',
+          deckId: deck.id == 0 ? null : deck.id,
+          deckName: deck.name,
+        ),
       ),
     ),
-  ));
+  );
 }

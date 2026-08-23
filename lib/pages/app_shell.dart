@@ -18,8 +18,10 @@ class AppShell extends ConsumerStatefulWidget {
 
 class _AppShellState extends ConsumerState<AppShell> {
   late int _selectedIndex = widget.initialIndex;
+  late final Set<int> _visitedIndices = {widget.initialIndex};
 
   void _selectDestination(int index) {
+    _visitedIndices.add(index);
     setState(() => _selectedIndex = index);
     Navigator.of(context).pop();
   }
@@ -102,7 +104,14 @@ class _AppShellState extends ConsumerState<AppShell> {
       ),
       body: IndexedStack(
         index: _selectedIndex,
-        children: const [HomePage(), DecksPage()],
+        children: [
+          _visitedIndices.contains(0)
+              ? const HomePage()
+              : const SizedBox.shrink(),
+          _visitedIndices.contains(1)
+              ? const DecksPage()
+              : const SizedBox.shrink(),
+        ],
       ),
     );
   }

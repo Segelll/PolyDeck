@@ -41,15 +41,16 @@ class AppTheme {
   // ── Theme Data ──
 
   static ThemeData get lightTheme {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: const Color(0xFF4E8572),
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: const Color(0xFF31554A),
-      onPrimary: Colors.white,
-      secondary: const Color(0xFFD9785A),
-      surface: const Color(0xFFF8FAF8),
-    );
+    final scheme =
+        ColorScheme.fromSeed(
+          seedColor: const Color(0xFF4E8572),
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: const Color(0xFF31554A),
+          onPrimary: Colors.white,
+          secondary: const Color(0xFFD9785A),
+          surface: const Color(0xFFF8FAF8),
+        );
     return ThemeData(
       colorScheme: scheme,
       brightness: Brightness.light,
@@ -70,7 +71,7 @@ class AppTheme {
       cardTheme: const CardThemeData(
         elevation: 0,
         color: Colors.white,
-        shape: const RoundedRectangleBorder(
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),

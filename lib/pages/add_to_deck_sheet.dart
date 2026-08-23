@@ -40,9 +40,8 @@ class _AddToDeckSheetState extends ConsumerState<AddToDeckSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _busyDeckId = null);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deste güncellenemedi: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Deste güncellenemedi: $e')));
       }
     }
   }
@@ -94,61 +93,78 @@ class _AddToDeckSheetState extends ConsumerState<AddToDeckSheet> {
     } catch (e) {
       if (mounted) {
         setState(() => _busyDeckId = null);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Deste oluşturulamadı: $e')),
-        );
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text('Deste oluşturulamadı: $e')));
       }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final sortedDecks = [...widget.decks]
-      ..sort((a, b) => (a.isFavorites ? 0 : 1).compareTo(b.isFavorites ? 0 : 1));
+    final sortedDecks = [
+      ...widget.decks,
+    ]..sort((a, b) => (a.isFavorites ? 0 : 1).compareTo(b.isFavorites ? 0 : 1));
 
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Desteye ekle',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
-              ),
-            ),
-            const SizedBox(height: 6),
-            const Text('Bu kartı kaydetmek istediğin desteyi seç.'),
-            const SizedBox(height: 12),
-            ...sortedDecks.map(
-              (deck) => ListTile(
-                contentPadding: EdgeInsets.zero,
-                leading: Icon(
-                  deck.isFavorites ? Icons.star_rounded : Icons.folder_outlined,
-                  color: deck.isFavorites ? Colors.amber.shade700 : null,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.sizeOf(context).height * 0.8,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Desteye ekle',
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
                 ),
-                title: Text(deck.name),
-                subtitle: Text('${deck.cardCount} kart'),
-                trailing: _busyDeckId == deck.id
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.chevron_right),
-                onTap: _busyDeckId == null ? () => _addToDeck(deck) : null,
               ),
-            ),
-            const Divider(height: 20),
-            TextButton.icon(
-              onPressed: _busyDeckId == null ? _createDeck : null,
-              icon: const Icon(Icons.add),
-              label: const Text('Yeni deste oluştur'),
-            ),
-          ],
+              const SizedBox(height: 6),
+              const Text('Bu kartı kaydetmek istediğin desteyi seç.'),
+              const SizedBox(height: 12),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  itemCount: sortedDecks.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final deck = sortedDecks[index];
+                    return ListTile(
+                      contentPadding: EdgeInsets.zero,
+                      leading: Icon(
+                        deck.isFavorites
+                            ? Icons.star_rounded
+                            : Icons.folder_outlined,
+                        color: deck.isFavorites ? Colors.amber.shade700 : null,
+                      ),
+                      title: Text(deck.name),
+                      subtitle: Text('${deck.cardCount} kart'),
+                      trailing: _busyDeckId == deck.id
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.chevron_right),
+                      onTap: _busyDeckId == null
+                          ? () => _addToDeck(deck)
+                          : null,
+                    );
+                  },
+                ),
+              ),
+              const Divider(height: 20),
+              TextButton.icon(
+                onPressed: _busyDeckId == null ? _createDeck : null,
+                icon: const Icon(Icons.add),
+                label: const Text('Yeni deste oluştur'),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -8,6 +8,8 @@ import 'package:poly2/domain/enums/rating.dart';
 import 'package:poly2/domain/enums/review_input_mode.dart';
 import 'package:poly2/domain/models/deck_summary.dart';
 import 'package:poly2/presentation/widgets/card_flip_animation.dart';
+import 'package:poly2/presentation/widgets/review_rating_controls.dart';
+import 'package:poly2/presentation/widgets/review_utility_controls.dart';
 import 'package:poly2/presentation/providers/deck_provider.dart';
 import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 import 'package:poly2/presentation/providers/settings_provider.dart';
@@ -72,31 +74,6 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
           CurvedAnimation(parent: _drawCardController!, curve: Curves.easeOut),
         );
     unawaited(_drawCardController!.forward());
-  }
-
-  Widget _buildRatingButton({
-    required String label,
-    required Color color,
-    required IconData icon,
-    required VoidCallback? onPressed,
-  }) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ElevatedButton(
-          onPressed: onPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: color,
-            foregroundColor: AppTheme.ratingOnColor,
-            padding: const EdgeInsets.all(12),
-            shape: const CircleBorder(),
-          ),
-          child: Icon(icon, size: 28),
-        ),
-        const SizedBox(height: 4),
-        Text(label, style: const TextStyle(fontSize: 11)),
-      ],
-    );
   }
 
   void _revealCard(FlipDirection direction) {
@@ -491,42 +468,13 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                     lastRating == null)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildRatingButton(
-                          label: local.again,
-                          color: AppTheme.ratingAgain,
-                          icon: Icons.replay,
-                          onPressed: isReviewing
-                              ? null
-                              : () => _submitRating(Rating.again),
-                        ),
-                        _buildRatingButton(
-                          label: local.hard,
-                          color: AppTheme.ratingHard,
-                          icon: Icons.trending_down,
-                          onPressed: isReviewing
-                              ? null
-                              : () => _submitRating(Rating.hard),
-                        ),
-                        _buildRatingButton(
-                          label: local.good,
-                          color: AppTheme.ratingGood,
-                          icon: Icons.check,
-                          onPressed: isReviewing
-                              ? null
-                              : () => _submitRating(Rating.good),
-                        ),
-                        _buildRatingButton(
-                          label: local.easy,
-                          color: AppTheme.ratingEasy,
-                          icon: Icons.thumb_up,
-                          onPressed: isReviewing
-                              ? null
-                              : () => _submitRating(Rating.easy),
-                        ),
-                      ],
+                    child: ReviewRatingControls(
+                      againLabel: local.again,
+                      hardLabel: local.hard,
+                      goodLabel: local.good,
+                      easyLabel: local.easy,
+                      disabled: isReviewing,
+                      onRating: (rating) => unawaited(_submitRating(rating)),
                     ),
                   ),
 
@@ -540,27 +488,16 @@ class _CardFlipPageState extends ConsumerState<CardFlipPage>
                 ),
                 const SizedBox(height: 10),
 
-                if (isFlipped)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (lastRating == null)
-                        ElevatedButton.icon(
-                          icon: const Icon(Icons.refresh),
-                          onPressed: isReviewing ? null : _reflipCard,
-                          label: Text(local.reflip),
-                        ),
-                      if (lastRating == null) const SizedBox(width: 10),
-                      const SizedBox(width: 10),
-                      ElevatedButton.icon(
-                        icon: const Icon(Icons.skip_next),
-                        onPressed: isReviewing
-                            ? null
-                            : () => unawaited(_nextCard()),
-                        label: Text(local.newCard),
-                      ),
-                    ],
-                  ),
+                ReviewUtilityControls(
+                  inputMode: reviewInputMode,
+                  isFlipped: isFlipped,
+                  showReflip: lastRating == null,
+                  disabled: isReviewing,
+                  reflipLabel: local.reflip,
+                  newCardLabel: local.newCard,
+                  onReflip: _reflipCard,
+                  onNewCard: () => unawaited(_nextCard()),
+                ),
                 const SizedBox(height: 20),
               ],
             ),

@@ -18,6 +18,7 @@ import 'package:poly2/presentation/providers/deck_repository_provider.dart';
 import 'package:poly2/presentation/providers/progress_provider.dart';
 import 'package:poly2/core/constants/language_codes.dart';
 import 'package:poly2/core/theme/app_palette.dart';
+import 'package:poly2/domain/state/language_preferences.dart';
 import 'package:poly2/l10n/generated/app_localizations.dart';
 import 'package:poly2/presentation/widgets/half_colored_title.dart';
 import 'package:poly2/domain/enums/review_input_mode.dart';
@@ -38,6 +39,18 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   @override
   void initState() {
     super.initState();
+    ref.listenManual<AsyncValue<LanguagePreferences>>(settingsProvider, (
+      _,
+      next,
+    ) {
+      final prefs = next.valueOrNull;
+      if (prefs == null || !mounted) return;
+      setState(() {
+        _motherLang = prefs.mainLanguage;
+        _targetLang = prefs.targetLanguage;
+        _reviewInputMode = prefs.reviewInputMode;
+      });
+    });
     _loadPrefs();
   }
 
@@ -324,6 +337,22 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     }
   }
 
+  Future<void> _selectReviewMode(ReviewInputMode mode) async {
+    final local = AppLocalizations.of(context)!;
+    setState(() => _reviewInputMode = mode);
+    try {
+      await ref.read(settingsProvider.notifier).saveReviewInputMode(mode);
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(local.saveFailed),
+          backgroundColor: AppPalette.raindropsOnRoses,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final local = AppLocalizations.of(context)!;
@@ -406,7 +435,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               selected: {_reviewInputMode},
               onSelectionChanged: (selection) {
                 if (selection.isNotEmpty) {
-                  setState(() => _reviewInputMode = selection.first);
+                  unawaited(_selectReviewMode(selection.first));
                 }
               },
             ),
